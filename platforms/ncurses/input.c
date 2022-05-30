@@ -8,7 +8,7 @@ uint8 wait_for_any_key(){
       return MINE_INPUT_LEFT;
     } else if (c == KEY_RIGHT) {
       return MINE_INPUT_RIGHT;
-    } else if (c == KEY_ENTER) {
+    } else if (c == (int)'\n') {
       return MINE_INPUT_OPEN;
     }
     return MINE_INPUT_IGNORED;
