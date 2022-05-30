@@ -6,6 +6,7 @@ void main(){
 	minefield mf;
 	uint8 width = 10;
 	uint8 height = 10;
+        uint8 num_cells = (width * height);
 	uint8 num_bombs = random_number(15,60);
 	// TODO: let platforms configure specific values for
 	//       minefield dimensions and number of bombs
@@ -16,11 +17,11 @@ void main(){
         while (1) {
           uint8 input = wait_for_any_key();
           if (input == MINE_INPUT_LEFT) {
-            // TODO: move cursor to the left;
+            if (mf.current_cell > 0) mf.current_cell--;
           } else if (input == MINE_INPUT_RIGHT) {
-            // TODO: move cursor to the right;
+            if (mf.current_cell < num_cells - 1) mf.current_cell++;
           } else if (input == MINE_INPUT_OPEN) {
-            // TODO: open current cell;
+            mf.cells[mf.current_cell] |= ISOPEN;
           }
           draw_minefield(&mf);
         }
