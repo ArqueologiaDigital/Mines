@@ -39,7 +39,7 @@ void draw_minefield(minefield* mf){
 	}
 
     move(mf->height*2 + 8, 1);
-    printw("Qualquer tecla para sair.");
+    printw("Pressione Ctrl+c para sair.");
     attroff(COLOR_PAIR(2));
     refresh();
 }
