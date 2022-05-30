@@ -4,8 +4,9 @@
 void setup_minefield(minefield* mf, uint8 width, uint8 height, uint8 num_bombs){
 	mf->width = width;
 	mf->height = height;
+        mf->current_cell = 0;
 	mf->cells = malloc(width * height * sizeof(uint8));
-	
+
 	// Clear the minefield:
 	for (uint8 x = 0; x < mf->width; x++){
 		for (uint8 y = 0; y < mf->height; y++){
@@ -40,5 +41,5 @@ void setup_minefield(minefield* mf, uint8 width, uint8 height, uint8 num_bombs){
 			// Store the count in the 4 lowest bits:
 			CELL(mf, x, y) |= count;
 		}
-	}	
+	}
 }
