@@ -47,6 +47,7 @@ void draw_minefield(minefield* mf){
 	for (uint8 x = 0; x < mf->width; x++){
 		for (uint8 y = 0; y < mf->height; y++){
 		    move(5 + y*2, 5 + x*2);
+                    if (CELL(mf, x, y) & ISOPEN) {
 			if (CELL(mf, x, y) & HASBOMB){
 			    attron(COLOR_PAIR(9));
 				printw("*");
@@ -55,6 +56,10 @@ void draw_minefield(minefield* mf){
 			    attron(COLOR_PAIR(1 + count));
 				if (count > 0) printw("%d", count);
 			}
+                    } else {
+                      attron(COLOR_PAIR(11));
+                      printw("#");
+                    }
 		}
 	}
 
