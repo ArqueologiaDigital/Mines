@@ -50,8 +50,6 @@ void draw_minefield(minefield* mf){
 		    move(5 + y*2, 5 + x*2);
                     if (CELL_INDEX(mf, x, y) == mf->current_cell) {
                       standout();
-                    } else {
-                      standend();
                     }
                     if (CELL(mf, x, y) & ISOPEN) {
 			if (CELL(mf, x, y) & HASBOMB){
@@ -66,6 +64,7 @@ void draw_minefield(minefield* mf){
                       attron(COLOR_PAIR(11));
                       printw("#");
                     }
+                    standend();
 		}
 	}
 
