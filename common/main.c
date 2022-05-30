@@ -6,7 +6,7 @@ void main(){
 	minefield mf;
 	uint8 width = 10;
 	uint8 height = 10;
-	uint8 num_bombs = 15;
+	uint8 num_bombs = random_number(15,60);
 	// TODO: let platforms configure specific values for
 	//       minefield dimensions and number of bombs
 
