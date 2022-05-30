@@ -26,7 +26,7 @@ $(TARGET).rom: $(OBJECTS) $(C_OBJECTS) $(BUILDDIR)/crt0.rel
 	@cp $(TARGET).bin $(TARGET).rom
 
 openmsx: $(TARGET).rom
-	openmsx -carta $(TARGET).rom -machine msx1
+	openmsx -carta $(TARGET).rom -machine C-BIOS_MSX2
 
 $(BUILDDIR)/%.rel: ../../common/%.c $(BUILDDIR)
 	$(CC) $(CFLAGS) $(LDFLAGS) -c $< -o $@
