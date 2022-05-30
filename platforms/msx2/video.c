@@ -7,6 +7,7 @@ void platform_init()
 
 void draw_minefield(minefield* mf){
 	//TODO: Implement-me!
+	mf;
 }
 
 void shutdown()
