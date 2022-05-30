@@ -10,6 +10,7 @@ void platform_init()
     initscr();
     start_color();
     noecho();
+    keypad(stdscr, TRUE);
     init_pair(1, COLOR_BLUE, COLOR_BLACK);    // 1 bomb
     init_pair(2, COLOR_GREEN, COLOR_BLACK);   // 2 bombs
     init_pair(3, COLOR_RED, COLOR_BLACK);     // 3 bombs
