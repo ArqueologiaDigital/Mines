@@ -9,6 +9,7 @@ void platform_init()
 	// Initialize ncurses library and setup colors
     initscr();
     start_color();
+    noecho();
     init_pair(1, COLOR_WHITE, COLOR_BLUE);
     init_pair(2, COLOR_BLUE, COLOR_WHITE);
     init_pair(3, COLOR_RED, COLOR_WHITE);
