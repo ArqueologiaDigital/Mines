@@ -78,7 +78,9 @@ void draw_minefield(minefield* mf){
 				if (count > 0){
 					attron(COLOR_PAIR(ONE_BOMB_COLOR + count - 1));
 					printw("%d", count);
-				}
+				} else {
+                                  printw(" ");
+                                }
 			}
                     } else {
                       attron(COLOR_PAIR(11));
