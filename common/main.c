@@ -22,6 +22,7 @@ void main(){
           } else if (input == MINE_INPUT_OPEN) {
             // TODO: open current cell;
           }
+          draw_minefield(&mf);
         }
 	shutdown();
 }
