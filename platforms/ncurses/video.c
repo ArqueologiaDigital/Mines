@@ -24,6 +24,8 @@ void platform_init()
 	// Initialize ncurses library and setup colors
     initscr();
     start_color();
+    noecho();
+    keypad(stdscr, TRUE);
     init_pair(ONE_BOMB_COLOR, COLOR_BLUE, COLOR_BLACK);
     init_pair(TWO_BOMBS_COLOR, COLOR_GREEN, COLOR_BLACK);
     init_pair(THREE_BOMBS_COLOR, COLOR_RED, COLOR_BLACK);
@@ -64,6 +66,10 @@ void draw_minefield(minefield* mf){
 	for (uint8 x = 0; x < mf->width; x++){
 		for (uint8 y = 0; y < mf->height; y++){
 		    move(minefield_y_position + y*2, minefield_x_position + x*2);
+                    if (CELL_INDEX(mf, x, y) == mf->current_cell) {
+                      standout();
+                    }
+                    if (CELL(mf, x, y) & ISOPEN) {
 			if (CELL(mf, x, y) & HASBOMB){
 			    attron(COLOR_PAIR(UNCOVERED_BOMB_COLOR));
 				printw("*");
@@ -72,19 +78,27 @@ void draw_minefield(minefield* mf){
 				if (count > 0){
 					attron(COLOR_PAIR(ONE_BOMB_COLOR + count - 1));
 					printw("%d", count);
-				}
+				} else {
+                                  printw(" ");
+                                }
 			}
+                    } else {
+                      attron(COLOR_PAIR(11));
+                      printw("#");
+                    }
+                    standend();
 		}
 	}
 
+
     move(minefield_y_position + mf->height*2 + 3, 1);
     attron(COLOR_PAIR(TEXT_COLOR));
-    printw("Press any key to exit.");
+    printw("Press Ctrl-C to exit.");
     refresh();
 }
 
 void shutdown()
 {
     endwin();
-    exit(0);  
+    exit(0);
 }
