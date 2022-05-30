@@ -1,9 +1,10 @@
 #include <assert.h>
+#include <stdbool.h>
 #include "input.h"
 #include "ports.h"
 
 
-const int KB_MAX_MATRIX_ROW = 10;
+#define KB_MAX_MATRIX_ROW 10
 uint8_t keyboard_matrix_row[KB_MAX_MATRIX_ROW];
 uint8_t old_keyboard_matrix_row[KB_MAX_MATRIX_ROW];
 
@@ -13,7 +14,7 @@ uint8_t key_buffer_tail = 0;
 uint8_t key_buffer_data[256];
 
 
-uint8_t keyboard_read_row(uint8_t row) __z88dk_fastcall
+uint8_t keyboard_read_row(uint8_t row) __z88dk_fastcall __naked
 {
 	assert(row <= 10);
 	__asm
@@ -23,6 +24,7 @@ uint8_t keyboard_read_row(uint8_t row) __z88dk_fastcall
 		out		(P_PPI_C), a
 		in		a, (P_PPI_B)    /* read row data */
 		ld		l, a
+		ret
 	__endasm;
 }
 
@@ -31,7 +33,7 @@ bool keyboard_read()
 {
 	bool key_pressed = false;
 
-	for (uint8_t row = 0; i <= KB_MAX_MATRIX_ROW; ++row)
+	for (uint8_t row = 0; row <= KB_MAX_MATRIX_ROW; ++row)
 	{
 		old_keyboard_matrix_row[row] = keyboard_matrix_row[row];
 		keyboard_matrix_row[row] = keyboard_read_row(row);
@@ -57,7 +59,7 @@ uint8_t wait_for_any_key()
 	return key_buffer_data[++key_buffer_head];
 }
 
-uint8_t MATRIX_KEY_2_COLUMN[8][10] = {
+uint8_t MATRIX_KEY_2_COLUMN[8][12] = {
 	"08'CKS\000\000 \0005",
 	"19`DLT\000\000\000\0006",
 	"2-,EMU\000\x1c\000\0007",
@@ -78,4 +80,6 @@ uint8_t get_raw_ch()
 int random_number(int min_num, int max_num)
 {
 	// TODO: Implement-me!
+	min_num; max_num;
+	return 0;
 }
