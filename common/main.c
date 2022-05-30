@@ -14,7 +14,14 @@ void main(){
 	draw_minefield(&mf);
 
         while (1) {
-          wait_for_any_key();
+          uint8 input = wait_for_any_key();
+          if (input == MINE_INPUT_LEFT) {
+            // TODO: move cursor to the left;
+          } else if (input == MINE_INPUT_LEFT) {
+            // TODO: move cursor to the left;
+          } else if (input == MINE_INPUT_OPEN) {
+            // TODO: open current cell;
+          }
         }
 	shutdown();
 }

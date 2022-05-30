@@ -17,6 +17,11 @@ typedef struct {
       uint8* cells;
 } minefield;
 
+#define MINE_INPUT_IGNORED 0
+#define MINE_INPUT_LEFT 1
+#define MINE_INPUT_RIGHT 2
+#define MINE_INPUT_OPEN 3
+
 void setup_minefield(minefield* mf, uint8 width, uint8 height, uint8 num_bombs);
 
 #endif //#define MINEFIELD_H
