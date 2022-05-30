@@ -13,16 +13,18 @@ typedef unsigned char uint8;
 #define ISOPEN (1 << 5)
 
 typedef struct {
-      uint8 width;
-      uint8 height;
-      uint8 current_cell;
-      uint8* cells;
+	uint8 width;
+	uint8 height;
+	uint8 current_cell;
+	uint8* cells;
 } minefield;
 
 #define MINE_INPUT_IGNORED 0
 #define MINE_INPUT_LEFT 1
 #define MINE_INPUT_RIGHT 2
-#define MINE_INPUT_OPEN 3
+#define MINE_INPUT_UP 3
+#define MINE_INPUT_DOWN 4
+#define MINE_INPUT_OPEN 5
 
 void setup_minefield(minefield* mf, uint8 width, uint8 height, uint8 num_bombs);
 

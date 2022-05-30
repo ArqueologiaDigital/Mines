@@ -4,7 +4,7 @@
 void setup_minefield(minefield* mf, uint8 width, uint8 height, uint8 num_bombs){
 	mf->width = width;
 	mf->height = height;
-        mf->current_cell = 0;
+	mf->current_cell = 0;
 	mf->cells = malloc(width * height * sizeof(uint8));
 
 	// Clear the minefield:

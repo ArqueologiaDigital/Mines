@@ -15,32 +15,34 @@ enum {
 	UNCOVERED_BOMB_COLOR,
 	EXPLODING_BOMB_COLOR,
 	MINEFIELD_GRID_COLOR,
-	TEXT_COLOR
+	TEXT_COLOR,
+	CLOSED_CELL_COLOR
 };
 
 // TODO: perhaps part of this should move to a platform.c file
 void platform_init()
 {
 	// Initialize ncurses library and setup colors
-    initscr();
-    start_color();
-    noecho();
-    keypad(stdscr, TRUE);
-    init_pair(ONE_BOMB_COLOR, COLOR_BLUE, COLOR_BLACK);
-    init_pair(TWO_BOMBS_COLOR, COLOR_GREEN, COLOR_BLACK);
-    init_pair(THREE_BOMBS_COLOR, COLOR_RED, COLOR_BLACK);
-    init_pair(FOUR_BOMBS_COLOR, COLOR_BLUE, COLOR_BLACK);
-    init_pair(FIVE_BOMBS_COLOR, COLOR_RED, COLOR_BLACK);
-    init_pair(SIX_BOMBS_COLOR, COLOR_CYAN, COLOR_BLACK);
-    init_pair(SEVEN_BOMBS_COLOR, COLOR_MAGENTA, COLOR_BLACK);
-    init_pair(EIGHT_BOMBS_COLOR, COLOR_WHITE, COLOR_BLACK);
-    init_pair(UNCOVERED_BOMB_COLOR, COLOR_BLACK, COLOR_YELLOW);
-    init_pair(EXPLODING_BOMB_COLOR, COLOR_BLACK, COLOR_RED);
-    init_pair(MINEFIELD_GRID_COLOR, COLOR_WHITE, COLOR_BLACK);
-    init_pair(TEXT_COLOR, COLOR_WHITE, COLOR_BLACK);
+	initscr();
+	start_color();
+	noecho();
+	keypad(stdscr, TRUE);
+	init_pair(ONE_BOMB_COLOR, COLOR_BLUE, COLOR_BLACK);
+	init_pair(TWO_BOMBS_COLOR, COLOR_GREEN, COLOR_BLACK);
+	init_pair(THREE_BOMBS_COLOR, COLOR_RED, COLOR_BLACK);
+	init_pair(FOUR_BOMBS_COLOR, COLOR_BLUE, COLOR_BLACK);
+	init_pair(FIVE_BOMBS_COLOR, COLOR_RED, COLOR_BLACK);
+	init_pair(SIX_BOMBS_COLOR, COLOR_CYAN, COLOR_BLACK);
+	init_pair(SEVEN_BOMBS_COLOR, COLOR_MAGENTA, COLOR_BLACK);
+	init_pair(EIGHT_BOMBS_COLOR, COLOR_WHITE, COLOR_BLACK);
+	init_pair(UNCOVERED_BOMB_COLOR, COLOR_BLACK, COLOR_YELLOW);
+	init_pair(EXPLODING_BOMB_COLOR, COLOR_BLACK, COLOR_RED);
+	init_pair(MINEFIELD_GRID_COLOR, COLOR_WHITE, COLOR_BLACK);
+	init_pair(TEXT_COLOR, COLOR_WHITE, COLOR_BLACK);
+	init_pair(CLOSED_CELL_COLOR, COLOR_WHITE, COLOR_BLACK);
 
 	// Init random number generator:
-    srand(time(NULL));
+	srand(time(NULL));
 }
 
 void draw_minefield(minefield* mf){
@@ -65,28 +67,28 @@ void draw_minefield(minefield* mf){
 
 	for (uint8 x = 0; x < mf->width; x++){
 		for (uint8 y = 0; y < mf->height; y++){
-		    move(minefield_y_position + y*2, minefield_x_position + x*2);
-                    if (CELL_INDEX(mf, x, y) == mf->current_cell) {
-                      standout();
-                    }
-                    if (CELL(mf, x, y) & ISOPEN) {
-			if (CELL(mf, x, y) & HASBOMB){
-			    attron(COLOR_PAIR(UNCOVERED_BOMB_COLOR));
-				printw("*");
-			} else {
-				uint8 count = CELL(mf, x, y) & 0x0F;
-				if (count > 0){
-					attron(COLOR_PAIR(ONE_BOMB_COLOR + count - 1));
-					printw("%d", count);
-				} else {
-                                  printw(" ");
-                                }
+			move(minefield_y_position + y*2, minefield_x_position + x*2);
+			if (CELL_INDEX(mf, x, y) == mf->current_cell) {
+				standout();
 			}
-                    } else {
-                      attron(COLOR_PAIR(11));
-                      printw("#");
-                    }
-                    standend();
+			if (CELL(mf, x, y) & ISOPEN) {
+				if (CELL(mf, x, y) & HASBOMB){
+					attron(COLOR_PAIR(UNCOVERED_BOMB_COLOR));
+					printw("*");
+				} else {
+					uint8 count = CELL(mf, x, y) & 0x0F;
+					if (count > 0){
+						attron(COLOR_PAIR(ONE_BOMB_COLOR + count - 1));
+						printw("%d", count);
+					} else {
+						printw(" ");
+					}
+				}
+			} else {
+				attron(COLOR_PAIR(CLOSED_CELL_COLOR));
+				printw("#");
+			}
+			standend();
 		}
 	}
 
