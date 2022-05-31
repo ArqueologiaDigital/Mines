@@ -34,12 +34,12 @@ void main(){
 				break;
 
 			case MINE_INPUT_UP:
-				if (mf.current_cell > mf.width)
+				if (mf.current_cell > mf.width - 1)
 					mf.current_cell -= mf.width;
 				break;
 
 			case MINE_INPUT_DOWN:
-				if (mf.current_cell < num_cells - 1 - mf.width)
+				if (mf.current_cell < num_cells - mf.width)
 					mf.current_cell += mf.width;
 				break;
 
