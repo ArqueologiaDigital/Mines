@@ -11,6 +11,7 @@ typedef unsigned char uint8;
 // neighbouring bombs around a given a cell.
 #define HASBOMB (1 << 4)
 #define ISOPEN (1 << 5)
+#define HASFLAG (1 << 6)
 
 typedef struct {
 	uint8 width;
@@ -25,6 +26,7 @@ typedef struct {
 #define MINE_INPUT_UP 3
 #define MINE_INPUT_DOWN 4
 #define MINE_INPUT_OPEN 5
+#define MINE_INPUT_FLAG 6
 
 void setup_minefield(minefield* mf, uint8 width, uint8 height, uint8 num_bombs);
 
