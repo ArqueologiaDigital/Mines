@@ -43,3 +43,30 @@ void setup_minefield(minefield* mf, uint8 width, uint8 height, uint8 num_bombs){
 		}
 	}
 }
+
+void open_cell(minefield* mf, uint8 x, uint8 y){
+	if (CELL(mf, x, y) & (HASFLAG | ISOPEN)){
+		return;
+	} else {
+		CELL(mf, x, y) |= ISOPEN;
+		if (CELL(mf, x, y) & HASBOMB){
+			game_over();
+			return;
+		}
+	}
+
+	if ((CELL(mf, x, y) & 0x0F) > 0)
+		return;
+
+	if (x-1 >= 0 && y-1 >= 0) open_cell(mf, x-1, y-1); // top-left
+	if (y-1 >= 0) open_cell(mf, x, y-1); // top
+	if (x+1 < mf->width && y-1 >= 0) open_cell(mf, x+1, y-1); // top-right
+
+	if (x-1 >= 0) open_cell(mf, x-1, y); // left
+	if (x+1 < mf->width) open_cell(mf, x+1, y); // right
+
+	if (x-1 >= 0 && y+1 < mf->height) open_cell(mf, x-1, y+1); // bottom-left
+	if (y+1 < mf->height) open_cell(mf, x, y+1); // bottom
+	if (x+1 < mf->width && y+1 < mf->height) open_cell(mf, x+1, y+1); // bottom-right
+}
+
