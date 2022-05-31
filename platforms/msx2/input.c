@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <stdbool.h>
-#include "input.h"
 #include "ports.h"
+#include "input.h"
 
 
 #define KB_MAX_MATRIX_ROW 11
@@ -55,8 +55,9 @@ bool keyboard_read()
 }
 
 
-uint8_t wait_for_any_key()
+uint8_t input_read(uint8_t source)
 {
+	source;
 	bool key_pressed = false;
 
 	while (!key_pressed)
@@ -78,7 +79,12 @@ uint8_t MATRIX_KEY_2_COLUMN[8][12] = {
 
 uint8_t get_raw_ch()
 {
-	uint8_t key = wait_for_any_key();
+	uint8_t key;
+
+	do {
+		key = input_read(KEYBOARD);
+	} while (key == MINE_INPUT_IGNORED);
+
 	uint8_t row = key & 0x0f;
 	return MATRIX_KEY_2_COLUMN[key >> 4][row];
 }

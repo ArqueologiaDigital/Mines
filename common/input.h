@@ -3,6 +3,20 @@
 
 #include <stdint.h>
 
+#define MINE_INPUT_IGNORED 0
+#define MINE_INPUT_LEFT    (1<<0)
+#define MINE_INPUT_RIGHT   (1<<1)
+#define MINE_INPUT_UP      (1<<2)
+#define MINE_INPUT_DOWN    (1<<3)
+#define MINE_INPUT_OPEN    (1<<4)
+#define MINE_INPUT_FLAG    (1<<5)
+
+#define KEYBOARD           0
+#define JOY_1              1
+#define JOY_2              2
+#define JOY_3              3
+#define JOY_4              4
+
 /**
  * Reads input from controller or keyboard, including all the buttons and pad directions
  * and returns immediately. `source` identifies the input source.
@@ -32,6 +46,6 @@
  *
  * Function is **non-blocking**.
  */
-void input_read(uint8_t source);
+uint8_t input_read(uint8_t source);
 
 #endif /* INPUT_H */

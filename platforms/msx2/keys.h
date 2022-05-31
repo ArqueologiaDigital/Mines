@@ -112,5 +112,3 @@
 #define KEY_NUM_MIN             MATRIX_KEY(10, 5)
 #define KEY_NUM_COM             MATRIX_KEY(10, 6)
 #define KEY_NUM_DOT             MATRIX_KEY(10, 7)
-
-#undef MATRIX_KEY
