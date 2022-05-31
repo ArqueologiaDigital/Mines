@@ -2,7 +2,7 @@
 #include <ncurses.h>
 #include <stdlib.h>
 
-uint8 wait_for_any_key(){
+uint8_t wait_for_any_key(){
 	int c = getch();
 	if (c == KEY_LEFT) {
 		return MINE_INPUT_LEFT;

@@ -52,12 +52,12 @@ void draw_minefield(minefield* mf){
     attron(COLOR_PAIR(TEXT_COLOR));
     printw("Mines!");
 
-	uint8 minefield_x_position = 5;
-	uint8 minefield_y_position = 5;
+	uint8_t minefield_x_position = 5;
+	uint8_t minefield_y_position = 5;
 
     attron(COLOR_PAIR(MINEFIELD_GRID_COLOR));
-	for (uint8 x = 0; x <= mf->width; x++){
-		for (uint8 y = 0; y <= mf->height; y++){
+	for (uint8_t x = 0; x <= mf->width; x++){
+		for (uint8_t y = 0; y <= mf->height; y++){
 		    move(minefield_y_position + y*2, minefield_x_position + x*2 - 1);
 			if (y < mf->height) printw("|");
 		    move(minefield_y_position + y*2-1, minefield_x_position + x*2 - 1);
@@ -67,8 +67,8 @@ void draw_minefield(minefield* mf){
 		}
 	}
 
-	for (uint8 x = 0; x < mf->width; x++){
-		for (uint8 y = 0; y < mf->height; y++){
+	for (uint8_t x = 0; x < mf->width; x++){
+		for (uint8_t y = 0; y < mf->height; y++){
 			move(minefield_y_position + y*2, minefield_x_position + x*2);
 			if (CELL_INDEX(mf, x, y) == mf->current_cell) {
 				standout();
@@ -78,7 +78,7 @@ void draw_minefield(minefield* mf){
 					attron(COLOR_PAIR(UNCOVERED_BOMB_COLOR));
 					printw("*");
 				} else {
-					uint8 count = CELL(mf, x, y) & 0x0F;
+					uint8_t count = CELL(mf, x, y) & 0x0F;
 					if (count > 0){
 						attron(COLOR_PAIR(ONE_BOMB_COLOR + count - 1));
 						printw("%d", count);

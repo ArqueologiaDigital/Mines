@@ -2,7 +2,7 @@
 #define MINEFIELD_H
 
 #include <stdlib.h>
-typedef unsigned char uint8;
+#include <stdint.h>
 #define CELL_INDEX(mf, x, y) (x + (y) * mf->width)
 #define CELL(mf,x,y) mf->cells[CELL_INDEX(mf, x, y)]
 
@@ -14,10 +14,10 @@ typedef unsigned char uint8;
 #define HASFLAG (1 << 6)
 
 typedef struct {
-	uint8 width;
-	uint8 height;
-	uint8 current_cell;
-	uint8* cells;
+	uint8_t width;
+	uint8_t height;
+	uint8_t current_cell;
+	uint8_t* cells;
 } minefield;
 
 #define MINE_INPUT_IGNORED 0
@@ -28,7 +28,7 @@ typedef struct {
 #define MINE_INPUT_OPEN 5
 #define MINE_INPUT_FLAG 6
 
-void setup_minefield(minefield* mf, uint8 width, uint8 height, uint8 num_bombs);
-void open_cell(minefield* mf, uint8 x, uint8 y);
+void setup_minefield(minefield* mf, uint8_t width, uint8_t height, uint8_t num_bombs);
+void open_cell(minefield* mf, uint8_t x, uint8_t y);
 
 #endif //#define MINEFIELD_H
