@@ -16,16 +16,33 @@ void main(){
 
 	while (1) {
 		uint8 input = wait_for_any_key();
-		if (input == MINE_INPUT_LEFT) {
-			if (mf.current_cell > 0) mf.current_cell--;
-		} else if (input == MINE_INPUT_RIGHT) {
-			if (mf.current_cell < num_cells - 1) mf.current_cell++;
-		} else if (input == MINE_INPUT_UP) {
-			if (mf.current_cell > mf.width) mf.current_cell-=mf.width;
-		} else if (input == MINE_INPUT_DOWN) {
-			if (mf.current_cell < num_cells - 1 - mf.width) mf.current_cell+=mf.width;
-		} else if (input == MINE_INPUT_OPEN) {
-			mf.cells[mf.current_cell] |= ISOPEN;
+		switch(input){
+			case MINE_INPUT_LEFT:
+				if (mf.current_cell > 0)
+					mf.current_cell--;
+				break;
+
+			case MINE_INPUT_RIGHT:
+				if (mf.current_cell < num_cells - 1)
+					mf.current_cell++;
+				break;
+
+			case MINE_INPUT_UP:
+				if (mf.current_cell > mf.width)
+					mf.current_cell -= mf.width;
+				break;
+
+			case MINE_INPUT_DOWN:
+				if (mf.current_cell < num_cells - 1 - mf.width)
+					mf.current_cell += mf.width;
+				break;
+
+			case MINE_INPUT_OPEN:
+				mf.cells[mf.current_cell] |= ISOPEN;
+				break;
+
+			default:
+				break;
 		}
 		draw_minefield(&mf);
 	}
