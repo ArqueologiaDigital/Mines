@@ -14,6 +14,8 @@ uint8 wait_for_any_key(){
 		return MINE_INPUT_DOWN;
 	} else if (c == (int)'\n' || c == (int)' ') {
 		return MINE_INPUT_OPEN;
+	} else if (c == (int)'f' || c == (int)'F') {
+		return MINE_INPUT_FLAG;
 	}
 	return MINE_INPUT_IGNORED;
 }

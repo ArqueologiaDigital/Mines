@@ -16,7 +16,8 @@ enum {
 	EXPLODING_BOMB_COLOR,
 	MINEFIELD_GRID_COLOR,
 	TEXT_COLOR,
-	CLOSED_CELL_COLOR
+	CLOSED_CELL_COLOR,
+	FLAG_COLOR
 };
 
 // TODO: perhaps part of this should move to a platform.c file
@@ -40,6 +41,7 @@ void platform_init()
 	init_pair(MINEFIELD_GRID_COLOR, COLOR_WHITE, COLOR_BLACK);
 	init_pair(TEXT_COLOR, COLOR_WHITE, COLOR_BLACK);
 	init_pair(CLOSED_CELL_COLOR, COLOR_WHITE, COLOR_BLACK);
+	init_pair(FLAG_COLOR, COLOR_WHITE, COLOR_RED);
 
 	// Init random number generator:
 	srand(time(NULL));
@@ -85,8 +87,13 @@ void draw_minefield(minefield* mf){
 					}
 				}
 			} else {
-				attron(COLOR_PAIR(CLOSED_CELL_COLOR));
-				printw("#");
+				if (CELL(mf, x, y) & HASFLAG){
+					attron(COLOR_PAIR(FLAG_COLOR));
+					printw("F");
+				} else {
+					attron(COLOR_PAIR(CLOSED_CELL_COLOR));
+					printw("#");
+				}
 			}
 			standend();
 		}

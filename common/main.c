@@ -41,6 +41,14 @@ void main(){
 				mf.cells[mf.current_cell] |= ISOPEN;
 				break;
 
+			case MINE_INPUT_FLAG:
+				if (mf.cells[mf.current_cell] & HASFLAG){
+					mf.cells[mf.current_cell] &= ~HASFLAG;
+				} else {
+					mf.cells[mf.current_cell] |= HASFLAG;
+				}
+				break;
+
 			default:
 				break;
 		}
