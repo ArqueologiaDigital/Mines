@@ -1,4 +1,4 @@
-#include "../../common/minefield.h"
+#include "minefield.h"
 #include <ncurses.h>
 #include <stdlib.h>
 #include <time.h>

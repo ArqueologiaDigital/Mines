@@ -1,4 +1,5 @@
 #include "main.h"
+#include "input.h"
 
 void game_over(){
 	// TODO: Implement-me!
@@ -19,7 +20,12 @@ void main(){
 	draw_minefield(&mf);
 
 	while (1) {
-		uint8_t input = wait_for_any_key();
+		uint8_t input;
+
+		do {
+			input = input_read(KEYBOARD);
+		} while (input == MINE_INPUT_IGNORED);
+
 		uint8_t x = mf.current_cell % mf.width;
 		uint8_t y = mf.current_cell / mf.width;
 		switch(input){

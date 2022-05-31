@@ -8,7 +8,7 @@ TARGET := $(BUILDDIR)/minesweeper
 CODE := 0x4000
 DATA := 0xc000
 ROM_MAX := 0x8000
-CFLAGS := -mz80 --Werror --fsigned-char --std-sdcc99 --opt-code-speed --fomit-frame-pointer $(EXTRA_CFLAGS)
+CFLAGS := -mz80 --Werror --fsigned-char --std-sdcc99 --opt-code-speed --fomit-frame-pointer $(EXTRA_CFLAGS) -I../../common
 LDFLAGS := --no-std-crt0
 
 SOURCES := $(wildcard *.c)

@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <string.h>
-#include "../../common/minefield.h"
+#include "minefield.h"
 
 
 extern uint8_t key_buffer_data[256];
