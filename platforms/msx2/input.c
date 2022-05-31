@@ -4,9 +4,9 @@
 #include "ports.h"
 
 
-#define KB_MAX_MATRIX_ROW 10
-uint8_t keyboard_matrix_row[KB_MAX_MATRIX_ROW];
-uint8_t old_keyboard_matrix_row[KB_MAX_MATRIX_ROW];
+#define KB_MAX_MATRIX_ROW 11
+uint8_t keyboard_matrix_row[KB_MAX_MATRIX_ROW] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+uint8_t old_keyboard_matrix_row[KB_MAX_MATRIX_ROW] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
 /* bool key_buffer_empty = true; */
 uint8_t key_buffer_head = 0;
@@ -39,9 +39,15 @@ bool keyboard_read()
 		keyboard_matrix_row[row] = keyboard_read_row(row);
 
 		if (keyboard_matrix_row[row] != old_keyboard_matrix_row[row]) {
-			/* key_buffer_empty = false; */
-			key_buffer_data[key_buffer_tail++] = (keyboard_matrix_row[row] << 4) | row;
-			key_pressed |= true;
+			bool found;
+
+			for (uint8_t b = 0; b < 8; ++b) {
+				found = (keyboard_matrix_row[row] & (1 << b)) == 0;
+				if (!found) continue;
+				key_buffer_data[key_buffer_tail++] = (b << 4) | row;
+				key_pressed |= true;
+				/* key_buffer_empty = false; */
+			}
 		}
 	}
 
