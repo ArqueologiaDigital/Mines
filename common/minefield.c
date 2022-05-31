@@ -1,32 +1,32 @@
 #include "main.h"
 #include "minefield.h"
 
-void setup_minefield(minefield* mf, uint8 width, uint8 height, uint8 num_bombs){
+void setup_minefield(minefield* mf, uint8_t width, uint8_t height, uint8_t num_bombs){
 	mf->width = width;
 	mf->height = height;
 	mf->current_cell = 0;
-	mf->cells = malloc(width * height * sizeof(uint8));
+	mf->cells = malloc(width * height * sizeof(uint8_t));
 
 	// Clear the minefield:
-	for (uint8 x = 0; x < mf->width; x++){
-		for (uint8 y = 0; y < mf->height; y++){
+	for (uint8_t x = 0; x < mf->width; x++){
+		for (uint8_t y = 0; y < mf->height; y++){
 			CELL(mf, x, y) = 0;
 		}
 	}
 
 	// Place bombs
 	while (num_bombs--){
-		uint8 x = random_number(0, mf->width - 1);
-		uint8 y = random_number(0, mf->height - 1);
+		uint8_t x = random_number(0, mf->width - 1);
+		uint8_t y = random_number(0, mf->height - 1);
 		CELL(mf, x, y) |= HASBOMB;
 	}
 
 	// Compute neighbouring bombs:
-	for (uint8 x = 0; x < mf->width; x++){
-		for (uint8 y = 0; y < mf->height; y++){
+	for (uint8_t x = 0; x < mf->width; x++){
+		for (uint8_t y = 0; y < mf->height; y++){
 			if ((CELL(mf, x, y) & HASBOMB)) continue;
 
-			uint8 count = 0;
+			uint8_t count = 0;
 			if (x > 0 && y > 0 && (CELL(mf, x-1, y-1) & HASBOMB)) count++;
 			if (x > 0 && (CELL(mf, x-1, y) & HASBOMB)) count++;
 			if (x > 0 && y < mf->height-1 && (CELL(mf, x-1, y+1) & HASBOMB)) count++;
@@ -44,7 +44,7 @@ void setup_minefield(minefield* mf, uint8 width, uint8 height, uint8 num_bombs){
 	}
 }
 
-void open_cell(minefield* mf, uint8 x, uint8 y){
+void open_cell(minefield* mf, uint8_t x, uint8_t y){
 	if (CELL(mf, x, y) & (HASFLAG | ISOPEN)){
 		return;
 	} else {

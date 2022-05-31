@@ -8,10 +8,10 @@ void main(){
 	platform_init();
 
 	minefield mf;
-	uint8 width = 10;
-	uint8 height = 10;
-	uint8 num_cells = (width * height);
-	uint8 num_bombs = random_number(15,60);
+	uint8_t width = 10;
+	uint8_t height = 10;
+	uint8_t num_cells = (width * height);
+	uint8_t num_bombs = random_number(15,60);
 	// TODO: let platforms configure specific values for
 	//       minefield dimensions and number of bombs
 
@@ -19,9 +19,9 @@ void main(){
 	draw_minefield(&mf);
 
 	while (1) {
-		uint8 input = wait_for_any_key();
-		uint8 x = mf.current_cell % mf.width;
-		uint8 y = mf.current_cell / mf.width;
+		uint8_t input = wait_for_any_key();
+		uint8_t x = mf.current_cell % mf.width;
+		uint8_t y = mf.current_cell / mf.width;
 		switch(input){
 			case MINE_INPUT_LEFT:
 				if (mf.current_cell > 0)
