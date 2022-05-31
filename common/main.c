@@ -1,5 +1,9 @@
 #include "main.h"
 
+void game_over(){
+	// TODO: Implement-me!
+}
+
 void main(){
 	platform_init();
 
@@ -16,6 +20,8 @@ void main(){
 
 	while (1) {
 		uint8 input = wait_for_any_key();
+		uint8 x = mf.current_cell % mf.width;
+		uint8 y = mf.current_cell / mf.width;
 		switch(input){
 			case MINE_INPUT_LEFT:
 				if (mf.current_cell > 0)
@@ -38,7 +44,7 @@ void main(){
 				break;
 
 			case MINE_INPUT_OPEN:
-				mf.cells[mf.current_cell] |= ISOPEN;
+				open_cell(&mf, x, y);
 				break;
 
 			case MINE_INPUT_FLAG:

@@ -29,5 +29,6 @@ typedef struct {
 #define MINE_INPUT_FLAG 6
 
 void setup_minefield(minefield* mf, uint8 width, uint8 height, uint8 num_bombs);
+void open_cell(minefield* mf, uint8 x, uint8 y);
 
 #endif //#define MINEFIELD_H
