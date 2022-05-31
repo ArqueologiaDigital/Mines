@@ -1,8 +1,14 @@
+#include <stdint.h>
+#include <string.h>
 #include "../../common/minefield.h"
+
+
+extern uint8_t key_buffer_data[256];
+
 
 void platform_init()
 {
-	//TODO: Implement-me!
+	memset(key_buffer_data, 0xff, 256);
 }
 
 
