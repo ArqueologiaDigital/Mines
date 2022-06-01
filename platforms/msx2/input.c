@@ -4,69 +4,61 @@
 #include "input.h"
 
 
-#define KB_MAX_MATRIX_ROW 11
-uint8_t keyboard_matrix_row[KB_MAX_MATRIX_ROW] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
-uint8_t old_keyboard_matrix_row[KB_MAX_MATRIX_ROW] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
-
-/* bool key_buffer_empty = true; */
-uint8_t key_buffer_head = 0;
-uint8_t key_buffer_tail = 0;
-uint8_t key_buffer_data[256];
-
-
 uint8_t keyboard_read_row(uint8_t row) __z88dk_fastcall __naked
 {
 	assert(row <= 10);
 	__asm
-		in		a, (P_PPI_C)
-		and		#0xf0           /* keep PPI data constant... */
-		or		l               /* ...but change row */
-		out		(P_PPI_C), a
-		in		a, (P_PPI_B)    /* read row data */
-		ld		l, a
+		in      a, (P_PPI_C)
+		and     #0xf0           /* keep PPI data constant... */
+		or      l               /* ...but change row */
+		out     (P_PPI_C), a
+		in      a, (P_PPI_B)    /* read row data */
+		ld      l, a
 		ret
 	__endasm;
 }
 
 
-bool keyboard_read()
+uint8_t keyboard_read()
 {
-	bool key_pressed = false;
+	uint8_t scan;
+	/* previous row statuses */
+	static uint8_t row4 = 0xff;
+	static uint8_t row8 = 0xff;
 
-	for (uint8_t row = 0; row <= KB_MAX_MATRIX_ROW; ++row)
-	{
-		old_keyboard_matrix_row[row] = keyboard_matrix_row[row];
-		keyboard_matrix_row[row] = keyboard_read_row(row);
-
-		if (keyboard_matrix_row[row] != old_keyboard_matrix_row[row]) {
-			bool found;
-
-			for (uint8_t b = 0; b < 8; ++b) {
-				found = (keyboard_matrix_row[row] & (1 << b)) == 0;
-				if (!found) continue;
-				key_buffer_data[key_buffer_tail++] = (b << 4) | row;
-				key_pressed |= true;
-				/* key_buffer_empty = false; */
-			}
-		}
+	/* search for 'M' key */
+	if ((scan = keyboard_read_row(4)) != row4) {
+		row4 = scan;
+		if (!(scan & (1 << 2))) return MINE_INPUT_FLAG;
 	}
+	row4 = scan;
 
-	return key_pressed;
+	/* search for space and arrow keys */
+	if ((scan = keyboard_read_row(8)) != row8) {
+		row8 = scan;
+		if (!(scan & 1)) return MINE_INPUT_OPEN;
+		if (!(scan & (1 << 4))) return MINE_INPUT_LEFT;
+		if (!(scan & (1 << 5))) return MINE_INPUT_UP;
+		if (!(scan & (1 << 6))) return MINE_INPUT_DOWN;
+		if (!(scan & (1 << 7))) return MINE_INPUT_RIGHT;
+	}
+	row8 = scan;
+
+	return MINE_INPUT_IGNORED;
 }
 
 
 uint8_t input_read(uint8_t source)
 {
-	source;
-	bool key_pressed = false;
+	if (source == KEYBOARD)
+		return keyboard_read();
 
-	while (!key_pressed)
-		key_pressed = keyboard_read();
-
-	return key_buffer_data[++key_buffer_head];
+	/* not implemented yet */
+	return MINE_INPUT_IGNORED;
 }
 
-uint8_t MATRIX_KEY_2_COLUMN[8][12] = {
+
+static uint8_t MATRIX_KEY_2_COLUMN[8][12] = {
 	"08'CKS\000\000 \0005",
 	"19`DLT\000\000\000\0006",
 	"2-,EMU\000\x1c\000\0007",
