@@ -3,7 +3,7 @@
 #include <ncurses.h>
 #include <stdlib.h>
 
-uint8_t input_read(uint8_t /*source*/)
+uint8_t input_read(uint8_t source)
 {
 	int c = getch();
 	if (c == KEY_LEFT) {
