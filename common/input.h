@@ -48,4 +48,19 @@
  */
 uint8_t input_read(uint8_t source);
 
+/**
+ * Returns a pseudo-random integer in the mathematical range [`min_num`, `max_num`). If
+ * `min_num` is greater than `max_num`, they will be swapped automatically.
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * No assumption about seed or quality of random numbers is considered at this point. All
+ * platforms are free to pursue their own implementations as they see fit.
+ *
+ * There should be no assumption whether function is reentrant or not since reproducible
+ * behavior is not a requirement.
+ */
+int random_number(int min, int max);
+
 #endif /* INPUT_H */
