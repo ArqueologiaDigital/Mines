@@ -23,15 +23,15 @@
  *
  * Output is defined by the bit mask:
  *
- * | Mask                  | Bit |
+ * | Name                  | Bit |
  * | ---                   | --- |
- * | MINE_INPUT_IGNORED    | 0   |
- * | MINE_INPUT_LEFT       | 1   |
- * | MINE_INPUT_RIGHT      | 2   |
- * | MINE_INPUT_UP         | 3   |
- * | MINE_INPUT_DOWN       | 4   |
- * | MINE_INPUT_OPEN       | 5   |
- * | MINE_INPUT_OPEN_BLOCK | 6   |
+ * | MINE_INPUT_IGNORED    | -   |
+ * | MINE_INPUT_LEFT       | 0   |
+ * | MINE_INPUT_RIGHT      | 1   |
+ * | MINE_INPUT_UP         | 2   |
+ * | MINE_INPUT_DOWN       | 3   |
+ * | MINE_INPUT_OPEN       | 4   |
+ * | MINE_INPUT_OPEN_BLOCK | 5   |
  *
  * See [input_select](#input_select) for possible `source` values.
  *

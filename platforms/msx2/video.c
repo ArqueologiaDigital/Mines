@@ -1,14 +1,14 @@
 #include <stdint.h>
 #include <string.h>
 #include "minefield.h"
-
-
-extern uint8_t key_buffer_data[256];
+#include "input.h"
 
 
 void platform_init()
 {
-	memset(key_buffer_data, 0xff, 256);
+    // TODO: set SCREEN5
+    while (1)
+        input_read(KEYBOARD);
 }
 
 
