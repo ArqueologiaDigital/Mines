@@ -1,11 +1,11 @@
 #include "main.h"
 #include "input.h"
 
-void game_over(){
+void game_over() {
 	// TODO: Implement-me!
 }
 
-void main(){
+int main() {
 	platform_init();
 
 	minefield mf;
@@ -67,4 +67,5 @@ void main(){
 		draw_minefield(&mf);
 	}
 	//shutdown();
+	return 0;
 }
