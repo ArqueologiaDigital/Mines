@@ -4,12 +4,13 @@
 #include <stdint.h>
 
 #define MINE_INPUT_IGNORED 0
-#define MINE_INPUT_LEFT    (1<<0)
-#define MINE_INPUT_RIGHT   (1<<1)
-#define MINE_INPUT_UP      (1<<2)
-#define MINE_INPUT_DOWN    (1<<3)
-#define MINE_INPUT_OPEN    (1<<4)
-#define MINE_INPUT_FLAG    (1<<5)
+#define MINE_INPUT_LEFT       (1<<0)
+#define MINE_INPUT_RIGHT      (1<<1)
+#define MINE_INPUT_UP         (1<<2)
+#define MINE_INPUT_DOWN       (1<<3)
+#define MINE_INPUT_OPEN       (1<<4)
+#define MINE_INPUT_FLAG       (1<<5)
+#define MINE_INPUT_OPEN_BLOCK (1<<6)
 
 #define KEYBOARD           0
 #define JOY_1              1

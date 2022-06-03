@@ -16,6 +16,8 @@ uint8_t input_read(uint8_t source)
 		return MINE_INPUT_DOWN;
 	} else if (c == (int)'\n' || c == (int)' ') {
 		return MINE_INPUT_OPEN;
+	} else if (c == (int)'b' || c == (int)'B') {
+		return MINE_INPUT_OPEN_BLOCK;
 	} else if (c == (int)'f' || c == (int)'F') {
 		return MINE_INPUT_FLAG;
 	}
