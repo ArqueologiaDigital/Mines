@@ -48,12 +48,12 @@ int main() {
 		uint8_t num_bombs_around = (mf.cells[mf.current_cell] & 0x0F);
 		switch(input){
 			case MINE_INPUT_LEFT:
-				if (mf.current_cell > 0)
+				if (mf.current_cell % mf.width > 0)
 					mf.current_cell--;
 				break;
 
 			case MINE_INPUT_RIGHT:
-				if (mf.current_cell < num_cells - 1)
+				if (mf.current_cell % mf.width < mf.width - 1)
 					mf.current_cell++;
 				break;
 
