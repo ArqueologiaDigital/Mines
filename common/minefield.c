@@ -1,6 +1,14 @@
 #include "main.h"
 #include "minefield.h"
 
+void game_over(minefield* mf) {
+	// show all bomb locations
+	for (uint8_t x = 0; x < mf->width; x++)
+		for (uint8_t y = 0; y < mf->height; y++)
+			if (CELL(mf, x, y) & HASBOMB)
+				CELL(mf, x, y) |= ISOPEN;
+}
+
 void setup_minefield(minefield* mf, uint8_t width, uint8_t height, uint8_t num_bombs){
 	mf->width = width;
 	mf->height = height;
@@ -50,7 +58,7 @@ void open_cell(minefield* mf, uint8_t x, uint8_t y){
 	} else {
 		CELL(mf, x, y) |= ISOPEN;
 		if (CELL(mf, x, y) & HASBOMB){
-			game_over();
+			game_over(mf);
 			return;
 		}
 	}
