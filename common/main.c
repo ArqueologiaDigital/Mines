@@ -5,6 +5,22 @@ void game_over() {
 	// TODO: Implement-me!
 }
 
+uint8_t count_surrounding_flags(minefield* mf, uint8_t x, uint8_t y){
+	uint8_t count = 0;
+	if (CELL(mf, x-1, y-1) & HASFLAG) count++;
+	if (CELL(mf, x-1, y) & HASFLAG) count++;
+	if (CELL(mf, x-1, y+1) & HASFLAG) count++;
+
+	if (CELL(mf, x, y-1) & HASFLAG) count++;
+	if (CELL(mf, x, y+1) & HASFLAG) count++;
+
+	if (CELL(mf, x+1, y-1) & HASFLAG) count++;
+	if (CELL(mf, x+1, y) & HASFLAG) count++;
+	if (CELL(mf, x+1, y+1) & HASFLAG) count++;
+
+	return count;
+}
+
 int main() {
 	platform_init();
 
@@ -28,6 +44,8 @@ int main() {
 
 		uint8_t x = mf.current_cell % mf.width;
 		uint8_t y = mf.current_cell / mf.width;
+		uint8_t has_bomb = (mf.cells[mf.current_cell] & HASBOMB);
+		uint8_t num_bombs_around = (mf.cells[mf.current_cell] & 0x0F);
 		switch(input){
 			case MINE_INPUT_LEFT:
 				if (mf.current_cell > 0)
@@ -51,6 +69,20 @@ int main() {
 
 			case MINE_INPUT_OPEN:
 				open_cell(&mf, x, y);
+				break;
+
+			case MINE_INPUT_OPEN_BLOCK:
+			    if (!has_bomb && (count_surrounding_flags(&mf, x, y) == num_bombs_around)){
+					open_cell(&mf, x-1, y-1);
+					open_cell(&mf, x-1, y);
+					open_cell(&mf, x-1, y+1);
+					open_cell(&mf, x, y-1);
+					open_cell(&mf, x, y);
+					open_cell(&mf, x, y+1);
+					open_cell(&mf, x+1, y-1);
+					open_cell(&mf, x+1, y);
+					open_cell(&mf, x+1, y+1);
+				}
 				break;
 
 			case MINE_INPUT_FLAG:
