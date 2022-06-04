@@ -4,7 +4,7 @@
 #include "input.h"
 
 
-uint8_t keyboard_read_row(uint8_t row) __z88dk_fastcall __naked
+static uint8_t keyboard_read_row(uint8_t row) __z88dk_fastcall __naked
 {
 	assert(row <= 10);
 	__asm
@@ -19,7 +19,7 @@ uint8_t keyboard_read_row(uint8_t row) __z88dk_fastcall __naked
 }
 
 
-uint8_t keyboard_read()
+static uint8_t keyboard_read()
 {
 	uint8_t scan;
 	/* previous row statuses */
@@ -81,9 +81,50 @@ uint8_t get_raw_ch()
 	return MATRIX_KEY_2_COLUMN[key >> 4][row];
 }
 
-int random_number(int min_num, int max_num)
+
+static uint16_t seed = 1;    // seed must not be 0
+
+static uint16_t xorshift_rng() __z88dk_fastcall __naked
 {
-	// TODO: Implement-me!
-	min_num; max_num;
-	return 0;
+	__asm
+		ld hl, (_seed)
+
+		ld a, h
+		rra
+		ld a, l
+		rra
+		xor h
+		ld h, a
+		ld a, l
+		rra
+		ld a, h
+		rra
+		xor l
+		ld l, a
+		xor h
+		ld h, a
+
+		ld (_seed), hl
+
+		ret
+	__endasm;
 }
+
+
+int random_number(int min, int max)
+{
+	int low, hi;
+
+	if (min < max)
+	{
+		low = min;
+		hi = max;
+	} else {
+		low = max;
+		hi = min;
+	}
+
+	++hi;
+	return (xorshift_rng() % (hi - low)) + low;
+}
+
