@@ -51,7 +51,7 @@
 uint8_t input_read(uint8_t source);
 
 /**
- * Returns a pseudo-random integer in the mathematical range [`min_num`, `max_num`). If
+ * Returns a pseudo-random integer in the mathematical range [`min_num`, `max_num`]. If
  * `min_num` is greater than `max_num`, they will be swapped automatically.
  *
  * Implementation details
