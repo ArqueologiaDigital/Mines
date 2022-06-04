@@ -1,7 +1,10 @@
 #include "main.h"
 #include "minefield.h"
 
+
 void game_over(minefield* mf) {
+	mf->state = GAME_OVER;
+
 	// show all bomb locations
 	for (uint8_t x = 0; x < mf->width; x++)
 		for (uint8_t y = 0; y < mf->height; y++)

@@ -11,6 +11,7 @@
 #define MINE_INPUT_OPEN       (1<<4)
 #define MINE_INPUT_FLAG       (1<<5)
 #define MINE_INPUT_OPEN_BLOCK (1<<6)
+#define MINE_INPUT_QUIT       (1<<7)
 
 #define KEYBOARD           0
 #define JOY_1              1

@@ -20,6 +20,8 @@ uint8_t input_read(uint8_t source)
 		return MINE_INPUT_OPEN_BLOCK;
 	} else if (c == (int)'f' || c == (int)'F') {
 		return MINE_INPUT_FLAG;
+	} else if (c == (int)'q' || c == (int)'Q') {
+		return MINE_INPUT_QUIT;
 	}
 	return MINE_INPUT_IGNORED;
 }

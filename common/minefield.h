@@ -7,6 +7,15 @@
 #define CELL_INDEX(mf, x, y) (x + (y) * mf->width)
 #define CELL(mf,x,y) mf->cells[CELL_INDEX(mf, x, y)]
 
+enum {
+	TITLE_SCREEN = 1,
+	PLAYING_GAME = 2,
+	GAME_OVER = 3,
+	ENTER_HISCORE_SCREEN = 4,
+	HIGHSCORES_LIST_SCREEN = 5,
+	QUIT = 6
+};
+
 // Note:
 // The 4 least significant bits hold the computed number of
 // neighbouring bombs around a given a cell.
@@ -15,6 +24,7 @@
 #define HASFLAG (1 << 6)
 
 typedef struct {
+	uint8_t state;
 	uint8_t width;
 	uint8_t height;
 	uint8_t current_cell;

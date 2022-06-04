@@ -102,7 +102,7 @@ void draw_minefield(minefield* mf){
 
     move(minefield_y_position + mf->height*2 + 3, 1);
     attron(COLOR_PAIR(TEXT_COLOR));
-    printw("Press Ctrl-C to exit.");
+    printw("Press 'Q' to exit.");
     refresh();
 }
 
