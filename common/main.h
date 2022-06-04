@@ -1,6 +1,7 @@
 #include "minefield.h"
 
 void platform_init();
+void idle_loop();
 void draw_minefield(minefield* mf);
 void shutdown();
 uint8_t wait_for_any_key();
