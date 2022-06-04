@@ -73,10 +73,12 @@ void main_gameplay_loop(minefield* mf) {
 			break;
 
 		case MINE_INPUT_FLAG:
-			if (mf->cells[mf->current_cell] & HASFLAG){
-				mf->cells[mf->current_cell] &= ~HASFLAG;
-			} else {
-				mf->cells[mf->current_cell] |= HASFLAG;
+			if (!(mf->cells[mf->current_cell] & ISOPEN)){
+				if (mf->cells[mf->current_cell] & HASFLAG){
+					mf->cells[mf->current_cell] &= ~HASFLAG;
+				} else {
+					mf->cells[mf->current_cell] |= HASFLAG;
+				}
 			}
 			break;
 
