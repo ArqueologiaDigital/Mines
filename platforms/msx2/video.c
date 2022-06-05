@@ -33,3 +33,5 @@ void shutdown()
 {
 	//TODO: Implement-me!
 }
+
+void idle_loop(){}

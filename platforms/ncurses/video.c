@@ -111,3 +111,5 @@ void shutdown()
     endwin();
     exit(0);
 }
+
+void idle_loop(){}
