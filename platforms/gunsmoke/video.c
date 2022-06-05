@@ -25,19 +25,20 @@
 #define CLOSED_CELL_COLOR 0
 #define ONE_BOMB_COLOR 16
 #define TWO_BOMBS_COLOR 17
-#define THREE_BOMBS_COLOR 21 /* OK */
-#define FOUR_BOMBS_COLOR 4 /* OK */
+#define THREE_BOMBS_COLOR 21
+#define FOUR_BOMBS_COLOR 4
 #define FIVE_BOMBS_COLOR 20
-#define SIX_BOMBS_COLOR 6 /* OK */
+#define SIX_BOMBS_COLOR 6
 #define SEVEN_BOMBS_COLOR 7
 #define EIGHT_BOMBS_COLOR 8
-#define FLAG_COLOR 9  /* OK */
+#define FLAG_COLOR 9
 #define SCENARIO_COLOR 15
 #define UNCOVERED_BOMB_COLOR 10
 #define EXPLODING_BOMB_COLOR 11
 #define MINEFIELD_GRID_COLOR 12
 #define TEXT_COLOR 13
 #define GRID_COLOR 14
+#define HIGHLIGHT_CELL_COLOR 4
 
 #define bool uint8_t
 #define true 0xFF
@@ -46,14 +47,62 @@
 extern uint8_t input_map;
 int scroll_x_pos;
 
+uint16_t sprite_x = 0;
+uint16_t sprite_y = 0;
+uint16_t target_x = 0;
+uint16_t target_y = 0;
+uint8_t count_loops = 0;
+
+void set_sprite(uint8_t sprite_number, uint8_t code, uint8_t bank,
+                uint8_t color, bool flipx,
+                uint16_t x, uint16_t y){
+	uint8_t* sprite = (SPRITERAM + 0x1000 - 32*sprite_number);
+	uint8_t attr = color & 0x0f;
+	attr |= ((bank & 0x03) << 6);
+	attr |= ((flipx & 0x01) << 4);
+	if (y <= 127){
+		attr |= (1 << 5);
+		y += 128;
+	}
+	sprite[0] = code;
+	sprite[1] = attr;
+	sprite[2] = (x & 0xFF);
+	sprite[3] = (y & 0xFF);
+}
+
 void set_scrollx(int pos){
 	*(SCROLLX) = pos&0xFF;
 	*(SCROLLX+1) = (pos>>8)&0xFF;
 }
 
-void idle_loop(){
-	//set_scrollx((scroll_x_pos++)/64);
-	set_scrollx(0x3000);
+void update_sprite_position(){
+//	if (sprite_x < target_x) sprite_x++;
+//	else if (sprite_x > target_x) sprite_x--;
+
+	if (count_loops % 5 > 0) return;
+
+	if (sprite_y < target_y) sprite_y++;
+	else if (sprite_y > target_y) sprite_y--;
+
+#if 0
+	set_sprite(/*sprite_number*/ (0x1000 - 0x200)/32,
+               /* code */ 0x12,
+               /* bank */ 0,
+               /* color */ 0,
+               /* flipy */ 0,
+               /* x */ sprite_x,
+	           /* y */ sprite_y);
+#endif
+
+   set_scrollx(0x3400 - sprite_y);
+}
+
+void blink_cursor(minefield* mf); //prototype
+
+void idle_loop(minefield* mf){
+	update_sprite_position();
+	blink_cursor(mf);
+	count_loops++;
 }
 
 //routine for placing a character on screen
@@ -62,6 +111,38 @@ void set_char(int x, int y, char char_code, char color){
 
 	*(COLORRAM + SCREEN_HEIGHT*(x + 1) - y - 1) = color;
 	*(VIDEORAM + SCREEN_HEIGHT*(x + 1) - y - 1) = char_code;
+}
+
+void set_color(int x, int y, char color){
+	x += 2; // there's a portion of the screen that is not visible.
+
+	*(COLORRAM + SCREEN_HEIGHT*(x + 1) - y - 1) = color;
+}
+
+void highlight_cell(int x, int y){
+	char color = HIGHLIGHT_CELL_COLOR;
+	set_color(x-1, y-1, color);
+	set_color( x,  y-1, color);
+	set_color(x+1, y-1, color);
+
+	set_color(x-1,  y, color);
+	set_color(x+1,  y, color);
+
+	set_color(x-1, y+1, color);
+	set_color( x,  y+1, color);
+	set_color(x+1, y+1, color);
+}
+
+uint8_t get_char(int x, int y){
+	x += 2; // there's a portion of the screen that is not visible.
+
+	return *(VIDEORAM + SCREEN_HEIGHT*(x + 1) - y - 1);
+}
+
+uint8_t get_color(int x, int y){
+	x += 2; // there's a portion of the screen that is not visible.
+
+	return *(COLORRAM + SCREEN_HEIGHT*(x + 1) - y - 1);
 }
 
 // Routine to print a line of text at a
@@ -147,10 +228,21 @@ void platform_init()
 	draw_scenario();
 }
 
-void draw_minefield(minefield* mf){
+#define minefield_x_position 3
+#define minefield_y_position 5
+uint8_t cursor_tile = BLANK;
+uint8_t cursor_color = GRID_COLOR;
 
-	uint8_t minefield_x_position = 3;
-	uint8_t minefield_y_position = 5;
+void blink_cursor(minefield* mf){
+	uint8_t x = mf->current_cell % mf->width;
+	uint8_t y = mf->current_cell / mf->width;
+	set_char(minefield_x_position + x*2 + 1,
+			 minefield_y_position + y*2 + 1,
+			 ((count_loops / 32) % 2) ? BLANK : cursor_tile,
+			 ((count_loops / 32) % 2) ? SCENARIO_COLOR : cursor_color);
+}
+
+void draw_minefield(minefield* mf){
 
 	for (uint8_t x = 0; x <= mf->width; x++){
 		for (uint8_t y = 0; y <= mf->height; y++){
@@ -213,11 +305,6 @@ void draw_minefield(minefield* mf){
 	
 	for (uint8_t x = 0; x < mf->width; x++){
 		for (uint8_t y = 0; y < mf->height; y++){
-			if (CELL_INDEX(mf, x, y) == mf->current_cell) {
-				//move(minefield_y_position + y*2 + 1,
-			    //     minefield_x_position + x*2 + 1);
-				//standout();
-			}
 			if (CELL(mf, x, y) & ISOPEN) {
 				if (CELL(mf, x, y) & HASBOMB){
 					set_char(minefield_x_position + x*2 + 1,
@@ -296,6 +383,17 @@ void draw_minefield(minefield* mf){
 							 minefield_y_position + y*2 + 1,
 							 CLOSED_CELL, CLOSED_CELL_COLOR);
 				}
+			}
+
+			if (CELL_INDEX(mf, x, y) == mf->current_cell) {
+				target_x = 8 * (minefield_x_position + x*2 + 1);
+				target_y = 8 * (minefield_y_position + y*2 + 1);
+				cursor_tile = get_char(minefield_x_position + x*2 + 1,
+									   minefield_y_position + y*2 + 1);
+				cursor_color = get_color(minefield_x_position + x*2 + 1,
+										 minefield_y_position + y*2 + 1);
+				highlight_cell(minefield_x_position + x*2 + 1,
+							   minefield_y_position + y*2 + 1);
 			}
 		}
 	}
