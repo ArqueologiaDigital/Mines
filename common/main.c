@@ -23,9 +23,9 @@ void main_gameplay_loop(minefield* mf) {
 	draw_minefield(mf);
 
 	do {
+		idle_loop(mf); // useful for doing other things
+	                   // such as running animations
 		input = input_read(KEYBOARD);
-		idle_loop(); // useful for doing other things
-	                 // such as running animations
 	} while (input == MINE_INPUT_IGNORED);
 
 	uint8_t x = mf->current_cell % mf->width;
