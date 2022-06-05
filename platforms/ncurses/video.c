@@ -47,7 +47,8 @@ void platform_init()
 	srand(time(NULL));
 }
 
-void draw_minefield(minefield* mf){
+void draw_minefield(minefield* mf)
+{
     move(2,1);
     attron(COLOR_PAIR(TEXT_COLOR));
     printw("Mines!");
@@ -104,6 +105,10 @@ void draw_minefield(minefield* mf){
     attron(COLOR_PAIR(TEXT_COLOR));
     printw("Press 'Q' to exit.");
     refresh();
+}
+
+void idle_loop()
+{
 }
 
 void shutdown()
