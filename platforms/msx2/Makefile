@@ -11,21 +11,21 @@ ROM_MAX := 0x8000
 CFLAGS := -mz80 --Werror --fsigned-char --std-sdcc99 --opt-code-speed --fomit-frame-pointer $(EXTRA_CFLAGS) -I../../common
 LDFLAGS := --no-std-crt0
 
-SOURCES := $(wildcard *.c)
-OBJECTS := $(patsubst %.c,$(BUILDDIR)/%.rel,$(SOURCES))
+C_SOURCES := $(wildcard *.c)
+ASM_SOURCES := $(wildcard *.z80)
+OBJECTS := $(patsubst %.c,$(BUILDDIR)/%.rel,$(C_SOURCES)) $(patsubst %.z80,$(BUILDDIR)/%.rel,$(ASM_SOURCES))
 OBJECTS := $(filter-out $(BUILDDIR)/crt0.rel,$(OBJECTS))
-
-COMMON  := $(wildcard ../../common/*.c)
-C_OBJECTS := $(patsubst ../../common/%.c,$(BUILDDIR)/%.rel,$(COMMON))
-
+COMMON := $(patsubst ../../common/%.c,$(BUILDDIR)/%.rel,$(wildcard ../../common/*.c))
 LIBS :=
 
-$(TARGET).rom: $(OBJECTS) $(C_OBJECTS) $(BUILDDIR)/crt0.rel
-	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) --code-loc $(CODE) --data-loc $(DATA) $(BUILDDIR)/crt0.rel $(OBJECTS) $(C_OBJECTS) -o $(TARGET).ihx
+$(TARGET).rom: $(OBJECTS) $(COMMON) $(BUILDDIR)/crt0.rel
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) --code-loc $(CODE) --data-loc $(DATA) $(BUILDDIR)/crt0.rel $(OBJECTS) $(COMMON) -o $(TARGET).ihx
 	$(HEX2BIN) -e bin -p 00 -l $(ROM_MAX) $(TARGET).ihx
 	@cp $(TARGET).bin $(TARGET).rom
 
-openmsx: $(TARGET).rom
+openmsx: run
+
+run: $(TARGET).rom
 	openmsx -carta $(TARGET).rom -machine C-BIOS_MSX2
 
 $(BUILDDIR)/%.rel: ../../common/%.c $(BUILDDIR)
