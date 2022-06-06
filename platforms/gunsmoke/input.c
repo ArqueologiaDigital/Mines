@@ -2,23 +2,32 @@
 #include "input.h"
 #include <stdlib.h>
 
-#define P1 ((char*) 0xC001)
-#define P2 ((char*) 0xC002)
-
-char input_map;
+#define SYSTEM ((uint8_t*) 0xC000)
+#define P1 ((uint8_t*) 0xC001)
+#define P2 ((uint8_t*) 0xC002)
+#define DSW1 ((uint8_t*) 0xC003)
+#define DSW2 ((uint8_t*) 0xC004)
 
 uint8_t input_read(uint8_t source){
-	char a = ~input_map ^ *P1;
+	uint8_t p1 = *P1;
+	uint8_t p2 = *P2;
 
-	if (source == KEYBOARD){ // This looks incorrect :-P
-		if ((a & (1 << 0))==0) return MINE_INPUT_RIGHT;
-		if ((a & (1 << 1))==0) return MINE_INPUT_LEFT;
-		if ((a & (1 << 2))==0) return MINE_INPUT_DOWN;
-		if ((a & (1 << 3))==0) return MINE_INPUT_UP;
-		if ((a & (1 << 4))==0) return MINE_INPUT_FLAG;
-		if ((a & (1 << 5))==0) return MINE_INPUT_OPEN;
-		if ((a & (1 << 6))==0) return MINE_INPUT_OPEN_BLOCK;
-		if ((a & (1 << 7))==0) return MINE_INPUT_QUIT;
+	if (source == KEYBOARD){ // <-- This looks incorrect :-P
+		/* P1 directionals */
+		if ((p1 & (1 << 0))==0) return MINE_INPUT_RIGHT;
+		if ((p1 & (1 << 1))==0) return MINE_INPUT_LEFT;
+		if ((p1 & (1 << 2))==0) return MINE_INPUT_DOWN;
+		if ((p1 & (1 << 3))==0) return MINE_INPUT_UP;
+		
+		/* P1 buttons */
+		if ((p1 & (1 << 4))==0) return MINE_INPUT_FLAG;
+		if ((p1 & (1 << 5))==0) return MINE_INPUT_OPEN;
+		if ((p1 & (1 << 6))==0) return MINE_INPUT_OPEN_BLOCK;
+
+		/* P2 buttons */
+		if ((p2 & (1 << 4))==0) return MINE_INPUT_QUIT;
+//		if ((p2 & (1 << 5))==0) return MINE_INPUT_...;
+//		if ((p2 & (1 << 6))==0) return MINE_INPUT_...;
 	}
 	return MINE_INPUT_IGNORED;
 }

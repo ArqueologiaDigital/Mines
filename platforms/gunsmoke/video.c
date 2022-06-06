@@ -4,17 +4,14 @@
 
 #include "char_codes.h"
 
-#define SYSTEM ((uint8_t*) 0xC000)
-#define DSW1 ((uint8_t*) 0xC003)
-#define DSW2 ((uint8_t*) 0xC004)
 #define SOUND_COMMAND ((uint8_t*) 0xC800)
 #define HWCFG ((uint8_t*) 0xC804)
 #define NO_SOUND 0xff
 
 #define VIDEORAM ((uint8_t*) 0xD000) //videoram area: D000-D3FF
 #define COLORRAM ((uint8_t*) 0xD400) //videoram area: D400-D7FF
-#define SCROLLX ((uint8_t*) 0xD800)
-#define SCROLLY ((uint8_t*) 0xD802)
+#define SCROLLY ((uint8_t*) 0xD800)
+#define SCROLLX ((uint8_t*) 0xD802)
 #define VIDEOCFG ((uint8_t*) 0xD806)
 #define SPRITERAM ((uint8_t*) 0xF000) //spriteram area: F000-FFFF
 #define CLEAR_COLOR 0x80 //why?!
@@ -44,9 +41,6 @@
 #define true 0xFF
 #define false 0x00
 
-extern uint8_t input_map;
-int scroll_x_pos;
-
 uint16_t sprite_x = 0;
 uint16_t sprite_y = 0;
 uint16_t target_x = 0;
@@ -70,9 +64,9 @@ void set_sprite(uint8_t sprite_number, uint8_t code, uint8_t bank,
 	sprite[3] = (y & 0xFF);
 }
 
-void set_scrollx(int pos){
-	*(SCROLLX) = pos&0xFF;
-	*(SCROLLX+1) = (pos>>8)&0xFF;
+void set_scroll_y(int pos){
+	*(SCROLLY) = pos&0xFF;
+	*(SCROLLY+1) = (pos>>8)&0xFF;
 }
 
 void update_sprite_position(){
@@ -94,7 +88,7 @@ void update_sprite_position(){
 	           /* y */ sprite_y);
 #endif
 
-   set_scrollx(0x3400 - sprite_y);
+   set_scroll_y(0x3400 - sprite_y);
 }
 
 void blink_cursor(minefield* mf); //prototype
@@ -155,8 +149,10 @@ void print_line(char* str, int x, int y, char color){
 }
 
 void clear_screen(){
-	for (int i=0; i<1024; i++)
+	for (int i=0; i<1024; i++){
+		*(VIDEORAM+i) = BLANK;
 		*(COLORRAM+i) = CLEAR_COLOR;
+	}
 }
 
 void draw_scenario(){
@@ -207,10 +203,14 @@ void draw_scenario(){
 	}
 }
 
+void enable_chars(){
+	// a.k.a. "Foreground Tiles"
+	*HWCFG |= (1 << 7);
+}
+
 void init_video(){
-	scroll_x_pos = 0x0000;
 	*VIDEOCFG = 0x30; // enables bg / enables sprites / selects sprite3bank #0
-	*HWCFG = 0x80; // unflip screen and enable chars
+	*HWCFG = 0x00; // screen is not flipped and chars are initially disabled
 
 	clear_screen();
 }
@@ -219,7 +219,6 @@ void init_video(){
 void platform_init()
 {
 	*SOUND_COMMAND = NO_SOUND;
-	input_map = 0xFF;
 
 	// Init random number generator:
 	srand(time(NULL));
@@ -397,6 +396,7 @@ void draw_minefield(minefield* mf){
 			}
 		}
 	}
+	enable_chars();
 }
 
 void shutdown()
