@@ -24,7 +24,7 @@ CLIKSW = 0xf3db
 	.dw _main_init
 	.db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
-mines_data::
+_mines_data::
 
 .include "mines.z80"
 

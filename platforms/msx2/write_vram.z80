@@ -1,9 +1,9 @@
-.globl _write_vm_64k
+.globl _write_vram
 
 NSTWRT = 0x0171
 VDP.DW = 0x07
 
-_write_vm_64k::
+_write_vram::
 	ld hl, #2
 	add hl, sp
 	ld e, (hl)	; de = dst
@@ -42,4 +42,6 @@ loop:
 	jp nz, loop
 	dec a
 	jp nz, loop
+
+	ret
 
