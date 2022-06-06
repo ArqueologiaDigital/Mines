@@ -33,9 +33,10 @@ init:
 
 	;; Initialise global variables
 	call   gsinit
+
 	call _main
 
-	jp	_exit
+	jp	init
 
 	;; Ordering of segments for the linker.
 	.area	_HOME
