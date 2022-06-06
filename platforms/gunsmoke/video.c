@@ -41,6 +41,10 @@
 #define true 0xFF
 #define false 0x00
 
+uint8_t bomb_colors[] = {
+	ONE_BOMB_COLOR, TWO_BOMBS_COLOR, THREE_BOMBS_COLOR, FOUR_BOMBS_COLOR, FIVE_BOMBS_COLOR,
+	SIX_BOMBS_COLOR, SEVEN_BOMBS_COLOR, EIGHT_BOMBS_COLOR };
+
 uint16_t sprite_x = 0;
 uint16_t sprite_y = 0;
 uint16_t target_x = 0;
@@ -313,63 +317,16 @@ void draw_minefield(minefield* mf){
 					uint8_t tile_number = 0;
 					uint8_t tile_color = 0;
 					uint8_t count = CELL(mf, x, y) & 0x0F;
-					if (count > 0){
-						switch(count){
-							case 1:
-							{
-								tile_number = ONE_BOMB;
-								tile_color = ONE_BOMB_COLOR;
-								break;
-							}
-							case 2:
-							{
-								tile_number = TWO_BOMBS;
-								tile_color = TWO_BOMBS_COLOR;
-								break;
-							}
-							case 3:
-							{
-								tile_number = THREE_BOMBS;
-								tile_color = THREE_BOMBS_COLOR;
-								break;
-							}
-							case 4:
-							{
-								tile_number = FOUR_BOMBS;
-								tile_color = FOUR_BOMBS_COLOR;
-								break;
-							}
-							case 5:
-							{
-								tile_number = FIVE_BOMBS;
-								tile_color = FIVE_BOMBS_COLOR;
-								break;
-							}
-							case 6:
-							{
-								tile_number = SIX_BOMBS;
-								tile_color = SIX_BOMBS_COLOR;
-								break;
-							}
-							case 7:
-								tile_number = SEVEN_BOMBS;
-								tile_color = SEVEN_BOMBS_COLOR;
-								break;
-							case 8:
-								tile_number = EIGHT_BOMBS;
-								tile_color = EIGHT_BOMBS_COLOR;
-								break;
-							default:
-								// never happens ;-)
-								break;
-						}
-						set_char(minefield_x_position + x*2 + 1, 
-								 minefield_y_position + y*2 + 1,
-								 tile_number, tile_color);
+					if (count > 0 && count < 9) {
+						tile_number = ONE_BOMB + count - 1;
+						tile_color = bomb_colors[count - 1];
+						set_char(minefield_x_position + x * 2 + 1, 
+						         minefield_y_position + y * 2 + 1,
+						         tile_number, tile_color);
 					} else {
-						set_char(minefield_x_position + x*2 + 1,
-								 minefield_y_position + y*2 + 1,
-								 BLANK, GRID_COLOR);
+						set_char(minefield_x_position + x * 2 + 1,
+						         minefield_y_position + y * 2 + 1,
+						         BLANK, GRID_COLOR);
 					}
 				}
 			} else {
