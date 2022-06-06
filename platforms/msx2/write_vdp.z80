@@ -7,8 +7,10 @@ _write_vdp::
 	add hl, sp
 
 	ld c, (hl)
+
 	inc hl
 	ld b, (hl)
+
 	call WRITEVDP
 	ret
 

@@ -18,6 +18,8 @@ OBJECTS := $(filter-out $(BUILDDIR)/crt0.rel,$(OBJECTS))
 COMMON := $(patsubst ../../common/%.c,$(BUILDDIR)/%.rel,$(wildcard ../../common/*.c))
 LIBS :=
 
+all: $(TARGET).rom
+
 $(TARGET).rom: $(OBJECTS) $(COMMON) $(BUILDDIR)/crt0.rel
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) --code-loc $(CODE) --data-loc $(DATA) $(BUILDDIR)/crt0.rel $(OBJECTS) $(COMMON) -o $(TARGET).ihx
 	$(HEX2BIN) -e bin -p 00 -l $(ROM_MAX) $(TARGET).ihx
