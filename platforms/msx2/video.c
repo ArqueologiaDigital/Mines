@@ -46,10 +46,41 @@ void set_video()
 }
 
 
+void draw_scenario()
+{
+    set_char(0, 0, 31, 0);
+    set_char(31, 0, 34, 0);
+    set_char(0, 25, 67, 0);
+    set_char(31, 25, 70, 0);
+
+    for (uint8_t i = 1; i < SCREEN_WIDTH / 2; ++i) {
+        set_char(i, 0, 32, 0);
+        set_char(i, 25, 68, 0);
+    }
+
+    for (uint8_t i = SCREEN_WIDTH / 2; i < SCREEN_WIDTH - 1; ++i) {
+        set_char(i, 0, 33, 0);
+        set_char(i, 25, 69, 0);
+    }
+
+    for (uint8_t j = 1; j < SCREEN_HEIGHT / 2; ++j) {
+        set_char(0, j, 43, 0);
+        set_char(31, j, 46, 0);
+    }
+
+    for (uint8_t j = SCREEN_HEIGHT / 2; j < SCREEN_HEIGHT; ++j) {
+        set_char(0, j, 55, 0);
+        set_char(31, j, 58, 0);
+    }
+}
+
+
 void platform_init()
 {
 
     set_video();
+
+    draw_scenario();
 
     while (1)
         input_read(KEYBOARD);
