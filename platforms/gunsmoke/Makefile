@@ -10,7 +10,7 @@ ROMSET = 3.ic85 gs03.09n gs01.11f #gs14.11c g-01.03b g-02.04b g-03.05b gs13.06c 
 BUILDDIR := build
 SOURCES := $(wildcard *.c)
 OBJECTS := $(patsubst %.c,$(BUILDDIR)/%.rel,$(SOURCES))
-OBJECTS := $(filter-out $(BUILDDIR)/boot.rel,$(OBJECTS))
+OBJECTS := $(filter-out $(BUILDDIR)/crt0.rel,$(OBJECTS))
 
 COMMON  := $(wildcard ../../common/*.c)
 C_OBJECTS := $(patsubst ../../common/%.c,$(BUILDDIR)/%.rel,$(COMMON))
@@ -69,8 +69,8 @@ gs01.11f: tools/patch_CGROM
 #	./tools/patch_BGROM
 #	cp *.bin $(ROMPATH)/gunsmoke/
 
-$(BUILDDIR)/maincpu.ihx: $(OBJECTS) $(C_OBJECTS) $(BUILDDIR)/boot.rel
-	$(Z80COMPILER) $(Z80_CFLAGS) $(Z80_LDFLAGS) $(LIBS) --code-loc $(CODE) --data-loc $(DATA) $(BUILDDIR)/boot.rel $(OBJECTS) $(C_OBJECTS) -o $(BUILDDIR)/maincpu.ihx
+$(BUILDDIR)/maincpu.ihx: $(OBJECTS) $(C_OBJECTS) $(BUILDDIR)/crt0.rel
+	$(Z80COMPILER) $(Z80_CFLAGS) $(Z80_LDFLAGS) $(LIBS) --code-loc $(CODE) --data-loc $(DATA) $(BUILDDIR)/crt0.rel $(OBJECTS) $(C_OBJECTS) -o $(BUILDDIR)/maincpu.ihx
 
 $(BUILDDIR)/%.rel: ../../common/%.c $(BUILDDIR)
 	$(Z80COMPILER) $(Z80_CFLAGS) $(Z80_LDFLAGS) -c $< -o $@
@@ -78,7 +78,7 @@ $(BUILDDIR)/%.rel: ../../common/%.c $(BUILDDIR)
 $(BUILDDIR)/%.rel: ./%.c $(BUILDDIR)
 	$(Z80COMPILER) $(Z80_CFLAGS) $(Z80_LDFLAGS) -c $< -o $@
 
-$(BUILDDIR)/boot.rel: boot.s
+$(BUILDDIR)/crt0.rel: crt0.z80
 	$(Z80ASSEMBLER) -g -o $@ $<
 
 3.ic85: $(BUILDDIR)/maincpu.ihx
