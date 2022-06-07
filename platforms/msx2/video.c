@@ -181,6 +181,10 @@ void draw_minefield(minefield* mf)
                     set_char(minefield_x_position + x * 2 + 1,
                              minefield_y_position + y * 2 + 1,
                              FLAG);
+                } else if (CELL(mf, x, y) & HASQUESTIONMARK) {
+                    set_char(minefield_x_position + x * 2 + 1,
+                             minefield_y_position + y * 2 + 1,
+                             QUESTION_MARK);
                 } else {
                     set_char(minefield_x_position + x * 2 + 1,
                              minefield_y_position + y * 2 + 1,

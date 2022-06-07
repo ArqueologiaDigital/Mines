@@ -56,7 +56,7 @@ void setup_minefield(minefield* mf, uint8_t width, uint8_t height, uint8_t num_b
 }
 
 void open_cell(minefield* mf, uint8_t x, uint8_t y){
-	if (CELL(mf, x, y) & (HASFLAG | ISOPEN)){
+	if (CELL(mf, x, y) & (HASQUESTIONMARK | HASFLAG | ISOPEN)){
 		return;
 	} else {
 		CELL(mf, x, y) |= ISOPEN;

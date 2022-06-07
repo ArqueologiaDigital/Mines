@@ -76,6 +76,9 @@ void main_gameplay_loop(minefield* mf) {
 			if (!(mf->cells[mf->current_cell] & ISOPEN)){
 				if (mf->cells[mf->current_cell] & HASFLAG){
 					mf->cells[mf->current_cell] &= ~HASFLAG;
+					mf->cells[mf->current_cell] |= HASQUESTIONMARK;
+				} else if (mf->cells[mf->current_cell] & HASQUESTIONMARK){
+					mf->cells[mf->current_cell] &= ~HASQUESTIONMARK;
 				} else {
 					mf->cells[mf->current_cell] |= HASFLAG;
 				}
