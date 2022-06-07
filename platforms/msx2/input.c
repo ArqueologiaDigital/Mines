@@ -85,32 +85,12 @@ uint8_t get_raw_ch()
 }
 
 
-static uint16_t seed = 1;    // seed must not be 0
+uint16_t seed = 1;       // seed must not be 0
 
-static uint16_t xorshift_rng() __z88dk_fastcall __naked
+
+void set_random_seed(uint16_t value)
 {
-	__asm
-		ld hl, (_seed)
-
-		ld a, h
-		rra
-		ld a, l
-		rra
-		xor h
-		ld h, a
-		ld a, l
-		rra
-		ld a, h
-		rra
-		xor l
-		ld l, a
-		xor h
-		ld h, a
-
-		ld (_seed), hl
-
-		ret
-	__endasm;
+	seed = value | 1;
 }
 
 
@@ -128,6 +108,6 @@ int random_number(int min, int max)
 	}
 
 	++hi;
-	return (xorshift_rng() % (hi - low)) + low;
+	return (xorshift() % (hi - low)) + low;
 }
 

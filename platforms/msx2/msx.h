@@ -48,4 +48,10 @@ void set_palette(uint8_t count, uint8_t* color_table) SDCCCALL0;
 
 void restore_palette();
 
+void set_random_seed(uint16_t value);
+
+uint16_t xorshift();
+
+uint32_t read_clock() SDCCCALL0;
+
 #endif /* MSX_H */
