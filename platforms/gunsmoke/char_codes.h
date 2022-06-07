@@ -13,6 +13,11 @@ enum {
 	MINEFIELD_VERTICAL,
 	MINEFIELD_HORIZONTAL,
 
+	/*	NOTE:
+		These tile codes for the number
+		of bombs *MUST* be sequential
+		because the video code assumes
+		that to be the case.	*/
 	ONE_BOMB,
 	TWO_BOMBS,
 	THREE_BOMBS,
@@ -21,6 +26,7 @@ enum {
 	SIX_BOMBS,
 	SEVEN_BOMBS,
 	EIGHT_BOMBS,
+
 	BOMB,
 	FLAG,
 	CLOSED_CELL,
