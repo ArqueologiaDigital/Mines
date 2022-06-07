@@ -21,6 +21,7 @@
 
 #define CLOSED_CELL_COLOR 0
 #define FLAG_COLOR 9
+#define QUESTION_MARK_COLOR 9
 #define SCENARIO_COLOR 15
 #define UNCOVERED_BOMB_COLOR 10
 #define EXPLODING_BOMB_COLOR 11
@@ -333,6 +334,10 @@ void draw_minefield(minefield* mf){
 					set_char(minefield_x_position + x*2 + 1,
 							 minefield_y_position + y*2 + 1,
 							 FLAG, FLAG_COLOR);
+				} else if (CELL(mf, x, y) & HASQUESTIONMARK){
+					set_char(minefield_x_position + x*2 + 1,
+							 minefield_y_position + y*2 + 1,
+							 QUESTION_MARK, QUESTION_MARK_COLOR);
 				} else {
 					set_char(minefield_x_position + x*2 + 1,
 							 minefield_y_position + y*2 + 1,

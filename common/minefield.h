@@ -24,6 +24,7 @@ enum {
 #define HASBOMB (1 << 4)
 #define ISOPEN (1 << 5)
 #define HASFLAG (1 << 6)
+#define HASQUESTIONMARK (1 << 7)
 
 typedef struct {
 	uint8_t state;

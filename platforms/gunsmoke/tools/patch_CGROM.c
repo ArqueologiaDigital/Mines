@@ -44,7 +44,8 @@ int main(){
 
 	save_tile(0, 1, BOMB);
 	save_tile(1, 1, FLAG);
-	save_tile(2, 1, BLANK);
+	save_tile(2, 1, QUESTION_MARK);
+	save_tile(3, 1, BLANK);
 
 	save_tile(0, 2, MINEFIELD_CORNER_TOP_LEFT);
 	save_tile(1, 2, MINEFIELD_TOP_TEE);
