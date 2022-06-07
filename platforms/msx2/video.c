@@ -229,19 +229,19 @@ void draw_minefield(minefield* mf)
 
 void platform_init()
 {
-
     video_init();
-
     draw_scenario();
 }
 
 
-void idle_loop()
+void idle_loop(minefield* mf)
 {
+    mf;
 }
 
 
 void shutdown()
 {
     // Cartridge games can't unload.
+    __asm__("jp 0");
 }

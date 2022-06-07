@@ -6,6 +6,7 @@
 * Space key opens the current cell under the cursor;
 * `M` key toggles flag and question mark;
 * `N` key opens multiple cells at once around the cursor;
+* `Q` key reboots;
 
 ### Build & runtime/debug dependencies
 
