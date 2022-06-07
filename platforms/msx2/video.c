@@ -1,11 +1,12 @@
-#include <stdint.h>
 #include <string.h>
 #include "msx.h"
 #include "minefield.h"
 #include "input.h"
 #include "char_codes.h"
 
+
 extern uint8_t* mines_data;
+extern uint8_t* mines_palette;
 
 
 /* set_char emulates tile behaviour, but is actually a bitmap copy */
@@ -14,9 +15,6 @@ void set_char(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
     /* copy 8x8 block from page 1 (hidden page) to page 0 (visible page) */
     lmmm(tile % 12 * 8, tile / 12 * 8 + 256, dst_x * 8, dst_y * 8, 8, 8);
 }
-
-
-static const uint8_t bg[] = { 1, 0x1, 0x1, 0x4 };
 
 
 void video_init()
@@ -43,7 +41,7 @@ void video_init()
     fill_vram(0x00, 32768, 0x0);
 
     //restore_palette();
-    set_palette(1, (uint8_t*) bg);
+    set_palette(15, (uint8_t*) &mines_palette);
 
     /* Move board and mines from RAM to second VRAM page */
     write_vram((uint8_t*) 0x8000, 0x1800, (uint8_t*) &mines_data);
@@ -54,6 +52,13 @@ void video_init()
 
 void draw_scenario()
 {
+    // background
+    for (uint8_t i = 1; i < SCREEN_WIDTH - 1; ++i) {
+        for (uint8_t j = 1; j < SCREEN_HEIGHT; ++j) {
+            set_char(i, j, CURSOR);
+        }
+    }
+
     set_char(0, 0, 31);
     set_char(31, 0, 34);
     set_char(0, 25, 67);
@@ -97,10 +102,21 @@ void draw_minefield(minefield* mf)
      /* Draw minefield frame */
      for (uint8_t x = 0; x <= mf->width; x++) {
          for (uint8_t y = 0; y <= mf->height; y++) {
-             if (y > 0 && y <= mf->height)
-                 set_char(minefield_x_position + x * 2,
-                          minefield_y_position + y * 2 - 1,
-                          MINEFIELD_VERTICAL);
+             if (y > 0 && y <= mf->height) {
+                 if (x == 0) {
+                     set_char(minefield_x_position + x * 2,
+                              minefield_y_position + y * 2 - 1,
+                              MINEFIELD_VERTICAL_LEFT);
+                 } else if (x < mf->width) {
+                     set_char(minefield_x_position + x * 2,
+                              minefield_y_position + y * 2 - 1,
+                              MINEFIELD_VERTICAL_MIDDLE);
+                 } else {
+                     set_char(minefield_x_position + x * 2,
+                              minefield_y_position + y * 2 - 1,
+                              MINEFIELD_VERTICAL_RIGHT);
+                 }
+             }
 
          if (x < mf->width - 1 && y < mf->height - 1)
                  set_char(minefield_x_position + x * 2 + 2,
@@ -108,9 +124,19 @@ void draw_minefield(minefield* mf)
                           MINEFIELD_CROSS);
 
          if (x > 0 && x <= mf->width)
-                 set_char(minefield_x_position + x*2 - 1,
-                          minefield_y_position + y*2,
-                          MINEFIELD_HORIZONTAL);
+             if (y == 0) {
+                     set_char(minefield_x_position + x*2 - 1,
+                              minefield_y_position + y*2,
+                              MINEFIELD_HORIZONTAL_TOP);
+             } else if (y < mf->height) {
+                     set_char(minefield_x_position + x*2 - 1,
+                              minefield_y_position + y*2,
+                              MINEFIELD_HORIZONTAL_MIDDLE);
+             } else {
+                     set_char(minefield_x_position + x*2 - 1,
+                              minefield_y_position + y*2,
+                              MINEFIELD_HORIZONTAL_BOTTOM);
+             }
          }
      }
 
