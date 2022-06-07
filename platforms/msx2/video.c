@@ -220,8 +220,8 @@ void draw_minefield(minefield* mf)
         }
     }
 
-    uint8_t x = CELL_X(mf);
-    uint8_t y = CELL_Y(mf);
+    uint8_t x = CURRENT_CELL_X(mf);
+    uint8_t y = CURRENT_CELL_Y(mf);
     highlight_cell(minefield_x_position + x * 2 + 1,
                    minefield_y_position + y * 2 + 1);
 }
