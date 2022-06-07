@@ -6,8 +6,8 @@
 
 #define CELL_INDEX(mf, x, y)  ((x) + (y) * mf->width)
 #define CELL(mf,x,y)          mf->cells[CELL_INDEX(mf, x, y)]
-#define CELL_X(mf)            mf->current_cell % mf->width
-#define CELL_Y(mf)            mf->current_cell / mf->width
+#define CURRENT_CELL_X(mf)    mf->current_cell % mf->width
+#define CURRENT_CELL_Y(mf)    mf->current_cell / mf->width
 
 enum {
 	TITLE_SCREEN = 1,

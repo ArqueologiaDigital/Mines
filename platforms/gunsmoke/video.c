@@ -344,19 +344,19 @@ void draw_minefield(minefield* mf){
 							 CLOSED_CELL, CLOSED_CELL_COLOR);
 				}
 			}
-
-			if (CELL_INDEX(mf, x, y) == mf->current_cell) {
-				target_x = 8 * (minefield_x_position + x*2 + 1);
-				target_y = 8 * (minefield_y_position + y*2 + 1);
-				cursor_tile = get_char(minefield_x_position + x*2 + 1,
-									   minefield_y_position + y*2 + 1);
-				cursor_color = get_color(minefield_x_position + x*2 + 1,
-										 minefield_y_position + y*2 + 1);
-				highlight_cell(minefield_x_position + x*2 + 1,
-							   minefield_y_position + y*2 + 1);
-			}
 		}
 	}
+
+	uint8_t x = CURRENT_CELL_X(mf);
+	uint8_t y = CURRENT_CELL_Y(mf);
+	target_x = 8 * (minefield_x_position + x * 2 + 1);
+	target_y = 8 * (minefield_y_position + y * 2 + 1);
+	cursor_tile = get_char(minefield_x_position + x * 2 + 1,
+	                       minefield_y_position + y * 2 + 1);
+	cursor_color = get_color(minefield_x_position + x * 2 + 1,
+	                         minefield_y_position + y * 2 + 1);
+	highlight_cell(minefield_x_position + x * 2 + 1,
+	               minefield_y_position + y * 2 + 1);
 	enable_chars();
 }
 
