@@ -1,6 +1,8 @@
 #ifndef MSX_H
 #define MSX_H
 
+#include <stdint.h>
+
 /* __sdcccall function attribute on SDCC 4.1.12 and later */
 #if (__SDCC_VERSION_MAJOR > 4 || \
     (__SDCC_VERSION_MAJOR == 4 && __SDCC_VERSION_MINOR > 1) || \
