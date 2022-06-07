@@ -30,6 +30,7 @@ static uint8_t keyboard_read()
 	if ((scan = keyboard_read_row(4)) != row4) {
 		row4 = scan;
 		if (!(scan & (1 << 2))) return MINE_INPUT_FLAG;
+		if (!(scan & (1 << 3))) return MINE_INPUT_OPEN_BLOCK;
 	}
 	row4 = scan;
 

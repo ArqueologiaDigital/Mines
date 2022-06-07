@@ -1,5 +1,12 @@
 ## MSX2 port
 
+### Keys
+
+* The arrow keys move the cursor;
+* Space key opens the current cell under the cursor;
+* `M` key toggles flag and question mark;
+* `N` key opens multiple cells at once around the cursor;
+
 ### Build & runtime/debug dependencies
 
 * sdcc compiler
