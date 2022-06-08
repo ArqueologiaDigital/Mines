@@ -1,6 +1,22 @@
 .globl _xorshift
 .globl _seed
 
+
+_set_random_seed::
+    ld hl, #2
+    add hl, sp
+    ld iy, #_seed
+
+    ld a, (hl)
+    or #1
+    ld 0(iy), a
+
+    inc hl
+    ld a, (hl)
+    ld 1(iy), a
+
+    ret
+
 _xorshift::
 	ld hl, (_seed)
 
@@ -22,4 +38,8 @@ _xorshift::
 	ld (_seed), hl
 
 	ret
+
+.area _DATA
+
+_seed: .dw 1    ; value must not be zero
 

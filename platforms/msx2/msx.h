@@ -13,20 +13,20 @@
 #endif
 
 /* fake tile-based screen used by set_char */
-#define SCREEN_WIDTH 32
-#define SCREEN_HEIGHT 25
+#define SCREEN_WIDTH        32
+#define SCREEN_HEIGHT       25
 
 /* VDP operations */
-#define OP_IMP   0b0000
-#define OP_AND   0b0001
-#define OP_OR    0b0010
-#define OP_XOR   0b0011
-#define OP_NOT   0b0100
-#define OP_TIMP  0b1000
-#define OP_TAND  0b1001
-#define OP_TOR   0b1010
-#define OP_TXOR  0b1011
-#define OP_TNOT  0b1100
+#define OP_IMP              0b0000
+#define OP_AND              0b0001
+#define OP_OR               0b0010
+#define OP_XOR              0b0011
+#define OP_NOT              0b0100
+#define OP_TIMP             0b1000
+#define OP_TAND             0b1001
+#define OP_TOR              0b1010
+#define OP_TXOR             0b1011
+#define OP_TNOT             0b1100
 
 void write_vdp(uint8_t reg, uint8_t data) SDCCCALL0;
 
@@ -48,7 +48,9 @@ void set_palette(uint8_t count, uint8_t* color_table) SDCCCALL0;
 
 void restore_palette();
 
-void set_random_seed(uint16_t value);
+extern uint16_t seed;
+
+void set_random_seed(uint16_t value) SDCCCALL0;
 
 uint16_t xorshift();
 

@@ -1,9 +1,11 @@
 #include <string.h>
 #include "msx.h"
 #include "minefield.h"
-#include "input.h"
+#include "common.h"
 #include "char_codes.h"
 
+//#define USE_DEBUG_MODE
+#include "debug.h"
 
 extern uint8_t* mines_data;
 extern uint8_t* mines_palette;

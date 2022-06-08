@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include "ports.h"
-#include "input.h"
+#include "common.h"
 
 
 static uint8_t keyboard_read_row(uint8_t row) __z88dk_fastcall __naked
@@ -82,15 +82,6 @@ uint8_t get_raw_ch()
 
 	uint8_t row = key & 0x0f;
 	return MATRIX_KEY_2_COLUMN[key >> 4][row];
-}
-
-
-uint16_t seed = 1;       // seed must not be 0
-
-
-void set_random_seed(uint16_t value)
-{
-	seed = value | 1;
 }
 
 
