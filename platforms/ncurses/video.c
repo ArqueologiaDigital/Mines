@@ -49,32 +49,17 @@ void platform_init()
 	srand(time(NULL));
 }
 
-void draw_minefield(minefield* mf){
-    move(2,1);
-    attron(COLOR_PAIR(TEXT_COLOR));
-    printw("Mines!");
 
-	uint8_t minefield_x_position = 5;
-	uint8_t minefield_y_position = 5;
+#define minefield_x_position 5
+#define minefield_y_position 5
 
-    attron(COLOR_PAIR(MINEFIELD_GRID_COLOR));
-	for (uint8_t x = 0; x <= mf->width; x++){
-		for (uint8_t y = 0; y <= mf->height; y++){
-		    move(minefield_y_position + y*2, minefield_x_position + x*2 - 1);
-			if (y < mf->height) printw("|");
-		    move(minefield_y_position + y*2-1, minefield_x_position + x*2 - 1);
-			printw("+");
-		    move(minefield_y_position + y*2-1, minefield_x_position + x*2);
-			if (x < mf->width) printw("-");
-		}
-	}
-
+void draw_minefield_contents(minefield* mf){
 	for (uint8_t x = 0; x < mf->width; x++){
 		for (uint8_t y = 0; y < mf->height; y++){
 			move(minefield_y_position + y*2, minefield_x_position + x*2);
-			if (CELL_INDEX(mf, x, y) == mf->current_cell) {
+			if (CELL_INDEX(mf, x, y) == mf->current_cell)
 				standout();
-			}
+
 			if (CELL(mf, x, y) & ISOPEN) {
 				if (CELL(mf, x, y) & HASBOMB){
 					attron(COLOR_PAIR(UNCOVERED_BOMB_COLOR));
@@ -100,10 +85,33 @@ void draw_minefield(minefield* mf){
 					printw("#");
 				}
 			}
-			standend();
+
+			if (CELL_INDEX(mf, x, y) == mf->current_cell)
+				standend();
+		}
+	}
+    refresh();
+}
+
+
+void draw_minefield(minefield* mf){
+    move(2,1);
+    attron(COLOR_PAIR(TEXT_COLOR));
+    printw("Mines!");
+
+    attron(COLOR_PAIR(MINEFIELD_GRID_COLOR));
+	for (uint8_t x = 0; x <= mf->width; x++){
+		for (uint8_t y = 0; y <= mf->height; y++){
+		    move(minefield_y_position + y*2, minefield_x_position + x*2 - 1);
+			if (y < mf->height) printw("|");
+		    move(minefield_y_position + y*2-1, minefield_x_position + x*2 - 1);
+			printw("+");
+		    move(minefield_y_position + y*2-1, minefield_x_position + x*2);
+			if (x < mf->width) printw("-");
 		}
 	}
 
+	draw_minefield_contents(mf);
 
     move(minefield_y_position + mf->height*2 + 3, 1);
     attron(COLOR_PAIR(TEXT_COLOR));

@@ -29,6 +29,7 @@
 #define TEXT_COLOR 13
 #define GRID_COLOR 14
 #define HIGHLIGHT_CELL_COLOR 4
+#define BLINK_COLOR 22
 
 #define bool uint8_t
 #define true 0xFF
@@ -236,14 +237,75 @@ void platform_init()
 uint8_t cursor_tile = BLANK;
 uint8_t cursor_color = GRID_COLOR;
 
+
 void blink_cursor(minefield* mf){
 	uint8_t x = mf->current_cell % mf->width;
 	uint8_t y = mf->current_cell / mf->width;
 	set_char(minefield_x_position + x*2 + 1,
 			 minefield_y_position + y*2 + 1,
 			 ((count_loops / 32) % 2) ? BLANK : cursor_tile,
-			 ((count_loops / 32) % 2) ? SCENARIO_COLOR : cursor_color);
+			 ((count_loops / 32) % 2) ? BLINK_COLOR : cursor_color);
 }
+
+void draw_single_cell(minefield* mf, uint8_t x, uint8_t y){
+	if (CELL(mf, x, y) & ISOPEN) {
+		if (CELL(mf, x, y) & HASBOMB){
+			set_char(minefield_x_position + x*2 + 1,
+					 minefield_y_position + y*2 + 1,
+					 BOMB, UNCOVERED_BOMB_COLOR);
+		} else {
+			uint8_t tile_number = 0;
+			uint8_t tile_color = 0;
+			uint8_t count = CELL(mf, x, y) & 0x0F;
+			if (count > 0 && count < 9) {
+				tile_number = ONE_BOMB + count - 1;
+				tile_color = bomb_colors[count - 1];
+				set_char(minefield_x_position + x * 2 + 1, 
+				         minefield_y_position + y * 2 + 1,
+				         tile_number, tile_color);
+			} else {
+				set_char(minefield_x_position + x * 2 + 1,
+				         minefield_y_position + y * 2 + 1,
+				         BLANK, GRID_COLOR);
+			}
+		}
+	} else {
+		if (CELL(mf, x, y) & HASFLAG){
+			set_char(minefield_x_position + x*2 + 1,
+					 minefield_y_position + y*2 + 1,
+					 FLAG, FLAG_COLOR);
+		} else if (CELL(mf, x, y) & HASQUESTIONMARK){
+			set_char(minefield_x_position + x*2 + 1,
+					 minefield_y_position + y*2 + 1,
+					 QUESTION_MARK, QUESTION_MARK_COLOR);
+		} else {
+			set_char(minefield_x_position + x*2 + 1,
+					 minefield_y_position + y*2 + 1,
+					 CLOSED_CELL, CLOSED_CELL_COLOR);
+		}
+	}
+}
+
+
+void draw_minefield_contents(minefield* mf){
+	for (uint8_t x = 0; x < mf->width; x++){
+		for (uint8_t y = 0; y < mf->height; y++){
+			draw_single_cell(mf, x, y);
+		}
+	}
+
+	uint8_t x = CURRENT_CELL_X(mf);
+	uint8_t y = CURRENT_CELL_Y(mf);
+	target_x = 8 * (minefield_x_position + x * 2 + 1);
+	target_y = 8 * (minefield_y_position + y * 2 + 1);
+	cursor_tile = get_char(minefield_x_position + x * 2 + 1,
+	                       minefield_y_position + y * 2 + 1);
+	cursor_color = get_color(minefield_x_position + x * 2 + 1,
+	                         minefield_y_position + y * 2 + 1);
+	//highlight_cell(minefield_x_position + x * 2 + 1,
+	//               minefield_y_position + y * 2 + 1);
+}
+
 
 void draw_minefield(minefield* mf){
 
@@ -306,57 +368,7 @@ void draw_minefield(minefield* mf){
 		}
 	}
 	
-	for (uint8_t x = 0; x < mf->width; x++){
-		for (uint8_t y = 0; y < mf->height; y++){
-			if (CELL(mf, x, y) & ISOPEN) {
-				if (CELL(mf, x, y) & HASBOMB){
-					set_char(minefield_x_position + x*2 + 1,
-							 minefield_y_position + y*2 + 1,
-							 BOMB, UNCOVERED_BOMB_COLOR);
-				} else {
-					uint8_t tile_number = 0;
-					uint8_t tile_color = 0;
-					uint8_t count = CELL(mf, x, y) & 0x0F;
-					if (count > 0 && count < 9) {
-						tile_number = ONE_BOMB + count - 1;
-						tile_color = bomb_colors[count - 1];
-						set_char(minefield_x_position + x * 2 + 1, 
-						         minefield_y_position + y * 2 + 1,
-						         tile_number, tile_color);
-					} else {
-						set_char(minefield_x_position + x * 2 + 1,
-						         minefield_y_position + y * 2 + 1,
-						         BLANK, GRID_COLOR);
-					}
-				}
-			} else {
-				if (CELL(mf, x, y) & HASFLAG){
-					set_char(minefield_x_position + x*2 + 1,
-							 minefield_y_position + y*2 + 1,
-							 FLAG, FLAG_COLOR);
-				} else if (CELL(mf, x, y) & HASQUESTIONMARK){
-					set_char(minefield_x_position + x*2 + 1,
-							 minefield_y_position + y*2 + 1,
-							 QUESTION_MARK, QUESTION_MARK_COLOR);
-				} else {
-					set_char(minefield_x_position + x*2 + 1,
-							 minefield_y_position + y*2 + 1,
-							 CLOSED_CELL, CLOSED_CELL_COLOR);
-				}
-			}
-		}
-	}
-
-	uint8_t x = CURRENT_CELL_X(mf);
-	uint8_t y = CURRENT_CELL_Y(mf);
-	target_x = 8 * (minefield_x_position + x * 2 + 1);
-	target_y = 8 * (minefield_y_position + y * 2 + 1);
-	cursor_tile = get_char(minefield_x_position + x * 2 + 1,
-	                       minefield_y_position + y * 2 + 1);
-	cursor_color = get_color(minefield_x_position + x * 2 + 1,
-	                         minefield_y_position + y * 2 + 1);
-	highlight_cell(minefield_x_position + x * 2 + 1,
-	               minefield_y_position + y * 2 + 1);
+	draw_minefield_contents(mf);
 	enable_chars();
 }
 

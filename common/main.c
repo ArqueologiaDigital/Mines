@@ -21,7 +21,7 @@ uint8_t count_surrounding_flags(minefield* mf, uint8_t x, uint8_t y){
 
 void main_gameplay_loop(minefield* mf) {
 	uint8_t input;
-	draw_minefield(mf);
+	draw_minefield_contents(mf);
 
 	do {
 		idle_loop(mf); // useful for doing other things
@@ -108,6 +108,7 @@ int main() {
 	//       minefield dimensions and number of bombs
 
 	setup_minefield(&mf, width, height, num_bombs);
+	draw_minefield(&mf);
 
 	mf.state = PLAYING_GAME;
 	while (mf.state != QUIT)
