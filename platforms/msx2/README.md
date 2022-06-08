@@ -1,5 +1,7 @@
 ## MSX2 port
 
+![Screenshot](screenshot.png)
+
 ### Keys
 
 * The arrow keys move the cursor;

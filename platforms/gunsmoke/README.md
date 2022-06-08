@@ -1,5 +1,7 @@
 ## GunSmoke JAMMA port
 
+![Screenshot](screenshot.png)
+
 ### Build & runtime/debug dependencies
 
 * sdcc compiler
