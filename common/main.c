@@ -1,5 +1,6 @@
+#include "common.h"
 #include "main.h"
-#include "input.h"
+
 
 uint8_t count_surrounding_flags(minefield* mf, uint8_t x, uint8_t y){
 	uint8_t count = 0;
@@ -99,7 +100,10 @@ int main() {
 	minefield mf;
 	uint8_t width = 10;
 	uint8_t height = 10;
+
 	uint8_t num_bombs = random_number(10,30);
+	debug("num_bombs = ", num_bombs);
+
 	// TODO: let platforms configure specific values for
 	//       minefield dimensions and number of bombs
 

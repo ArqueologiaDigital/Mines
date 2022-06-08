@@ -1,5 +1,5 @@
+#include "common.h"
 #include "minefield.h"
-#include "input.h"
 #include <stdlib.h>
 
 #define SYSTEM ((uint8_t*) 0xC000)
