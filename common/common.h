@@ -1,5 +1,5 @@
-#ifndef INPUT_H
-#define INPUT_H
+#ifndef COMMON_H
+#define COMMON_H
 
 #include <stdint.h>
 
@@ -65,4 +65,51 @@ uint8_t input_read(uint8_t source);
  */
 int random_number(int min, int max);
 
-#endif /* INPUT_H */
+#ifdef USE_DEBUG_MODE
+
+#define DEBUG_HEX          0
+#define DEBUG_INT          1
+#define DEBUG_BIN          2
+#define DEBUG_INVALID      3
+
+/**
+ * Change emulator's debug mode. This allows programs to output text and values to the
+ * emulator for debugging purposes. The format of the output value is defined below.
+ *
+ * | Name                  | Value |
+ * | ---                   | ----- |
+ * | DEBUG_HEX             |   0   |
+ * | DEBUG_INT             |   1   |
+ * | DEBUG_BIN             |   2   |
+ *
+ * See [debug](#debug) for more details about the output.
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * Optional. You can undefine `USE_DEBUG_MODE` macro to transform debug_mode() and debug()
+ * into empty macros.
+ */
+void debug_mode(uint8_t mode);
+
+/**
+ * Send message to emulator for debugging (printing) along with a numeric value.
+ * See [debug_mode](#debug_mode) for output options.
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * Optional. You can undefine `USE_DEBUG_MODE` macro to transform debug_mode() and debug()
+ * into empty macros.
+ */
+void debug(char* msg, uint8_t value);
+
+#else
+
+/* empty macros */
+#define debug_mode(x)
+#define debug(x, y)
+
+#endif /* USE_DEBUG_MODE */
+
+#endif /* COMMON_H */

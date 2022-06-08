@@ -1,5 +1,5 @@
+#include "common.h"
 #include "minefield.h"
-#include "input.h"
 #include <ncurses.h>
 #include <stdlib.h>
 

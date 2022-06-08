@@ -4,4 +4,3 @@ void platform_init();
 void idle_loop(minefield* mf);
 void draw_minefield(minefield* mf);
 void shutdown();
-int random_number(int min_num, int max_num);
