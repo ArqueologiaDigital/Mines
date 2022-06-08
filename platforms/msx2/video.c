@@ -99,6 +99,56 @@ void highlight_cell(int x, int y)
 #define minefield_x_position 6
 #define minefield_y_position 3
 
+void draw_single_cell(minefield* mf, uint8_t x, uint8_t y){
+    if (CELL(mf, x, y) & ISOPEN) {
+        if (CELL(mf, x, y) & HASBOMB) {
+            set_char(minefield_x_position + x * 2 + 1,
+                     minefield_y_position + y * 2 + 1,
+                     BOMB);
+        } else {
+            uint8_t tile_number = 0;
+            uint8_t tile_color = 0;
+            uint8_t count = CELL(mf, x, y) & 0x0F;
+            if (count > 0) {
+                set_char(minefield_x_position + x * 2 + 1,
+                         minefield_y_position + y * 2 + 1,
+                         count - 1);
+            } else {
+                set_char(minefield_x_position + x * 2 + 1,
+                         minefield_y_position + y * 2 + 1,
+                         BLANK);
+            }
+        }
+    } else {
+        if (CELL(mf, x, y) & HASFLAG) {
+            set_char(minefield_x_position + x * 2 + 1,
+                     minefield_y_position + y * 2 + 1,
+                     FLAG);
+        } else if (CELL(mf, x, y) & HASQUESTIONMARK) {
+            set_char(minefield_x_position + x * 2 + 1,
+                     minefield_y_position + y * 2 + 1,
+                     QUESTION_MARK);
+        } else {
+            set_char(minefield_x_position + x * 2 + 1,
+                     minefield_y_position + y * 2 + 1,
+                     CLOSED_CELL);
+        }
+    }
+}
+
+void draw_minefield_contents(minefield* mf){
+    for (uint8_t x = 0; x < mf->width; x++) {
+        for (uint8_t y = 0; y < mf->height; y++) {
+			draw_single_cell(mf, x, y);
+        }
+    }
+
+    uint8_t x = CURRENT_CELL_X(mf);
+    uint8_t y = CURRENT_CELL_Y(mf);
+    highlight_cell(minefield_x_position + x * 2 + 1,
+                   minefield_y_position + y * 2 + 1);
+}
+
 void draw_minefield(minefield* mf)
 {
      /* Draw minefield frame */
@@ -181,53 +231,8 @@ void draw_minefield(minefield* mf)
                      MINEFIELD_RIGHT_TEE);
         }
     }
-
-    /* Draw minefield contents */
-    for (uint8_t x = 0; x < mf->width; x++) {
-        for (uint8_t y = 0; y < mf->height; y++) {
-            if (CELL(mf, x, y) & ISOPEN) {
-                if (CELL(mf, x, y) & HASBOMB) {
-                    set_char(minefield_x_position + x * 2 + 1,
-                             minefield_y_position + y * 2 + 1,
-                             BOMB);
-                } else {
-                    uint8_t tile_number = 0;
-                    uint8_t tile_color = 0;
-                    uint8_t count = CELL(mf, x, y) & 0x0F;
-                    if (count > 0) {
-                        set_char(minefield_x_position + x * 2 + 1,
-                                 minefield_y_position + y * 2 + 1,
-                                 count - 1);
-                    } else {
-                        set_char(minefield_x_position + x * 2 + 1,
-                                 minefield_y_position + y * 2 + 1,
-                                 BLANK);
-                    }
-                }
-            } else {
-                if (CELL(mf, x, y) & HASFLAG) {
-                    set_char(minefield_x_position + x * 2 + 1,
-                             minefield_y_position + y * 2 + 1,
-                             FLAG);
-                } else if (CELL(mf, x, y) & HASQUESTIONMARK) {
-                    set_char(minefield_x_position + x * 2 + 1,
-                             minefield_y_position + y * 2 + 1,
-                             QUESTION_MARK);
-                } else {
-                    set_char(minefield_x_position + x * 2 + 1,
-                             minefield_y_position + y * 2 + 1,
-                             CLOSED_CELL);
-                }
-            }
-        }
-    }
-
-    uint8_t x = CURRENT_CELL_X(mf);
-    uint8_t y = CURRENT_CELL_Y(mf);
-    highlight_cell(minefield_x_position + x * 2 + 1,
-                   minefield_y_position + y * 2 + 1);
+	draw_minefield_contents(mf);
 }
-
 
 void platform_init()
 {
