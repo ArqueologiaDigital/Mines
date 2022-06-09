@@ -12,8 +12,8 @@
 
 ### Build & runtime/debug dependencies
 
-* sdcc compiler
+* SDCC compiler (successfully tested with 4.0.0 and 4.1.0)
 * hex2bin tool
-* openmsx emulator with C-BIOS rom
+* openMSX emulator with C-BIOS ROM
 
 **Note:** The hex2bin tool can be compiled from sources available at https://gitlab.com/reidrac/ubox-msx-lib/-/blob/main/tools/hex2bin-2.0 or you can also use binaries downloaded from https://sourceforge.net/projects/hex2bin/files/
