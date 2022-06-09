@@ -9,6 +9,7 @@
 #define CURRENT_CELL_X(mf)    mf->current_cell % mf->width
 #define CURRENT_CELL_Y(mf)    mf->current_cell / mf->width
 
+/* game state */
 enum {
 	TITLE_SCREEN = 1,
 	PLAYING_GAME = 2,

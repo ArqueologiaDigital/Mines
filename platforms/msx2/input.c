@@ -1,6 +1,6 @@
-#include "msx.h"
 #include <assert.h>
 #include <stdbool.h>
+#include "msx.h"
 #include "ports.h"
 #include "common.h"
 

@@ -28,6 +28,7 @@ void main_gameplay_loop(minefield* mf) {
 	                   // such as running animations
 		input = input_read(KEYBOARD);
 	} while (input == MINE_INPUT_IGNORED);
+	debug("\nkey code = ", input);
 
 	uint8_t x = mf->current_cell % mf->width;
 	uint8_t y = mf->current_cell / mf->width;
