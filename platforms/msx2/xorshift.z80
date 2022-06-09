@@ -1,7 +1,6 @@
 .globl _xorshift
 .globl _seed
 
-
 _set_random_seed::
     ld hl, #2
     add hl, sp

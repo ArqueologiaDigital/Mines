@@ -19,13 +19,12 @@ uint8_t _stored_debug_mode = DEBUGDEVICE_INT; /* default */
 
 
 /* configure debugdevice */
-void _debug_mode(uint8_t mode) __z88dk_fastcall
+void _set_debugdevice_mode(uint8_t mode) __z88dk_fastcall
 {
     mode;
     __asm
         ld a, l
         out (#0x2e), a
-        ret
     __endasm;
 }
 
@@ -37,7 +36,6 @@ void _out2f(int8_t value) __z88dk_fastcall
     __asm
         ld a, l
         out (#0x2f), a
-        ret
     __endasm;
 }
 
@@ -52,14 +50,24 @@ void debug_mode(uint8_t mode)
 
 void debug(char* msg, uint8_t value)
 {
-    _debug_mode(DEBUGDEVICE_ASCII);
+    _set_debugdevice_mode(DEBUGDEVICE_ASCII);
 
     for (int i = 0; msg[i] != 0; ++i) {
         _out2f(msg[i]);
     }
 
-    _debug_mode(_stored_debug_mode);
+    _set_debugdevice_mode(_stored_debug_mode);
     _out2f(value);
+}
+
+
+/* pause debug device (by tcl script) */
+void debug_break()
+{
+    __asm
+        ld a, #0xff
+        out (#0x2e), a
+    __endasm;
 }
 
 #endif /* DEBUG_H*/

@@ -1,7 +1,16 @@
-proc debug_ {{msg ""}} {
-    message $msg
-    #debug break
+proc pause {{value 0}} {
+    global use_pause
+    if {$use_pause && $value == 0xff} { debug break }
 }
 
-ext debugdevice
-#debug set_watchpoint write_io {0x2f} {} {debug_ "** $::wp_last_value received from debugdevice"}
+proc pause_on {} {
+    ext debugdevice
+    set use_pause true
+    debug set_watchpoint write_io {0x2e} {} {pause $::wp_last_value}
+}
+
+if { [info exists ::env(DEBUG)] } {
+    set use_pause $::env(DEBUG)
+    ext debugdevice
+    debug set_watchpoint write_io {0x2e} {} {pause $::wp_last_value}
+}

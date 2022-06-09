@@ -87,8 +87,8 @@ int random_number(int min, int max);
  * Implementation details
  * ----------------------
  *
- * Optional. You can undefine `USE_DEBUG_MODE` macro to transform debug_mode() and debug()
- * into empty macros.
+ * Optional. You can undefine `USE_DEBUG_MODE` macro to transform debug_mode(), debug()
+ * and debug_break() into empty macros.
  */
 void debug_mode(uint8_t mode);
 
@@ -99,16 +99,28 @@ void debug_mode(uint8_t mode);
  * Implementation details
  * ----------------------
  *
- * Optional. You can undefine `USE_DEBUG_MODE` macro to transform debug_mode() and debug()
- * into empty macros.
+ * Optional. You can undefine `USE_DEBUG_MODE` macro to transform debug_mode(), debug()
+ * and debug_break() into empty macros.
  */
 void debug(char* msg, uint8_t value);
+
+/**
+ * Pause emulator at debug_break function.
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * Optional. You can undefine `USE_DEBUG_MODE` macro to transform debug_mode(), debug()
+ * and debug_break() into empty macros.
+ */
+void debug_break();
 
 #else
 
 /* empty macros */
 #define debug_mode(x)
 #define debug(x, y)
+#define debug_break()
 
 #endif /* USE_DEBUG_MODE */
 
