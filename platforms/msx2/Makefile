@@ -15,14 +15,13 @@ TARGET := $(BUILDDIR)/minesweeper
 CODE := 0x4000
 DATA := 0xc000
 ROM_MAX := 0x8000
-CFLAGS := $(CFLAGS) -mz80 --Werror --fsigned-char --std-sdcc99 --opt-code-size --fomit-frame-pointer $(EXTRA_CFLAGS) -I. -I../../common
+CFLAGS := $(CFLAGS) -mz80 --Werror --fsigned-char --std-sdcc99 --opt-code-size  --fomit-frame-pointer $(EXTRA_CFLAGS) -I. -I../../common
 LDFLAGS := --no-std-crt0
 
 C_SOURCES := $(wildcard *.c)
-ASM_SOURCES := $(wildcard *.z80)
+ASM_SOURCES := $(wildcard *.asm)
 HEADERS := $(wildcard *.h)
-OBJECTS := $(patsubst %.c,$(BUILDDIR)/%.rel,$(C_SOURCES)) $(patsubst %.z80,$(BUILDDIR)/%.rel,$(ASM_SOURCES))
-OBJECTS := $(filter-out $(BUILDDIR)/crt0.rel,$(OBJECTS))
+OBJECTS := $(patsubst %.c,$(BUILDDIR)/%.rel,$(C_SOURCES)) $(patsubst %.asm,$(BUILDDIR)/%.rel,$(ASM_SOURCES))
 COMMON := $(patsubst ../../common/%.c,$(BUILDDIR)/%.rel,$(wildcard ../../common/*.c))
 LIBS :=
 
@@ -44,7 +43,10 @@ $(BUILDDIR)/%.rel: ../../common/%.c $(BUILDDIR) ../../common/common.h
 $(BUILDDIR)/%.rel: %.c $(HEADERS) $(BUILDDIR)
 	$(CC) $(CFLAGS) $(LDFLAGS) -c $< -o $@
 
-$(BUILDDIR)/%.rel: %.z80 $(HEADERS) $(BUILDDIR)
+$(BUILDDIR)/%.rel: %.asm $(HEADERS) $(BUILDDIR)
+	$(AS) -g -o $@ $<
+
+$(BUILDDIR)/crt0.rel: crt0.z80
 	$(AS) -g -o $@ $<
 
 $(BUILDDIR):
@@ -52,4 +54,4 @@ $(BUILDDIR):
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJECTS) $(C_OBJECTS) build
+	rm -rf $(OBJECTS) $(COMMON) build
