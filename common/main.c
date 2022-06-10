@@ -95,6 +95,7 @@ void main_gameplay_loop(minefield* mf) {
 	}
 }
 
+#if !defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)
 int main() {
 	platform_init();
 
@@ -118,4 +119,4 @@ int main() {
 	shutdown();
 	return 0;
 }
-
+#endif
