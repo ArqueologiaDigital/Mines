@@ -2,5 +2,5 @@
 *.rom.lk
 *.rom.map
 *.rom.noi
-*.SC5
 *.dat
+mines.c
