@@ -59,7 +59,7 @@ $(BUILDDIR)/crt0.rel: crt0.z80
 
 $(BUILDDIR)/mines.rel: mines.c
 
-mines.c: MINES.SC5
+mines.c:
 	$(BINTOOL) $< -skip 0 7 -o $@ -t mines_data -n 12
 
 $(BUILDDIR):
