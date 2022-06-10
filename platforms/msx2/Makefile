@@ -1,35 +1,43 @@
 export PATH := $(PWD)/../../bin:$(PATH)
 
 ifeq ($(DEBUG),1)
-    CFLAGS := $(CFLAGS) -DUSE_DEBUG_MODE
+    Z80_CFLAGS := $(Z80_CFLAGS) -DUSE_DEBUG_MODE
 else
-    CFLAGS := $(CFLAGS)
+    Z80_CFLAGS := $(Z80_CFLAGS)
 endif
 
-CC := sdcc
-AS := sdasz80
-HEX2BIN := hex2bin
+Z80_CC := sdcc
+Z80_AS := sdasz80
+HEXTOOL := hex2bin
+#HEXTOOL := ./tools/MSXhex
+BINTOOL := ./tools/MSXbin
 
 BUILDDIR := build
 TARGET := $(BUILDDIR)/minesweeper
 CODE := 0x4000
 DATA := 0xc000
 ROM_MAX := 0x8000
-CFLAGS := $(CFLAGS) -mz80 --Werror --fsigned-char --std-sdcc99 --opt-code-size  --fomit-frame-pointer $(EXTRA_CFLAGS) -I. -I../../common
-LDFLAGS := --no-std-crt0
+Z80_CFLAGS := $(Z80_CFLAGS) -mz80 --Werror --fsigned-char --std-sdcc99 --opt-code-size  --fomit-frame-pointer $(EXTRA_Z80_CFLAGS) -I. -I../../common
+Z80_LDFLAGS := --no-std-crt0
 
-C_SOURCES := $(wildcard *.c)
+# Do not include mines.rel twice
+C_SOURCES := $(filter-out mines.c,$(wildcard *.c))
 ASM_SOURCES := $(wildcard *.asm)
 HEADERS := $(wildcard *.h)
-OBJECTS := $(patsubst %.c,$(BUILDDIR)/%.rel,$(C_SOURCES)) $(patsubst %.asm,$(BUILDDIR)/%.rel,$(ASM_SOURCES))
+OBJECTS := $(patsubst %.c,$(BUILDDIR)/%.rel,$(C_SOURCES)) $(patsubst %.asm,$(BUILDDIR)/%.rel,$(ASM_SOURCES)) $(BUILDDIR)/mines.rel
 COMMON := $(patsubst ../../common/%.c,$(BUILDDIR)/%.rel,$(wildcard ../../common/*.c))
-LIBS :=
+Z80_LIBS :=
 
-all: $(TARGET).rom
+.PHONY: all clean tools openmsx run
+all: tools $(TARGET).rom
+
+tools: $(BINTOOL)
+	LDFLAGS= CFLAGS= make -C tools
 
 $(TARGET).rom: $(OBJECTS) $(COMMON) $(BUILDDIR)/crt0.rel
-	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) --code-loc $(CODE) --data-loc $(DATA) $(BUILDDIR)/crt0.rel $(OBJECTS) $(COMMON) -o $(TARGET).ihx
-	$(HEX2BIN) -e bin -p FF -l $(ROM_MAX) $(TARGET).ihx
+	$(Z80_CC) $(Z80_CFLAGS) $(Z80_LDFLAGS) $(Z80_LIBS) --code-loc $(CODE) --data-loc $(DATA) $(BUILDDIR)/crt0.rel $(OBJECTS) $(COMMON) -o $(TARGET).ihx
+	#$(HEXTOOL) $(TARGET).ihx -o $(TARGET).rom -e ROM -p 0xFF -s 0x4000 -l $(ROM_MAX)
+	$(HEXTOOL) -e bin -p FF -l $(ROM_MAX) $(TARGET).ihx
 	@cp $(TARGET).bin $(TARGET).rom
 
 openmsx: run
@@ -38,20 +46,24 @@ run: $(TARGET).rom
 	openmsx -carta $(TARGET).rom -machine C-BIOS_MSX2 -script debugdevice.tcl
 
 $(BUILDDIR)/%.rel: ../../common/%.c $(BUILDDIR) ../../common/common.h
-	$(CC) $(CFLAGS) $(LDFLAGS) -c $< -o $@
+	$(Z80_CC) $(Z80_CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/%.rel: %.c $(HEADERS) $(BUILDDIR)
-	$(CC) $(CFLAGS) $(LDFLAGS) -c $< -o $@
+	$(Z80_CC) $(Z80_CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/%.rel: %.asm $(HEADERS) $(BUILDDIR)
-	$(AS) -g -o $@ $<
+	$(Z80_AS) -g -o $@ $<
 
 $(BUILDDIR)/crt0.rel: crt0.z80
-	$(AS) -g -o $@ $<
+	$(Z80_AS) -g -o $@ $<
+
+$(BUILDDIR)/mines.rel: mines.c
+
+mines.c: MINES.SC5
+	$(BINTOOL) $< -skip 0 7 -o $@ -t mines_data -n 12
 
 $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
 
-.PHONY: clean
 clean:
-	rm -rf $(OBJECTS) $(COMMON) build
+	rm -rf $(OBJECTS) $(COMMON) build $(BINTOOL)
