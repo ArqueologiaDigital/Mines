@@ -6,6 +6,7 @@ OBJCOPY = objcopy
 CC = gcc -std=gnu99
 PCB_VARIANT = gunsmoke
 ROMSET = 3.ic85 gs03.09n gs01.11f #gs14.11c g-01.03b g-02.04b g-03.05b gs13.06c gs12.05c gs11.04c gs10.02c gs09.06a gs08.05a gs07.04a gs06.02a
+VIDEO_RESOLUTION := -DSCREEN_WIDTH=28 -DSCREEN_HEIGHT=32 -DMINEFIELD_X_OFFSET=3 -DMINEFIELD_Y_OFFSET=5
 
 BUILDDIR := build
 SOURCES := $(wildcard *.c)
@@ -73,10 +74,10 @@ $(BUILDDIR)/maincpu.ihx: $(OBJECTS) $(C_OBJECTS) $(BUILDDIR)/crt0.rel
 	$(Z80COMPILER) $(Z80_CFLAGS) $(Z80_LDFLAGS) $(LIBS) --code-loc $(CODE) --data-loc $(DATA) $(BUILDDIR)/crt0.rel $(OBJECTS) $(C_OBJECTS) -o $(BUILDDIR)/maincpu.ihx
 
 $(BUILDDIR)/%.rel: ../../common/%.c $(BUILDDIR)
-	$(Z80COMPILER) $(Z80_CFLAGS) $(Z80_LDFLAGS) -c $< -o $@
+	$(Z80COMPILER) $(Z80_CFLAGS) $(Z80_LDFLAGS) $(VIDEO_RESOLUTION) -c $< -o $@
 
 $(BUILDDIR)/%.rel: ./%.c $(BUILDDIR)
-	$(Z80COMPILER) $(Z80_CFLAGS) $(Z80_LDFLAGS) -c $< -o $@
+	$(Z80COMPILER) $(Z80_CFLAGS) $(Z80_LDFLAGS) $(VIDEO_RESOLUTION) -c $< -o $@
 
 $(BUILDDIR)/crt0.rel: crt0.z80
 	$(Z80ASSEMBLER) -g -o $@ $<

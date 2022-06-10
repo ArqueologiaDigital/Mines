@@ -1,5 +1,5 @@
 #include "../mines.xpm"
-#include "../char_codes.h"
+#include "../../../common/video-tiles.h"
 #include <stdio.h>
 
 #define WIDTH 320
@@ -46,17 +46,22 @@ int main(){
 	save_tile(1, 1, FLAG);
 	save_tile(2, 1, QUESTION_MARK);
 	save_tile(3, 1, BLANK);
+	save_tile(3, 1, GROUND);
 
 	save_tile(0, 2, MINEFIELD_CORNER_TOP_LEFT);
 	save_tile(1, 2, MINEFIELD_TOP_TEE);
-	save_tile(2, 2, MINEFIELD_HORIZONTAL);
+	save_tile(2, 2, MINEFIELD_HORIZONTAL_TOP);
+	save_tile(2, 2, MINEFIELD_HORIZONTAL_MIDDLE);
+	save_tile(2, 2, MINEFIELD_HORIZONTAL_BOTTOM);
 	save_tile(4, 2, MINEFIELD_CORNER_TOP_RIGHT);
 
 	save_tile(0, 3, MINEFIELD_LEFT_TEE);
 	save_tile(1, 3, MINEFIELD_CROSS);
 	save_tile(4, 3, MINEFIELD_RIGHT_TEE);
 
-	save_tile(0, 4, MINEFIELD_VERTICAL);
+	save_tile(0, 4, MINEFIELD_VERTICAL_LEFT);
+	save_tile(0, 4, MINEFIELD_VERTICAL_MIDDLE);
+	save_tile(0, 4, MINEFIELD_VERTICAL_RIGHT);
 	save_tile(2, 4, CLOSED_CELL);
 
 	save_tile(0, 5, MINEFIELD_CORNER_BOTTOM_LEFT);

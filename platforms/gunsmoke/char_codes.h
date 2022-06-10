@@ -1,5 +1,6 @@
 enum {
 	BLANK = 0,
+	CURSOR = 0, // The MSX2 port defined this one. The name is not clear to me though.
 
 	MINEFIELD_CORNER_TOP_LEFT,
 	MINEFIELD_CORNER_TOP_RIGHT,
