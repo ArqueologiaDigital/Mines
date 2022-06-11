@@ -87,10 +87,21 @@ int random_number(int min, int max);
  * Implementation details
  * ----------------------
  *
- * Optional. You can undefine `USE_DEBUG_MODE` macro to transform debug_mode(), debug()
- * and debug_break() into empty macros.
+ * Optional. You can undefine `USE_DEBUG_MODE` macro to transform all the debug macros
+ * into empty macros, so no penalties are imposed on the release version.
  */
 void debug_mode(uint8_t mode);
+
+/**
+ * Send text message to emulator for debugging (printing).
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * Optional. You can undefine `USE_DEBUG_MODE` macro to transform all the debug macros
+ * into empty macros, so no penalties are imposed on the release version.
+ */
+void debug_msg(char* msg);
 
 /**
  * Send message to emulator for debugging (printing) along with a numeric value.
@@ -99,8 +110,8 @@ void debug_mode(uint8_t mode);
  * Implementation details
  * ----------------------
  *
- * Optional. You can undefine `USE_DEBUG_MODE` macro to transform debug_mode(), debug()
- * and debug_break() into empty macros.
+ * Optional. You can undefine `USE_DEBUG_MODE` macro to transform all the debug macros
+ * into empty macros, so no penalties are imposed on the release version.
  */
 void debug(char* msg, uint8_t value);
 
@@ -110,10 +121,33 @@ void debug(char* msg, uint8_t value);
  * Implementation details
  * ----------------------
  *
- * Optional. You can undefine `USE_DEBUG_MODE` macro to transform debug_mode(), debug()
- * and debug_break() into empty macros.
+ * Optional. You can undefine `USE_DEBUG_MODE` macro to transform all the debug macros
+ * into empty macros, so no penalties are imposed on the release version.
  */
 void debug_break();
+
+#ifndef NO_STRINGIFICATION
+/**
+ * Breaks execution if not `ok`.
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * Optional. You can undefine `USE_DEBUG_MODE` macro to transform all the debug macros
+ * into empty macros, so no penalties are imposed on the release version.
+ *
+ * Regular C `assert`-like macros are not appropriate for graphics mode, so Mines leverages
+ * some debug functions to implements its own.
+ *
+ * This macro requires that the platform's C compiler supports stringification of arguments
+ * in macros. Otherwise, the `NO_STRINGIFICATION` macro should be defined first.
+ */
+#define assert(ok) \
+	do { if (!(ok)) { debug_msg("Assertion `" #ok "' failed.\nPaused "); debug_break(); } } while(0)
+#else
+#define assert(ok) \
+	do { if (!(ok)) { debug_msg("Assertion failed.\nPaused "); debug_break(); } } while(0)
+#endif /* NO_STRINGIFICATION */
 
 #else
 
@@ -121,6 +155,7 @@ void debug_break();
 #define debug_mode(x)
 #define debug(x, y)
 #define debug_break()
+#define assert(x)
 
 #endif /* USE_DEBUG_MODE */
 
