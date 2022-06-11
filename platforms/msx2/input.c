@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdbool.h>
 #include "msx.h"
 #include "ports.h"
@@ -7,7 +6,7 @@
 
 static uint8_t keyboard_read_row(uint8_t row) __z88dk_fastcall __naked
 {
-	assert(row <= 10);
+	row; assert(row <= 10);
 	__asm
 		in      a, (P_PPI_C)
 		and     #0xf0           /* keep PPI data constant... */

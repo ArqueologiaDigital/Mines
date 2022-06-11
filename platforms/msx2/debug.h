@@ -48,16 +48,22 @@ void debug_mode(uint8_t mode)
 }
 
 
-void debug(char* msg, uint8_t value)
+void debug_msg(char* msg)
 {
     _set_debugdevice_mode(DEBUGDEVICE_ASCII);
 
     for (int i = 0; msg[i] != 0; ++i) {
         _out2f(msg[i]);
     }
+}
 
+
+void debug(char* msg, uint8_t value)
+{
+    debug_msg(msg);
     _set_debugdevice_mode(_stored_debug_mode);
     _out2f(value);
+    debug_msg("\n");
 }
 
 
@@ -70,5 +76,6 @@ void debug_break()
     __endasm;
 }
 
-#endif /* DEBUG_H*/
+
+#endif /* DEBUG_H */
 #endif /* USE_DEBUG_MODE */
