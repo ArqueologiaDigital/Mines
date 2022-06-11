@@ -94,8 +94,8 @@ $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
 
 clean:
-	rm -r $(BUILDDIR)
-	rm $(ROMSET)
-	rm tools/patch_CGROM
-#	rm tools/patch_BGROM
-	rm mines*.xpm
+	rm -rf $(BUILDDIR)
+	rm -f $(ROMSET)
+	rm -f tools/patch_CGROM
+#	rm -f tools/patch_BGROM
+	rm -f mines*.xpm
