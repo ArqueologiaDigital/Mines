@@ -7,4 +7,4 @@ all: $(SOURCES)
 	gcc $(SOURCES) $(CFLAGS) -lncurses -o $(BUILDDIR)mines
 
 clean:
-	rm -r $(BUILDDIR)
+	rm -rf $(BUILDDIR)
