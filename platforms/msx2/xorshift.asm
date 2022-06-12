@@ -7,7 +7,7 @@ _set_random_seed::
     ld iy, #_seed
 
     ld a, (hl)
-    or #1
+    or #1               ; guarantees that seed is never zero
     ld 0(iy), a
 
     inc hl
@@ -40,5 +40,5 @@ _xorshift::
 
 .area _DATA
 
-_seed: .dw 1    ; value must not be zero
+_seed: .ds 2
 

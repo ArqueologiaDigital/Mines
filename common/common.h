@@ -20,6 +20,27 @@
 #define JOY_4              4
 
 /**
+ * Platform-specific initialisation code
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * A place to properly initialise graphics mode and sound settings, move tiles and
+ * sprites from ROM to RAM etc.
+ */
+void platform_init();
+
+/**
+ * Platform-specific shutdown code
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * A place to properly change back to text mode, free previous memory allocations etc.
+ */
+void platform_shutdown();
+
+/**
  * Reads input from controller or keyboard, including all the buttons and pad directions
  * and returns immediately. `source` identifies the input source.
  *
@@ -126,7 +147,6 @@ void debug(char* msg, uint8_t value);
  */
 void debug_break();
 
-#ifndef NO_STRINGIFICATION
 /**
  * Breaks execution if not `ok`.
  *
@@ -142,6 +162,7 @@ void debug_break();
  * This macro requires that the platform's C compiler supports stringification of arguments
  * in macros. Otherwise, the `NO_STRINGIFICATION` macro should be defined first.
  */
+#ifndef NO_STRINGIFICATION
 #define assert(ok) \
 	do { if (!(ok)) { debug_msg("Assertion `" #ok "' failed.\nPaused "); debug_break(); } } while(0)
 #else

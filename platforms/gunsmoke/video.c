@@ -372,6 +372,6 @@ void draw_minefield(minefield* mf){
 	enable_chars();
 }
 
-void shutdown()
+void platform_shutdown()
 {
 }
