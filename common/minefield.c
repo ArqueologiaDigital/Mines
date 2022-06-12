@@ -55,6 +55,11 @@ void setup_minefield(minefield* mf, uint8_t width, uint8_t height, uint8_t num_b
 	}
 }
 
+void free_minefield(minefield* mf)
+{
+	free(mf->cells);
+}
+
 void open_cell(minefield* mf, uint8_t x, uint8_t y) {
 	if (CELL(mf, x, y) & (HASQUESTIONMARK | HASFLAG | ISOPEN)){
 		return;

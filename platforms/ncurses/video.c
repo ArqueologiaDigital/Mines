@@ -119,7 +119,7 @@ void draw_minefield(minefield* mf){
     refresh();
 }
 
-void shutdown()
+void platform_shutdown()
 {
     endwin();
     exit(0);

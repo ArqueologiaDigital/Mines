@@ -253,7 +253,7 @@ void idle_loop(minefield* mf)
 }
 
 
-void shutdown()
+void platform_shutdown()
 {
     // Cartridge games can't unload.
     __asm__("jp 0");

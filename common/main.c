@@ -35,7 +35,8 @@ void main_gameplay_loop(minefield* mf) {
 	uint8_t has_bomb = (mf->cells[mf->current_cell] & HASBOMB);
 	uint8_t num_bombs_around = (mf->cells[mf->current_cell] & 0x0F);
 	uint8_t num_cells = (mf->width * mf->height);
-	switch(input){
+
+	switch (input) {
 		case MINE_INPUT_LEFT:
 			if (mf->current_cell % mf->width > 0)
 				mf->current_cell--;
@@ -61,7 +62,7 @@ void main_gameplay_loop(minefield* mf) {
 			break;
 
 		case MINE_INPUT_OPEN_BLOCK:
-		    if (!has_bomb && (count_surrounding_flags(mf, x, y) == num_bombs_around)){
+			if (!has_bomb && (count_surrounding_flags(mf, x, y) == num_bombs_around)) {
 				open_cell(mf, x-1, y-1);
 				open_cell(mf, x-1, y);
 				open_cell(mf, x-1, y+1);
@@ -75,11 +76,11 @@ void main_gameplay_loop(minefield* mf) {
 			break;
 
 		case MINE_INPUT_FLAG:
-			if (!(mf->cells[mf->current_cell] & ISOPEN)){
-				if (mf->cells[mf->current_cell] & HASFLAG){
+			if (!(mf->cells[mf->current_cell] & ISOPEN)) {
+				if (mf->cells[mf->current_cell] & HASFLAG) {
 					mf->cells[mf->current_cell] &= ~HASFLAG;
 					mf->cells[mf->current_cell] |= HASQUESTIONMARK;
-				} else if (mf->cells[mf->current_cell] & HASQUESTIONMARK){
+				} else if (mf->cells[mf->current_cell] & HASQUESTIONMARK) {
 					mf->cells[mf->current_cell] &= ~HASQUESTIONMARK;
 				} else {
 					mf->cells[mf->current_cell] |= HASFLAG;
@@ -114,10 +115,13 @@ int main() {
 
 	mf.state = PLAYING_GAME;
 	while (mf.state != QUIT)
+	{
 		main_gameplay_loop(&mf);
+	}
 
-	free(mf.cells);
-	shutdown();
+	free_minefield(&mf);
+	platform_shutdown();
+
 	return 0;
 }
 #endif
