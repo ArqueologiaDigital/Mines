@@ -16,17 +16,26 @@
 #define SCREEN_WIDTH        32
 #define SCREEN_HEIGHT       25
 
-/* VDP operations */
-#define OP_IMP              0b0000
-#define OP_AND              0b0001
-#define OP_OR               0b0010
-#define OP_XOR              0b0011
-#define OP_NOT              0b0100
-#define OP_TIMP             0b1000
-#define OP_TAND             0b1001
-#define OP_TOR              0b1010
-#define OP_TXOR             0b1011
-#define OP_TNOT             0b1100
+/* VDP copy direction (high byte):
+ * bit #5,#4: b00 = VRAM->VRAM
+ * bit #3: b0 = top->bottom
+ * bit #2: b0 = left->right */
+#define DIR_DEFAULT         (0b0000 << 8)
+
+/* pixel operation */
+#define PO_IMP              0b0000
+#define PO_AND              0b0001
+#define PO_OR               0b0010
+#define PO_XOR              0b0011
+#define PO_NOT              0b0100
+#define PO_TIMP             0b1000
+#define PO_TAND             0b1001
+#define PO_TOR              0b1010
+#define PO_TXOR             0b1011
+#define PO_TNOT             0b1100
+
+/* VDP operation (combine it with pixel operation above) */
+#define VDP_LMMM            0b10010000
 
 void write_vdp(uint8_t reg, uint8_t data) SDCCCALL0;
 
@@ -40,9 +49,7 @@ void enable_screen();
 
 void disable_screen();
 
-void lmmm(uint16_t sx, uint16_t sy, uint16_t dx, uint16_t dy, uint16_t width, uint16_t height) SDCCCALL0;
-
-void lmmm_op(uint16_t sx, uint16_t sy, uint16_t dx, uint16_t dy, uint16_t width, uint16_t height, uint8_t op) SDCCCALL0;
+void vdp(uint16_t sx, uint16_t sy, uint16_t dx, uint16_t dy, uint16_t width, uint16_t height, uint16_t direction, uint8_t vdpop) SDCCCALL0;
 
 void set_palette(uint8_t count, uint8_t* color_table) SDCCCALL0;
 

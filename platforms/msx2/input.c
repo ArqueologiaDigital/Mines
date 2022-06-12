@@ -1,5 +1,5 @@
 #include <stdbool.h>
-#include "msx.h"
+#include "msx2.h"
 #include "ports.h"
 #include "common.h"
 
