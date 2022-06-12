@@ -49,6 +49,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	while (mf.state != QUIT)
 		main_gameplay_loop(&mf);
 
+	free(mf.cells);
 	return 0;
 }
 

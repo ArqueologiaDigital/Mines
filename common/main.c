@@ -116,6 +116,7 @@ int main() {
 	while (mf.state != QUIT)
 		main_gameplay_loop(&mf);
 
+	free(mf.cells);
 	shutdown();
 	return 0;
 }
