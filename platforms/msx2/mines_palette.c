@@ -1,4 +1,4 @@
-#include "msx.h"
+#include "msx2.h"
 
 const uint8_t mines_palette[] = {
 	0,  0,0,0, // black

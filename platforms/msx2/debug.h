@@ -5,7 +5,7 @@
 #define DEBUG_H
 
 #include "common.h"
-#include "msx.h"
+#include "msx2.h"
 
 /* debugdevice modes */
 #define DEBUGDEVICE_ASCII   0x63 // or 0x23 for line feed mode version
