@@ -39,7 +39,7 @@
 
 void write_vdp(uint8_t reg, uint8_t data) SDCCCALL0;
 
-void write_vram(uint8_t *dst, uint16_t len, uint8_t *src) SDCCCALL0;
+void write_vram(uint16_t dst, uint16_t len, uint8_t *src) SDCCCALL0;
 
 void fill_vram(uint8_t byte, uint16_t len, uint8_t *dst) SDCCCALL0;
 
@@ -62,5 +62,21 @@ void set_random_seed(uint16_t value) SDCCCALL0;
 uint16_t xorshift();
 
 uint32_t read_clock() SDCCCALL0;
+
+void set_sprite_pattern(uint8_t* src, uint8_t pattern) SDCCCALL0;
+
+void put_sprite_colors(uint8_t* src, uint8_t index) SDCCCALL0;
+
+void put_cursor(uint8_t x, uint8_t y);
+
+struct sprite_attr {
+    uint8_t y;
+    uint8_t x;
+    uint8_t pattern_no;
+    uint8_t unused;
+};
+
+/* low level sprite placement function */
+void put_sprite_attr(struct sprite_attr *src, uint8_t index) SDCCCALL0;
 
 #endif /* MSX_H */
