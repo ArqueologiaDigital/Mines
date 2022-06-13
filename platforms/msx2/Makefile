@@ -20,11 +20,10 @@ ROM_MAX := 0x8000
 Z80_CFLAGS := $(Z80_CFLAGS) -mz80 --Werror --fsigned-char --std-sdcc99 --opt-code-size  --fomit-frame-pointer $(EXTRA_Z80_CFLAGS) -I. -I../../common
 Z80_LDFLAGS := --no-std-crt0
 
-# Do not include mines.rel twice
-C_SOURCES := $(filter-out mines.c,$(wildcard *.c))
+C_SOURCES := $(wildcard *.c)
 ASM_SOURCES := $(wildcard *.asm)
 HEADERS := $(wildcard *.h)
-OBJECTS := $(patsubst %.c,$(BUILDDIR)/%.rel,$(C_SOURCES)) $(patsubst %.asm,$(BUILDDIR)/%.rel,$(ASM_SOURCES)) $(BUILDDIR)/mines.rel
+OBJECTS := $(patsubst %.c,$(BUILDDIR)/%.rel,$(C_SOURCES)) $(patsubst %.asm,$(BUILDDIR)/%.rel,$(ASM_SOURCES))
 COMMON := $(patsubst ../../common/%.c,$(BUILDDIR)/%.rel,$(wildcard ../../common/*.c))
 Z80_LIBS :=
 
@@ -57,9 +56,7 @@ $(BUILDDIR)/%.rel: %.asm $(HEADERS) $(BUILDDIR)
 $(BUILDDIR)/crt0.rel: crt0.z80
 	$(Z80_AS) -g -o $@ $<
 
-$(BUILDDIR)/mines.rel: mines.c
-
-mines.c: MINES.SC5
+mines.h: MINES.SC5
 	$(BINTOOL) $< -skip 0 7 -o $@ -t mines_data -n 12
 
 $(BUILDDIR):

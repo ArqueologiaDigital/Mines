@@ -1,3 +1,5 @@
+; void write_vram(uint16_t dst, uint16_t len, uint8_t *src) SDCCCALL0
+
 .globl _write_vram
 
 NSTWRT = 0x0171
@@ -6,42 +8,41 @@ VDP.DW = 0x07
 _write_vram::
 	ld hl, #2
 	add hl, sp
-	ld e, (hl)	; de = dst
-	inc hl
-	ld d, (hl)
 
-	inc hl		; bc = length
+	ld e, (hl)
+	inc hl
+	ld d, (hl)      ; de <- dst
+
+	inc hl
 	ld c, (hl)
 	inc hl
-	ld b, (hl)
+	ld b, (hl)      ; bc <- length
 
-	inc hl		; hl = src
+	inc hl
 	ld a, (hl)
 	inc hl
 	ld h, (hl)
-	ld l, a
+	ld l, a         ; hl <- src
 
-	ex de, hl	; hl = dst, de = src
-	push bc		; save length
+	ex de, hl       ; hl <- dst, de <- src
 	call NSTWRT
-	ex de, hl	; hl = src, de = dst
-	pop de		; de = length
+	ex de, hl       ; hl <- src, de <- dst
+	ld d, b
+	ld b, c         ; db <- len
 
 	ld a, (VDP.DW)
-	ld c, a
+	ld c, a         ; OUTI uses port in c
 
-	ld b, e
-	ld a, d
-	inc e
-	dec e
-	jr z, loop
-	inc a
+	ld a, d         ; ab <- len
+	inc b
+	dec b
+	jr z, loop      ; OUTI and cycle b if zero
+	inc a           ; preserve value of a in iteration
 
 loop:
-	outi
-	jp nz, loop
-	dec a
-	jp nz, loop
+	outi            ; read byte from (hl) and OUTI in c
+	jp nz, loop     ; loop while b > 0
+	dec a           ; b "borrowed" from a
+	jp nz, loop     ; loop while a > 0
 
 	ret
-

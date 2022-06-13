@@ -7,9 +7,10 @@
 //#define USE_DEBUG_MODE
 #include "debug.h"
 
-
-extern uint8_t* mines_data;
-extern uint8_t* mines_palette;
+/* Assets */
+#include "mines.h"
+#include "mines_palette.h"
+#include "cursor.h"
 
 
 /* set_char emulates tile behaviour, but is actually a bitmap copy */
@@ -44,12 +45,24 @@ void video_init()
     fill_vram(0x00, 32768, 0x0);
 
     //restore_palette();
-    set_palette(15, (uint8_t*) &mines_palette);
+    set_palette(15, mines_palette);
 
     /* Move board and mines from RAM to second VRAM page */
-    write_vram((uint8_t*) 0x8000, 0x1800, (uint8_t*) &mines_data);
+    write_vram(0x8000, 0x1800, mines_data);
+
+    /* Set cursor sprite */
+    set_sprite_pattern(cursor_pattern, 0);
+    put_sprite_colors(cursor_colors, 0);
+    put_cursor(0, 209);
 
     enable_screen();
+}
+
+
+void put_cursor(uint8_t x, uint8_t y)
+{
+    struct sprite_attr attr = { y - 1, x, 0, 0 };
+    put_sprite_attr(&attr, 0);
 }
 
 
@@ -91,9 +104,9 @@ void draw_scenario()
 
 void highlight_cell(int x, int y)
 {
-    //put_sprite(cursor, x, y + 1);
     /* merge cursor block with tile from page 0 (visible page) */
-    vdp(CURSOR % 12 * 8, CURSOR / 12 * 8 + 256, x * 8, y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_XOR);
+    put_cursor(x * 8 - 3, y * 8 - 3);
+    //vdp(CURSOR % 12 * 8, CURSOR / 12 * 8 + 256, x * 8, y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_XOR);
 }
 
 
