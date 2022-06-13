@@ -1,5 +1,5 @@
-#ifndef MSX_H
-#define MSX_H
+#ifndef MSX2_H
+#define MSX2_H
 
 #include <stdint.h>
 
@@ -11,10 +11,6 @@
 #else
 #define SDCCCALL0
 #endif
-
-/* fake tile-based screen used by set_char */
-#define SCREEN_WIDTH        32
-#define SCREEN_HEIGHT       25
 
 /* VDP copy direction (high byte):
  * bit #5,#4: b00 = VRAM->VRAM
@@ -79,4 +75,4 @@ struct sprite_attr {
 /* low level sprite placement function */
 void put_sprite_attr(struct sprite_attr *src, uint8_t index) SDCCCALL0;
 
-#endif /* MSX_H */
+#endif /* MSX2_H */

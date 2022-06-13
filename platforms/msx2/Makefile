@@ -33,6 +33,7 @@ all: tools $(TARGET).rom
 tools: $(BINTOOL)
 	LDFLAGS= CFLAGS= make -C tools
 
+SCREEN_RESOLUTION := -DSCREEN_WIDTH=32 -DSCREEN_HEIGHT=26 -DMINEFIELD_X_OFFSET=6 -DMINEFIELD_Y_OFFSET=3
 $(TARGET).rom: $(OBJECTS) $(COMMON) $(BUILDDIR)/crt0.rel
 	$(Z80_CC) $(Z80_CFLAGS) $(Z80_LDFLAGS) $(Z80_LIBS) --code-loc $(CODE) --data-loc $(DATA) $(BUILDDIR)/crt0.rel $(OBJECTS) $(COMMON) -o $(TARGET).ihx
 	#$(HEXTOOL) $(TARGET).ihx -o $(TARGET).rom -e ROM -p 0xFF -s 0x4000 -l $(ROM_MAX)
@@ -45,7 +46,7 @@ run: $(TARGET).rom
 	openmsx -carta $(TARGET).rom -machine C-BIOS_MSX2 -script debugdevice.tcl
 
 $(BUILDDIR)/%.rel: ../../common/%.c $(BUILDDIR) ../../common/common.h
-	$(Z80_CC) $(Z80_CFLAGS) -c $< -o $@
+	$(Z80_CC) $(Z80_CFLAGS) $(SCREEN_RESOLUTION) -c $< -o $@
 
 $(BUILDDIR)/%.rel: %.c $(HEADERS) $(BUILDDIR)
 	$(Z80_CC) $(Z80_CFLAGS) -c $< -o $@

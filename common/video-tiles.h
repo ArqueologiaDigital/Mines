@@ -1,7 +1,18 @@
-#ifndef CHAR_CODES
-#define CHAR_CODES
+#ifndef VIDEO_TILES_H
+#define VIDEO_TILES_H
+
+#include <stdint.h>
+
+void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile);
+void draw_scenario();
+void highlight_cell(int x, int y);
 
 enum {
+	/*	NOTE:
+		The tile codes for the number
+		of bombs *MUST* be sequential
+		because the video code assumes
+		that to be the case.	*/
     ONE_BOMB = 0,
     TWO_BOMBS = 1,
     THREE_BOMBS = 2,
@@ -10,6 +21,7 @@ enum {
     SIX_BOMBS = 5,
     SEVEN_BOMBS = 6,
     EIGHT_BOMBS = 7,
+    
     BLANK = 8,
     CURSOR = 9,
     BOMB = 12,
@@ -49,4 +61,4 @@ enum {
     MINEFIELD_CORNER_BOTTOM_RIGHT = 64,
 };
 
-#endif /* CHAR_CODES */
+#endif /* VIDEO_TILES_H */
