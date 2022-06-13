@@ -15,7 +15,7 @@ _read_clock_byte:
 	sla a
 	sla a
 	sla a
-	or l                    ; result in A
+	or l                    ; result in a
 
 	ret
 
