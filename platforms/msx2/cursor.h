@@ -1,5 +1,7 @@
 #include "msx2.h"
 
+#define SPRITE_ID 0
+#define PATTERN_ID 0
 
 /* crosshair shaped cursor sprite */
 const uint8_t cursor_pattern[32] = {

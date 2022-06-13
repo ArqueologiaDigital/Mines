@@ -60,7 +60,7 @@ $(BUILDDIR)/crt0.rel: crt0.z80
 $(BUILDDIR)/video.rel: video.c mines.h
 	$(Z80_CC) $(Z80_CFLAGS) -c $< -o $@
 
-mines.h: MINES.SC5
+mines.h: MINES.SC5 $(BINTOOL)
 	$(BINTOOL) $< -skip 0 7 -o $@ -t mines_data -n 12
 
 $(BUILDDIR):

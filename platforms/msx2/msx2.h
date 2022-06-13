@@ -55,7 +55,7 @@ extern uint16_t seed;
 
 void set_random_seed(uint16_t value) SDCCCALL0;
 
-uint16_t xorshift();
+uint16_t xorshift() SDCCCALL0;
 
 uint32_t read_clock() SDCCCALL0;
 

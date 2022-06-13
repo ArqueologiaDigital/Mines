@@ -54,8 +54,10 @@ void video_init()
     write_vram(0x8000, 0x1800, mines_data);
 
     /* Set cursor sprite */
-    set_sprite_pattern(cursor_pattern, 0);
-    put_sprite_colors(cursor_colors, 0);
+    set_sprite_pattern(cursor_pattern, PATTERN_ID);
+    put_sprite_colors(cursor_colors, SPRITE_ID);
+
+    /* Set it to invisible */
     put_cursor(0, 209);
 
     enable_screen();
@@ -64,8 +66,8 @@ void video_init()
 
 void put_cursor(uint8_t x, uint8_t y)
 {
-    struct sprite_attr attr = { y - 1, x, 0, 0 };
-    put_sprite_attr(&attr, 0);
+    struct sprite_attr attr = { y - 1, x, 4 * PATTERN_ID, 0 };
+    put_sprite_attr(&attr, SPRITE_ID);
 }
 
 
