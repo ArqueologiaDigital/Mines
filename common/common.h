@@ -21,6 +21,16 @@
 #define JOY_4              4
 
 /**
+ * Compatibility macro for unused function parameter warnings or errors.
+ * If you need it, just put -DUNUSED_MACRO on CFLAGS.
+ */
+#ifdef UNUSED_MACRO
+#define UNUSED(x) x;
+#else
+#define UNUSED(x)
+#endif /* NO_UNUSED */
+
+/**
  * Platform-specific initialisation code
  *
  * Implementation details

@@ -1,3 +1,4 @@
+#include "common.h"
 #include "minefield.h"
 #include "video-tiles.h"
 #include <stdlib.h>
@@ -100,12 +101,14 @@ void set_sprite(uint8_t sprite_number, uint8_t code, uint8_t bank,
 	sprite[3] = (y & 0xFF);
 }
 
-void set_scroll_y(int pos){
+void set_scroll_y(int pos)
+{
 	*(SCROLLY) = pos&0xFF;
 	*(SCROLLY+1) = (pos>>8)&0xFF;
 }
 
-void update_sprite_position(minefield* mf){
+void update_sprite_position(minefield* mf)
+{
 	uint8_t x = CURRENT_CELL_X(mf);
 	uint8_t y = CURRENT_CELL_Y(mf);
 	target_x = 8 * (MINEFIELD_X_OFFSET + x * 2 + 1);
@@ -134,27 +137,31 @@ void update_sprite_position(minefield* mf){
 
 void blink_cursor(minefield* mf); //prototype
 
-void idle_loop(minefield* mf){
+void idle_loop(minefield* mf)
+{
 	update_sprite_position(mf);
 	blink_cursor(mf);
 	count_loops++;
 }
 
 //routine for placing a character on screen
-void set_tile(uint8_t x, uint8_t y, uint8_t tile){
+void set_tile(uint8_t x, uint8_t y, uint8_t tile)
+{
 	x += 2; // there's a portion of the screen that is not visible.
 
 	*(COLORRAM + SCREEN_HEIGHT*(x + 1) - y - 1) = get_tile_color(tile);
 	*(VIDEORAM + SCREEN_HEIGHT*(x + 1) - y - 1) = tile;
 }
 
-uint8_t get_tile(uint8_t x, uint8_t y){
+uint8_t get_tile(uint8_t x, uint8_t y)
+{
 	x += 2; // there's a portion of the screen that is not visible.
 
 	return *(VIDEORAM + SCREEN_HEIGHT*(x + 1) - y - 1);
 }
 
-void set_color(int x, int y, char color){
+void set_color(int x, int y, char color)
+{
 	x += 2; // there's a portion of the screen that is not visible.
 
 	*(COLORRAM + SCREEN_HEIGHT*(x + 1) - y - 1) = color;
@@ -162,7 +169,9 @@ void set_color(int x, int y, char color){
 
 #define HIGHLIGHT_CELL_COLOR 4
 #define GRID_COLOR 14
-void highlight_cell(int x, int y){
+void highlight_cell(minefield* mf, int x, int y)
+{
+    UNUSED(mf)
 #if 0
 //Experimental:
 	char color = HIGHLIGHT_CELL_COLOR;
@@ -177,11 +186,13 @@ void highlight_cell(int x, int y){
 	set_color( x,  y+1, color);
 	set_color(x+1, y+1, color);
 #else
-x; y;
+    UNUSED(x)
+    UNUSED(y)
 #endif
 }
 
-uint8_t get_char(int x, int y){
+uint8_t get_char(int x, int y)
+{
 	x += 2; // there's a portion of the screen that is not visible.
 
 	return *(VIDEORAM + SCREEN_HEIGHT*(x + 1) - y - 1);

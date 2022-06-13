@@ -1,7 +1,7 @@
 export PATH := ~/mame:$(PATH)
 
-MAME = mame
-ROMPATH = ~/nonfree/mame
+MAME := mame
+ROMPATH := ~/nonfree/mame
 Z80ASSEMBLER = sdasz80
 Z80COMPILER = sdcc -mz80
 OBJCOPY = objcopy
@@ -18,7 +18,8 @@ OBJECTS := $(filter-out $(BUILDDIR)/crt0.rel,$(OBJECTS))
 COMMON  := $(wildcard ../../common/*.c)
 C_OBJECTS := $(patsubst ../../common/%.c,$(BUILDDIR)/%.rel,$(COMMON))
 
-Z80_CFLAGS := -mz80 --Werror --fsigned-char --std-sdcc99 --opt-code-speed --fomit-frame-pointer $(EXTRA_CFLAGS) -I../../common
+Z80_EXTRA_CFLAGS := -DUNUSED_MACRO
+Z80_CFLAGS := -mz80 --Werror --fsigned-char --std-sdcc99 --opt-code-speed --fomit-frame-pointer $(Z80_EXTRA_CFLAGS) -I../../common
 Z80_LDFLAGS := --no-std-crt0
 CODE := 0x0080
 DATA := 0xE000
