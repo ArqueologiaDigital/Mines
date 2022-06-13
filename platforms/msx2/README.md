@@ -1,6 +1,6 @@
 ## MSX2 port
 
-![Screenshot](screenshot.png)
+![Screenshot](screenshot.jpg)
 
 ### Keys
 
