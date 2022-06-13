@@ -1,5 +1,6 @@
 #ifndef COMMON_H
 #define COMMON_H
+/* common.h: generic game functions (separated for easier reuse) */
 
 #include <stdint.h>
 

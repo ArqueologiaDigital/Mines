@@ -1,9 +1,12 @@
-#include "main.h"
 #include "common.h"
 #include "minefield.h"
+#include "game.h"
 #include <stdlib.h>
 
 static const uint8_t *fuzz_data, *fuzz_data_end;
+
+/* main.c functions are not usually called directly, but the other way around, so we need to include it here. */
+extern void main_gameplay_loop(minefield* mf);
 
 uint8_t input_read(uint8_t source)
 {
