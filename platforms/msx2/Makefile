@@ -56,6 +56,9 @@ $(BUILDDIR)/%.rel: %.asm $(HEADERS) $(BUILDDIR)
 $(BUILDDIR)/crt0.rel: crt0.z80
 	$(Z80_AS) -g -o $@ $<
 
+$(BUILDDIR)/video.rel: video.c mines.h
+	$(Z80_CC) $(Z80_CFLAGS) -c $< -o $@
+
 mines.h: MINES.SC5
 	$(BINTOOL) $< -skip 0 7 -o $@ -t mines_data -n 12
 
@@ -63,4 +66,4 @@ $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
 
 clean:
-	rm -rf $(OBJECTS) $(COMMON) build $(BINTOOL)
+	rm -rf $(OBJECTS) $(COMMON) build $(BINTOOL) mines.h

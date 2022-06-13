@@ -2,19 +2,19 @@
 .globl _seed
 
 _set_random_seed::
-    ld hl, #2
-    add hl, sp
-    ld iy, #_seed
+	ld hl, #2
+	add hl, sp
+	ld iy, #_seed
 
-    ld a, (hl)
-    or #1               ; guarantees that seed is never zero
-    ld 0(iy), a
+	ld a, (hl)
+	or #1               ; guarantees that seed is never zero
+	ld 0(iy), a
 
-    inc hl
-    ld a, (hl)
-    ld 1(iy), a
+	inc hl
+	ld a, (hl)
+	ld 1(iy), a
 
-    ret
+	ret
 
 _xorshift::
 	ld hl, (_seed)
