@@ -2,7 +2,7 @@
 
 const uint8_t mines_palette[] = {
 	0,  0,0,0, // black
-	1,  0,0,0, // unused
+	1,  0,0,0, // crosshair sprite color
 	2,  0,0,0, // unused
 	3,  2,1,0, // unused
 	4,  0,3,1,
