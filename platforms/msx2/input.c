@@ -60,7 +60,7 @@ uint8_t input_read(uint8_t source)
 }
 
 
-static uint8_t MATRIX_KEY_2_COLUMN[8][12] = {
+static const uint8_t MATRIX_KEY_2_COLUMN[8][12] = {
 	"08'CKS\000\000 \0005",
 	"19`DLT\000\000\000\0006",
 	"2-,EMU\000\x1c\000\0007",

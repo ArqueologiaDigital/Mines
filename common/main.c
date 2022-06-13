@@ -1,5 +1,6 @@
 #include "common.h"
-#include "main.h"
+#include "minefield.h"
+#include "game.h"
 
 
 uint8_t count_surrounding_flags(minefield* mf, uint8_t x, uint8_t y){
