@@ -1,7 +1,10 @@
+#include "common.h"
 #include "minefield.h"
+#include "game.h"
 #include <ncurses.h>
 #include <stdlib.h>
 #include <time.h>
+#include <assert.h>
 
 enum {
 	ONE_BOMB_COLOR = 1,
@@ -49,19 +52,19 @@ void platform_init()
 	srand(time(NULL));
 }
 
-
 #define minefield_x_position 5
 #define minefield_y_position 5
 
-void draw_minefield_contents(minefield* mf){
-	for (uint8_t x = 0; x < mf->width; x++){
+void draw_minefield_contents(minefield* mf)
+{
+	for (uint8_t x = 0; x < mf->width; x++) {
 		for (uint8_t y = 0; y < mf->height; y++){
-			move(minefield_y_position + y*2, minefield_x_position + x*2);
+			move(minefield_y_position + y * 2, minefield_x_position + x * 2);
 			if (CELL_INDEX(mf, x, y) == mf->current_cell)
 				standout();
 
 			if (CELL(mf, x, y) & ISOPEN) {
-				if (CELL(mf, x, y) & HASBOMB){
+				if (CELL(mf, x, y) & HASBOMB) {
 					attron(COLOR_PAIR(UNCOVERED_BOMB_COLOR));
 					printw("*");
 				} else {
@@ -90,33 +93,69 @@ void draw_minefield_contents(minefield* mf){
 				standend();
 		}
 	}
+
     refresh();
 }
 
+void draw_title_screen(minefield* mf)
+{
+    clear();
 
-void draw_minefield(minefield* mf){
-    move(2,1);
+    move(1,4);
     attron(COLOR_PAIR(TEXT_COLOR));
     printw("Mines!");
+
+    move(minefield_y_position + mf->height * 2 + 2, 1);
+    printw("Press any key to start!");
+    refresh();
+}
+
+void draw_game_over(minefield* mf)
+{
+    clear();
+    draw_minefield(mf);
+
+    move(minefield_y_position + mf->height * 2 + 2, 1);
+    attron(COLOR_PAIR(TEXT_COLOR));
+    printw("GAME OVER");
+
+    move(minefield_y_position + mf->height * 2 + 3, 1);
+    attron(COLOR_PAIR(TEXT_COLOR));
+    printw("Press button to restart or Q to exit");
+
+    refresh();
+}
+
+void draw_minefield(minefield* mf)
+{
+    clear();
+
+    move(2,4);
+    attron(COLOR_PAIR(TEXT_COLOR));
+    printw("Mines!");
+
+    move(minefield_y_position + mf->height * 2 + 3, 1);
+    attron(COLOR_PAIR(TEXT_COLOR));
+    printw("Press 'Q' to exit.");
 
     attron(COLOR_PAIR(MINEFIELD_GRID_COLOR));
 	for (uint8_t x = 0; x <= mf->width; x++){
 		for (uint8_t y = 0; y <= mf->height; y++){
-		    move(minefield_y_position + y*2, minefield_x_position + x*2 - 1);
+		    move(minefield_y_position + y * 2, minefield_x_position + x * 2 - 1);
 			if (y < mf->height) printw("|");
-		    move(minefield_y_position + y*2-1, minefield_x_position + x*2 - 1);
+		    move(minefield_y_position + y * 2 - 1, minefield_x_position + x * 2 - 1);
 			printw("+");
-		    move(minefield_y_position + y*2-1, minefield_x_position + x*2);
+		    move(minefield_y_position + y * 2 - 1, minefield_x_position + x * 2);
 			if (x < mf->width) printw("-");
 		}
 	}
 
-	draw_minefield_contents(mf);
-
-    move(minefield_y_position + mf->height*2 + 3, 1);
-    attron(COLOR_PAIR(TEXT_COLOR));
-    printw("Press 'Q' to exit.");
+    draw_minefield_contents(mf);
     refresh();
+}
+
+void idle_loop(minefield* mf)
+{
 }
 
 void platform_shutdown()
@@ -124,5 +163,3 @@ void platform_shutdown()
     endwin();
     exit(0);
 }
-
-void idle_loop(){}

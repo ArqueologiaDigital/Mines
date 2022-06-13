@@ -4,8 +4,8 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#include "common.h"
 #include "msx2.h"
+#include "common.h"
 
 /* debugdevice modes */
 #define DEBUGDEVICE_ASCII   0x63 // or 0x23 for line feed mode version

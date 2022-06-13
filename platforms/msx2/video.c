@@ -1,11 +1,9 @@
 #include <string.h>
+#include <stdbool.h>
 #include "msx2.h"
-#include "minefield.h"
 #include "common.h"
 #include "video-tiles.h"
-
-#define true 0xff
-#define false 0x00
+#include "minefield.h"
 
 //#define USE_DEBUG_MODE
 #include "debug.h"
@@ -70,11 +68,18 @@ void put_cursor(uint8_t x, uint8_t y)
 }
 
 
-void highlight_cell(int x, int y)
+void highlight_cell(minefield* mf, int x, int y)
 {
-    /* merge cursor block with tile from page 0 (visible page) */
-    put_cursor(x * 8 - 3, y * 8 - 3);
-    //vdp(CURSOR % 12 * 8, CURSOR / 12 * 8 + 256, x * 8, y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_XOR);
+    bool finished = mf->state == GAME_OVER;
+
+    if (!finished) {
+        put_cursor(x * 8 - 3, y * 8 - 3);
+        /* merge cursor block with tile from page 0 (visible page) */
+        //vdp(CURSOR % 12 * 8, CURSOR / 12 * 8 + 256, x * 8, y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_XOR);
+    } else {
+        /* game over */   
+        vdp(EXPLOSION % 12 * 8, EXPLOSION / 12 * 8 + 256, x * 8, y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_IMP);
+    }
 }
 
 

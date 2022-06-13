@@ -39,22 +39,23 @@ void draw_single_cell(minefield* mf, uint8_t x, uint8_t y){
 }
 
 
-void draw_minefield_contents(minefield* mf){
-	for (uint8_t x = 0; x < mf->width; x++){
-		for (uint8_t y = 0; y < mf->height; y++){
+void draw_minefield_contents(minefield* mf)
+{
+	for (uint8_t x = 0; x < mf->width; x++) {
+		for (uint8_t y = 0; y < mf->height; y++) {
 			draw_single_cell(mf, x, y);
 		}
 	}
 
 	uint8_t x = CURRENT_CELL_X(mf);
 	uint8_t y = CURRENT_CELL_Y(mf);
-	highlight_cell(MINEFIELD_X_OFFSET + x * 2 + 1,
+	highlight_cell(mf, MINEFIELD_X_OFFSET + x * 2 + 1,
 	               MINEFIELD_Y_OFFSET + y * 2 + 1);
 }
 
 
-void draw_minefield(minefield* mf){
-
+void draw_minefield(minefield* mf)
+{
     for (uint8_t x = 0; x <= mf->width; x++) {
         for (uint8_t y = 0; y <= mf->height; y++) {
             if (y > 0 && y <= mf->height) {

@@ -2,10 +2,11 @@
 #define VIDEO_TILES_H
 
 #include <stdint.h>
+#include "minefield.h"
 
 void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile);
 void draw_scenario();
-void highlight_cell(int x, int y);
+void highlight_cell(minefield* mf, int x, int y);
 
 enum {
 	/*	NOTE:
