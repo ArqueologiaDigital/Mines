@@ -3,5 +3,5 @@
 *.rom.map
 *.rom.noi
 *.dat
-mines.c
+mines.h
 MSXbin

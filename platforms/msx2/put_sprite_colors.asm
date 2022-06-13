@@ -20,10 +20,10 @@ _put_sprite_colors::
 	add hl, hl
 	add hl, hl
 	add hl, hl
-	add hl, hl	; hl <- hl * 16
+	add hl, hl      ; hl <- hl * 16
 
 	ld bc, #SPRITE_COLOR_TABLE
-	add hl, bc	; hl <- SPRITE_COLOR_TABLE + 16 * sprite_index
+	add hl, bc      ; hl <- SPRITE_COLOR_TABLE + 16 * sprite_index
 
 	push de         ; src
 	ld bc, #16      ; copy 16 bytes of sprite colors (1 color per line)
