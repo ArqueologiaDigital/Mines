@@ -12,7 +12,7 @@
 
 ### Build & runtime/debug dependencies
 
-* SDCC compiler (successfully tested with 4.0.0 and 4.1.0)
+* SDCC compiler (successfully tested with 4.0.0, 4.1.0 and 4.2.0)
 * hex2bin tool
 * openMSX emulator with C-BIOS ROM
 
