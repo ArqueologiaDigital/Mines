@@ -1,6 +1,7 @@
-#include "../mines.xpm"
-#include "../../../common/video-tiles.h"
+#include "mines.xpm"
+#include "video-tiles.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 #define WIDTH 320
 FILE *fp;
@@ -30,8 +31,12 @@ void save_tile(int x, int y, int tile_number){
 	}
 }
 
-int main(){
-	fp = fopen("gs01.11f", "r+");
+int main() {
+	fp = fopen("./build/gs01.11f", "r+");
+	if (fp == NULL) {
+		fprintf(stderr, "./build/gs01.11f: file not found\n");
+		exit(-1);
+	}
 
 	save_tile(0, 0, ONE_BOMB);
 	save_tile(1, 0, TWO_BOMBS);
