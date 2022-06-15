@@ -1,0 +1,34 @@
+name: milestone release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    uses: ./.github/workflows/workflow-build.yaml
+  release:
+    name: Release project packages
+    runs-on: ubuntu-latest
+    needs: build
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+      - name: Get variables
+        id: get-targets
+        run: |
+          echo "::set-output name=prerelease::${{ needs.build.outputs.prerelease }}"
+          echo "::set-output name=draft::${{ needs.build.outputs.draft }}"
+          echo "::set-output name=file::${{ needs.build.outputs.file }}"
+      - name: Package binaries as zip files
+        run: |
+          zip -r "${{ steps.get-targets.outputs.file }}.zip" "${{ steps.get-targets.outputs.file }}"
+      - name: Publish binaries as artifacts
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "*.zip"
+          body: "Build number ${{ github.run_number }}\n${{ github.event.head_commit.message }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
