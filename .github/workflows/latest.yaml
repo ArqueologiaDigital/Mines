@@ -1,0 +1,43 @@
+name: deploy latest commit
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    uses: ./.github/workflows/workflow-build.yaml
+  release:
+    name: Deploy package from latest commit
+    runs-on: ubuntu-latest
+    needs: build
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+      - name: Get variables
+        id: get-targets
+        run: |
+          echo "::set-output name=prerelease::${{ needs.build.outputs.prerelease }}"
+          echo "::set-output name=draft::${{ needs.build.outputs.draft }}"
+          echo "::set-output name=file::${{ needs.build.outputs.file }}"
+      - name: Package ROM as zip file
+        run: |
+          zip -r mines.zip "${{ steps.get-targets.outputs.file }}"
+
+      - name: Create info file
+        run: |
+           echo "ref: ${GITHUB_REF}" > info.txt
+           echo "commit: ${GITHUB_SHA}" >> info.txt
+           echo "build: $(date +"%Y-%m-%dT%H:%M:%SZ")" >> info.txt
+
+      - name: Latest commit release
+        uses: eine/tip@master
+        with:
+          tag: latest
+          rm: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: info.txt mines.zip
+

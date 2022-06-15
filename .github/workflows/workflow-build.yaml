@@ -1,0 +1,75 @@
+name: Build workflow
+
+on:
+  workflow_call:
+    outputs:
+      prerelease:
+        description: "Whether a prerelease artifact will be generated"
+        value: ${{ jobs.build.outputs.prerelease }}
+      draft:
+        description: "Whether a draft artifact will be generated"
+        value: ${{ jobs.build.outputs.draft }}
+      file:
+        description: "Filename of this release"
+        value: ${{ jobs.build.outputs.file }}
+
+env:
+  package_origin: github
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      prerelease: ${{ steps.get-version.outputs.prerelease }}
+      draft: ${{ steps.get-version.outputs.draft }}
+      file: ${{ steps.get-version.outputs.file }}
+    container:
+      image: ${{ matrix.image }}
+      options: --user=0:0
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: docker://pvmm/sdcc:latest
+            name: GNU/Linux
+            cpu: x86_64
+            os: debian
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v3
+    - name: Compile repository code
+      run: |
+        cd platforms/msx2
+        make
+    - name: Determine release version and target directory name
+      id: get-version
+      run: |
+        if [ '${{ github.event_name }}' = 'pull request' ]; then
+          file='mines_pr@${{ github.ref_name }}'
+          draft='true'
+          prerelease='false'
+        else
+          file='mines@${{ github.ref_name }}-${{ env.package_origin }}'
+          if echo "${{ github.ref_name }}" | grep -Eq 'rc[0-9]?$'; then
+            draft='true'
+            prerelease='true'
+          elif echo "${{ github.ref_name }}" | grep -Eq '^v[0-9]'; then
+              draft='false'
+              prerelease='false'
+          else
+              draft='true'
+              prerelease='false'
+          fi
+        fi
+        echo "::set-output name=draft::$draft"
+        echo "draft=$draft"
+        echo "::set-output name=prerelease::$prerelease"
+        echo "prerelease=$prerelease"
+        echo "::set-output name=file::$file"
+        echo "file=$file"
+    - name: Upload redistributable package
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ steps.get-version.outputs.file }}
+        path: |
+          platforms/msx2/build/
