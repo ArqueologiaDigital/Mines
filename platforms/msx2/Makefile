@@ -6,10 +6,12 @@ else
     Z80_CFLAGS := $(Z80_CFLAGS)
 endif
 
+MAKE := make
 Z80_CC := sdcc
 Z80_AS := sdasz80
 HEXTOOL := hex2bin
 #HEXTOOL := ./tools/MSXhex
+SC5TOOL := ./tools/SCREEN5
 BINTOOL := ./tools/MSXbin
 
 BUILDDIR := build
@@ -28,10 +30,7 @@ COMMON := $(patsubst ../../common/%.c,$(BUILDDIR)/%.rel,$(wildcard ../../common/
 Z80_LIBS :=
 
 .PHONY: all clean tools openmsx run
-all: tools $(TARGET).rom
-
-tools: $(BINTOOL)
-	LDFLAGS= CFLAGS= make -C tools
+all: $(TARGET).rom
 
 SCREEN_RESOLUTION := -DSCREEN_WIDTH=32 -DSCREEN_HEIGHT=26 -DMINEFIELD_X_OFFSET=6 -DMINEFIELD_Y_OFFSET=3
 $(TARGET).rom: $(OBJECTS) $(COMMON) $(BUILDDIR)/crt0.rel
@@ -60,11 +59,15 @@ $(BUILDDIR)/crt0.rel: crt0.z80
 $(BUILDDIR)/video.rel: video.c mines.h
 	$(Z80_CC) $(Z80_CFLAGS) -c $< -o $@
 
-mines.h: MINES.SC5 $(BINTOOL)
-	$(BINTOOL) $< -skip 0 7 -o $@ -t mines_data -n 12
+mines.h: mines.xpm $(SC5TOOL)
+	$(SC5TOOL) mines > $@
 
 $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
 
+$(SC5TOOL): tools/SCREEN5.c
+	make -C tools
+
 clean:
-	rm -rf $(OBJECTS) $(COMMON) build $(BINTOOL) mines.h
+	rm -rf $(OBJECTS) $(COMMON) build mines.h
+	make -C tools clean
