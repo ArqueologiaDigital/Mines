@@ -12,7 +12,6 @@
 
 /* Assets */
 #include "mines.h"
-#include "mines_palette.h"
 #include "cursor.h"
 
 
