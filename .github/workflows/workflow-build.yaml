@@ -44,12 +44,12 @@ jobs:
     - name: Determine release version and target directory name
       id: get-version
       run: |
-        if [ '${{ github.event_name }}' = 'pull request' ]; then
-          file='mines_pr@${{ github.ref_name }}'
+        if [ '${{ github.event_name }}' = 'pull_request' ]; then
+          file=$(echo 'mines_pr@${{ github.ref_name }}-${{ env.package_origin }}' | sed 's/\//-/')
           draft='true'
           prerelease='false'
         else
-          file='mines@${{ github.ref_name }}-${{ env.package_origin }}'
+          file=$(echo 'mines@${{ github.ref_name }}-${{ env.package_origin }}' | sed 's/\//-/')
           if echo "${{ github.ref_name }}" | grep -Eq 'rc[0-9]?$'; then
             draft='true'
             prerelease='true'
