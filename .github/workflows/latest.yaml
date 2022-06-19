@@ -22,10 +22,10 @@ jobs:
         run: |
           echo "::set-output name=prerelease::${{ needs.build.outputs.prerelease }}"
           echo "::set-output name=draft::${{ needs.build.outputs.draft }}"
-          echo "::set-output name=file::${{ needs.build.outputs.file }}"
-      - name: Package ROM as zip file
+      - name: Package ROMs as zip files
         run: |
-          zip -r mines.zip "${{ steps.get-targets.outputs.file }}"
+          zip -r mines_msx2.zip msx2
+          zip -r mines_msdos.zip msdos
 
       - name: Create info file
         run: |
@@ -39,5 +39,5 @@ jobs:
           tag: latest
           rm: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: info.txt mines.zip
+          files: info.txt mines_msx2.zip mines_msdos.zip
 
