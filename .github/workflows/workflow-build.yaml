@@ -9,9 +9,6 @@ on:
       draft:
         description: "Whether a draft artifact will be generated"
         value: ${{ jobs.build.outputs.draft }}
-      file:
-        description: "Filename of this release"
-        value: ${{ jobs.build.outputs.file }}
 
 env:
   package_origin: github
@@ -25,31 +22,29 @@ jobs:
       file: ${{ steps.get-version.outputs.file }}
     container:
       image: ${{ matrix.image }}
-      options: --user=0:0
+      options: --user=root
     strategy:
       fail-fast: false
       matrix:
         include:
           - image: docker://pvmm/sdcc:latest
-            name: GNU/Linux
-            cpu: x86_64
-            os: debian
+            platform: msx2
+          - image: docker://pvmm/ia16:minimal
+            platform: msdos
     steps:
     - name: Checkout repository code
       uses: actions/checkout@v3
     - name: Compile repository code
       run: |
-        cd platforms/msx2
+        cd platforms/${{ matrix.platform }}
         make
     - name: Determine release version and target directory name
       id: get-version
       run: |
         if [ '${{ github.event_name }}' = 'pull_request' ]; then
-          file=$(echo 'mines_pr@${{ github.ref_name }}-${{ env.package_origin }}' | sed 's/\//-/')
           draft='true'
           prerelease='false'
         else
-          file=$(echo 'mines@${{ github.ref_name }}-${{ env.package_origin }}' | sed 's/\//-/')
           if echo "${{ github.ref_name }}" | grep -Eq 'rc[0-9]?$'; then
             draft='true'
             prerelease='true'
@@ -65,11 +60,9 @@ jobs:
         echo "draft=$draft"
         echo "::set-output name=prerelease::$prerelease"
         echo "prerelease=$prerelease"
-        echo "::set-output name=file::$file"
-        echo "file=$file"
     - name: Upload redistributable package
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ steps.get-version.outputs.file }}
+        name: ${{ matrix.platform }}
         path: |
-          platforms/msx2/build/
+          platforms/${{ matrix.platform }}/build/
