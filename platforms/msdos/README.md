@@ -2,8 +2,10 @@
 
 - Draws on VGA screen mode 0x13.
 - Tested on DOSBOX 0.74 (you can use the `make run` for that)
+- Also tested on real hardware (on an old 386 IBM-PC)
 
-![Screenshot](screenshot.png)
+![DOSBOX screenshot](screenshot.png)
+![Running on real hardware (386 PC)](running_on_real_hardware.jpg)
 
 ### Build & runtime/debug dependencies
 
