@@ -79,19 +79,20 @@ void draw_minefield(minefield* mf)
                          MINEFIELD_Y_OFFSET + y * 2 + 2,
                          MINEFIELD_CROSS);
 
-            if (x > 0 && x <= mf->width)
+            if (x > 0 && x <= mf->width) {
                 if (y == 0) {
                     set_tile(MINEFIELD_X_OFFSET + x * 2 - 1,
                              MINEFIELD_Y_OFFSET + y * 2,
                              MINEFIELD_HORIZONTAL_TOP);
-            } else if (y < mf->height) {
-                set_tile(MINEFIELD_X_OFFSET + x * 2 - 1,
-                         MINEFIELD_Y_OFFSET + y * 2,
-                         MINEFIELD_HORIZONTAL_MIDDLE);
-            } else {
-                set_tile(MINEFIELD_X_OFFSET + x * 2 - 1,
-                         MINEFIELD_Y_OFFSET + y * 2,
-                         MINEFIELD_HORIZONTAL_BOTTOM);
+            	} else if (y < mf->height) {
+                    set_tile(MINEFIELD_X_OFFSET + x * 2 - 1,
+                             MINEFIELD_Y_OFFSET + y * 2,
+                             MINEFIELD_HORIZONTAL_MIDDLE);
+            	} else {
+                    set_tile(MINEFIELD_X_OFFSET + x * 2 - 1,
+                             MINEFIELD_Y_OFFSET + y * 2,
+                             MINEFIELD_HORIZONTAL_BOTTOM);
+            	}
             }
         }
     }
