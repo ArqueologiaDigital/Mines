@@ -92,7 +92,13 @@ uint16_t get_tile_offset(uint8_t tile)
     case EXPLOSION:
         return TILE_OFFSET(3, 1);
     case GROUND:
-        return TILE_OFFSET(4, 1);
+        switch (rand() & 15) {
+        case 0: return TILE_OFFSET(5, 3);
+        case 1: return TILE_OFFSET(6, 3);
+        case 2: return TILE_OFFSET(5, 4);
+        case 3: return TILE_OFFSET(6, 4);
+        default: return TILE_OFFSET(4, 1);
+        }
 
     case MINEFIELD_CORNER_TOP_LEFT:
         return TILE_OFFSET(0, 2);
