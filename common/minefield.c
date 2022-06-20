@@ -12,21 +12,19 @@ void game_over(minefield* mf) {
 				CELL(mf, x, y) |= ISOPEN;
 }
 
-void setup_minefield(minefield* mf, uint8_t width, uint8_t height, uint8_t num_bombs){
-	mf->width = width;
-	mf->height = height;
-	mf->current_cell = 0;
-	mf->cells = calloc(width * height, sizeof(uint8_t));
 
+#ifndef RESET_MINEFIELD
+void fill_minefield(minefield* mf, uint8_t num_bombs)
+{
 	// Clear the minefield:
-	for (uint8_t x = 0; x < mf->width; x++){
-		for (uint8_t y = 0; y < mf->height; y++){
+	for (uint8_t x = 0; x < mf->width; x++) {
+		for (uint8_t y = 0; y < mf->height; y++) {
 			CELL(mf, x, y) = 0;
 		}
 	}
 
-	// Place bombs
-	while (num_bombs--){
+	// Place bombs:
+	while (num_bombs--) {
 		uint8_t x = random_number(0, mf->width - 1);
 		uint8_t y = random_number(0, mf->height - 1);
 		CELL(mf, x, y) |= HASBOMB;
@@ -54,11 +52,38 @@ void setup_minefield(minefield* mf, uint8_t width, uint8_t height, uint8_t num_b
 		}
 	}
 }
+#endif /* RESET_MINEFIELD */
+
+
+#ifndef MINEFIELD_ALLOCATION
+minefield* init_minefield()
+{
+	minefield* mf = calloc(1, sizeof(minefield));
+	mf->width = 10;
+	mf->height = 10;
+	mf->cells = calloc(mf->width * mf->height, sizeof(uint8_t));
+
+	return mf;
+}
+
 
 void free_minefield(minefield* mf)
 {
 	free(mf->cells);
+	free(mf);
 }
+#endif /* MINEFIELD_ALLOCATION */
+
+
+#ifndef RESET_MINEFIELD
+void reset_minefield(minefield* mf)
+{
+    uint8_t num_bombs = random_number(10, 30);
+    debug("num_bombs = ", num_bombs);
+    fill_minefield(mf, num_bombs);
+}
+#endif /* RESET_MINEFIELD */
+
 
 void open_cell(minefield* mf, uint8_t x, uint8_t y) {
 	if (CELL(mf, x, y) & (HASQUESTIONMARK | HASFLAG | ISOPEN)){

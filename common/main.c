@@ -1,10 +1,13 @@
 #include "common.h"
 #include "game.h"
 #include "main.h"
+#include "minefield.h"
+
 
 #ifdef GLUT_BASED_IMPLEMENTATION
 #include <GL/glut.h>
 #endif
+
 
 static uint8_t count_surrounding_flags(minefield* mf, uint8_t x, uint8_t y){
 	uint8_t count = 0;
@@ -22,7 +25,7 @@ static uint8_t count_surrounding_flags(minefield* mf, uint8_t x, uint8_t y){
 	return count;
 }
 
-static void title_screen_loop(minefield* mf)
+void title_screen_loop(minefield* mf)
 {
 #ifdef DRAW_TITLE_SCREEN
 	uint8_t input;
@@ -47,9 +50,9 @@ static void title_screen_loop(minefield* mf)
 		case MINE_INPUT_OPEN:
 		case MINE_INPUT_OPEN_BLOCK:
 		case MINE_INPUT_FLAG:
+			reset_minefield(mf);
 			draw_minefield(mf);
 			mf->state = PLAYING_GAME;
-			init_play_area(mf);
 			break;
 		case MINE_INPUT_QUIT:
 			mf->state = QUIT;
@@ -60,7 +63,8 @@ static void title_screen_loop(minefield* mf)
 	}
 #else
 	mf->state = PLAYING_GAME;
-	init_play_area(mf);
+	reset_minefield(mf);
+	draw_minefield(mf);
 #endif
 }
 
@@ -186,54 +190,43 @@ void gameplay_loop(minefield* mf) {
 	}
 }
 
-void init_play_area(minefield* mf)
+
+#ifndef GLUT_BASED_IMPLEMENTATION
+void main_loop(minefield* mf)
 {
-	uint8_t width = 10;
-	uint8_t height = 10;
-	uint8_t num_bombs = random_number(10,30);
-	debug("num_bombs = ", num_bombs);
-
-	// TODO: let platforms configure specific values for
-	//       minefield dimensions and number of bombs
-
-	setup_minefield(mf, width, height, num_bombs);
-	draw_minefield(mf);
+	while (mf->state != QUIT)
+		switch (mf->state)
+		{
+			case TITLE_SCREEN:
+				title_screen_loop(mf);
+				break;
+			case PLAYING_GAME:
+				gameplay_loop(mf);
+				break;
+			case GAME_OVER:
+				game_over_loop(mf);
+				break;
+		}
 }
+#endif /* GLUT_BASED_IMPLEMENTATION */
 
-minefield mf;
-
-void main_loop(){
-	switch (mf.state)
-	{
-		case TITLE_SCREEN:
-			title_screen_loop(&mf);
-			break;
-		case PLAYING_GAME:
-			gameplay_loop(&mf);
-			break;
-		case GAME_OVER:
-			game_over_loop(&mf);
-			break;
-	}
-}
 
 #if !defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)
 int main() {
 	platform_init();
 
-	init_play_area(&mf);
-	mf.state = TITLE_SCREEN;
+	minefield* mf = init_minefield();
+	mf->state = TITLE_SCREEN;
 
 #ifdef GLUT_BASED_IMPLEMENTATION
 	glutMainLoop();
 #else
-	while (mf.state != QUIT)
-		main_loop();
-#endif
+	main_loop(mf);
+#endif /* GLUT_BASED_IMPLEMENTATION */
 
-	free_minefield(&mf);
-	platform_shutdown();	
+	free_minefield(mf);
+	platform_shutdown();
 
 	return 0;
 }
-#endif
+#endif /* !defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION) */
