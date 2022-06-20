@@ -1,7 +1,8 @@
 #include "video-tiles.h"
-#include <mines.xpm>
 #include <conio.h>
 #include <dos.h>
+#include <libi86/string.h>
+#include <mines.xpm>
 #include <string.h>
 #include <time.h>
 
@@ -51,16 +52,6 @@ void video_init(){
 	set_palette();
 }
 
-void plot_pixel_slow(int x,int y,uint8_t color)
-{
-  union REGPACK regs;
-
-  regs.h.ah = WRITE_DOT;
-  regs.h.al = color;
-  regs.x.cx = x;
-  regs.x.dx = y;
-  intr(VIDEO_INT, &regs);
-}
 
 #define TILE_OFFSET(x, y) (((y) << 8) | (x))
 uint16_t get_tile_offset(uint8_t tile){
@@ -123,15 +114,17 @@ uint16_t get_tile_offset(uint8_t tile){
 }
 
 /* set_tile emulates tile behaviour, but is actually a bitmap copy */
-void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
-{
-	uint16_t offs = get_tile_offset(tile);
-	for (uint8_t y = 0; y < 8; y++){ 
-		for (uint8_t x = 0; x < 8; x++){
-			plot_pixel_slow(8*dst_x + x,
-			                8*dst_y + y, mines_xpm[16 + 8*(offs >> 8) + y][8*(offs & 0xFF) + x]);
-		}
-	}
+void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile) {
+    static uint8_t __far *video_seg = MK_FP(0xa000, 0);
+    uint8_t __far *video_seg_start = &video_seg[320 * (int)dst_y * 8 + (int)dst_x * 8];
+    const uint16_t offs = get_tile_offset(tile);
+    const uint8_t off_high = 16 + 8 * (offs >> 8);
+    const uint8_t off_low = 8 * (offs & 0xff);
+
+    for (uint8_t y = 0; y < 8; y++) {
+        _fmemcpy(video_seg_start, &mines_xpm[off_high + y][off_low], 8);
+        video_seg_start += 320;
+    }
 }
 
 void highlight_cell(minefield* mf, int x, int y)
