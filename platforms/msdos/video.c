@@ -163,7 +163,7 @@ uint16_t get_tile_offset(uint8_t tile)
 }
 
 /* set_tile emulates tile behaviour, but is actually a bitmap copy */
-void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
+static inline void set_tile_full(uint8_t dst_x, uint8_t dst_y, uint8_t tile, int8_t mask)
 {
     static uint8_t __far *video_seg = MK_FP(0xa000, 0);
     uint8_t __far *video_seg_start =
@@ -172,10 +172,26 @@ void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
     const uint16_t off_high = 16 + 8 * (offs >> 8);
     const uint16_t off_low = 8 * (offs & 0xff);
 
-    for (uint8_t y = 0; y < 8; y++) {
-        _fmemcpy(video_seg_start, &mines_xpm[off_high + y][off_low], 8);
-        video_seg_start += 320;
+    if (mask < 0) {
+        for (uint8_t y = 0; y < 8; y++) {
+            _fmemcpy(video_seg_start, &mines_xpm[off_high + y][off_low], 8);
+            video_seg_start += 320;
+        }
+    } else {
+        for (uint8_t y = 0; y < 8; y++) {
+            const char *data = &mines_xpm[off_high + y][off_low];
+            for (uint8_t x = 0; x < 8; x++) {
+                if (data[x] != mask)
+                    video_seg_start[x] = data[x];
+            }
+            video_seg_start += 320;
+        }
     }
+}
+
+void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
+{
+    return set_tile_full(dst_x, dst_y, tile, -1);
 }
 
 void highlight_cell(minefield *mf, int x, int y)
@@ -183,7 +199,7 @@ void highlight_cell(minefield *mf, int x, int y)
     if (mf->state == GAME_OVER)
         set_tile(x, y, EXPLOSION);
     else
-        set_tile(x, y, CURSOR);
+        set_tile_full(x, y, CURSOR, '+');
 }
 
 void platform_init()
