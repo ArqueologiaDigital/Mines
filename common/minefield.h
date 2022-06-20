@@ -35,8 +35,6 @@ typedef struct {
 	uint8_t* cells;
 } minefield;
 
-void setup_minefield(minefield* mf, uint8_t width, uint8_t height, uint8_t num_bombs);
 void open_cell(minefield* mf, uint8_t x, uint8_t y);
-void free_minefield(minefield* mf);
 
 #endif //#define MINEFIELD_H

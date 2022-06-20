@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <GL/glut.h>
-#include<math.h>
+#include <math.h>
 
 void init_lights(void) 
 {
@@ -295,7 +295,6 @@ void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
 	glPopMatrix();
 }
 
-
 void highlight_cell(minefield* mf, int x, int y)
 {
     if (mf->state == GAME_OVER)
@@ -305,6 +304,9 @@ void highlight_cell(minefield* mf, int x, int y)
 }
 
 double minefield_angle = 0;
+
+extern void gl_main_loop();
+
 // Clears the current window and draws a triangle.
 void display() {
 	// Set every pixel in the frame buffer to the current clear color.
@@ -314,7 +316,7 @@ void display() {
 	minefield_angle += 0.001;
 	glRotatef(-60 + 5*sin(minefield_angle), 1, 0, 0);
 	glRotatef(5*sin(minefield_angle+90), 0, 1, 0);
-	main_loop();
+	gl_main_loop();
 	glPopMatrix();
 
 	// Flush drawing command buffer to make drawing happen as soon as possible.

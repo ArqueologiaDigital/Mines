@@ -31,6 +31,8 @@ jobs:
             platform: msx2
           - image: docker://pvmm/ia16:minimal
             platform: msdos
+          - image: docker://pvmm/opengl:latest
+            platform: opengl
     steps:
     - name: Checkout repository code
       uses: actions/checkout@v3

@@ -26,6 +26,7 @@ jobs:
         run: |
           zip -r mines_msx2.zip msx2
           zip -r mines_msdos.zip msdos
+          zip -r mines_opengl.zip opengl
 
       - name: Create info file
         run: |
@@ -39,5 +40,9 @@ jobs:
           tag: latest
           rm: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: info.txt mines_msx2.zip mines_msdos.zip
+          files: |
+            info.txt
+            mines_msx2.zip
+            mines_msdos.zip
+            mines_opengl.zip
 

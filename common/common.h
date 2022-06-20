@@ -1,6 +1,6 @@
+/* common.h: generic game functions (separated for easier reuse) */
 #ifndef COMMON_H
 #define COMMON_H
-/* common.h: generic game functions (separated for easier reuse) */
 
 #include <stdint.h>
 
@@ -28,7 +28,7 @@
 #define UNUSED(x) x;
 #else
 #define UNUSED(x)
-#endif /* NO_UNUSED */
+#endif /* UNUSED_MACRO */
 
 /**
  * Platform-specific initialisation code
