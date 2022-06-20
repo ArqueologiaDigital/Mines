@@ -1,12 +1,10 @@
 #include "common.h"
 #include "game.h"
-#include "minefield.h"
+#include "main.h"
 
-
-static void init_play_area(minefield* mf);
-static void game_over_loop(minefield* mf);
-static void gameplay_loop(minefield* mf);
-
+#ifdef GLUT_BASED_IMPLEMENTATION
+#include <GL/glut.h>
+#endif
 
 static uint8_t count_surrounding_flags(minefield* mf, uint8_t x, uint8_t y){
 	uint8_t count = 0;
@@ -32,11 +30,17 @@ static void title_screen_loop(minefield* mf)
 	// TODO: platform dependent title screen, animations, music etc.
 	draw_title_screen(mf);
 
+	#ifdef GLUT_BASED_IMPLEMENTATION
+	input = input_read(KEYBOARD);
+	if (input == MINE_INPUT_IGNORED)
+		return;
+	#else
 	do {
 		idle_loop(mf); // useful for doing other things
 		               // such as running animations
 		input = input_read(KEYBOARD);
 	} while (input == MINE_INPUT_IGNORED);
+	#endif
 	debug("\nkey code = ", input);
 
 	switch (input) {
@@ -69,11 +73,18 @@ void game_over_loop(minefield* mf)
 #endif
 	uint8_t input;
 
+	#ifdef GLUT_BASED_IMPLEMENTATION
+	draw_minefield(mf);
+	input = input_read(KEYBOARD);
+	if (input == MINE_INPUT_IGNORED)
+		return;
+	#else
 	do {
 		idle_loop(mf); // useful for doing other things
 		               // such as running animations
 		input = input_read(KEYBOARD);
 	} while (input == MINE_INPUT_IGNORED);
+	#endif
 	debug("\nkey code = ", input);
 
 	switch (input) {
@@ -95,11 +106,18 @@ void gameplay_loop(minefield* mf) {
 	draw_minefield_contents(mf);
 
 	uint8_t input;
+	#ifdef GLUT_BASED_IMPLEMENTATION
+	draw_minefield(mf);
+	input = input_read(KEYBOARD);
+	if (input == MINE_INPUT_IGNORED)
+		return;
+	#else
 	do {
 		idle_loop(mf); // useful for doing other things
 		               // such as running animations
 		input = input_read(KEYBOARD);
 	} while (input == MINE_INPUT_IGNORED);
+	#endif
 	debug("\nkey code = ", input);
 
 	uint8_t x = mf->current_cell % mf->width;
@@ -182,33 +200,39 @@ void init_play_area(minefield* mf)
 	draw_minefield(mf);
 }
 
+minefield mf;
+
+void main_loop(){
+	switch (mf.state)
+	{
+		case TITLE_SCREEN:
+			title_screen_loop(&mf);
+			break;
+		case PLAYING_GAME:
+			gameplay_loop(&mf);
+			break;
+		case GAME_OVER:
+			game_over_loop(&mf);
+			break;
+	}
+}
+
 #if !defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)
 int main() {
 	platform_init();
 
-	minefield mf;
 	init_play_area(&mf);
 	mf.state = TITLE_SCREEN;
 
+#ifdef GLUT_BASED_IMPLEMENTATION
+	glutMainLoop();
+#else
 	while (mf.state != QUIT)
-	{
-		switch (mf.state)
-		{
-			case TITLE_SCREEN:
-				title_screen_loop(&mf);
-				break;
-			case PLAYING_GAME:
-				gameplay_loop(&mf);
-				break;
-			case GAME_OVER:
-				game_over_loop(&mf);
-				break;
-
-		}
-	}
+		main_loop();
+#endif
 
 	free_minefield(&mf);
-	platform_shutdown();
+	platform_shutdown();	
 
 	return 0;
 }

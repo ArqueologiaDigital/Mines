@@ -11,6 +11,7 @@ For specific build & runtime/debug dependencies, please check the individual REA
 - [ncurses](platforms/ncurses/README.md) (partially working)
 - [GunSmoke JAMMA board](platforms/gunsmoke/README.md) (partially working)
 - [MSX2](platforms/msx2/README.md) (partially working)
+- [OpenGL](platforms/opengl/README.md) (partially working)
 - [C64](platforms/c64/README.md) (boilerplate)
 
 ### How to create your own
