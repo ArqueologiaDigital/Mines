@@ -58,8 +58,9 @@ static const uint8_t TILE_X[MAX_VIDEO_TILES] = {
 };
 
 
-#define TILE_POS_Y(x, y) ((y) * 8)
-static const uint8_t TILE_Y[MAX_VIDEO_TILES] = {
+#define PAGE2_OFFSET 256
+#define TILE_POS_Y(x, y) ((y) * 8 + PAGE2_OFFSET)
+static const uint16_t TILE_Y[MAX_VIDEO_TILES] = {
     [ONE_BOMB] = TILE_POS_Y(0, 0),
     [TWO_BOMBS] = TILE_POS_Y(1, 0),
     [THREE_BOMBS] = TILE_POS_Y(2, 0),

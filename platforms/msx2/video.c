@@ -14,14 +14,11 @@
 #include "tile_coords.c"
 
 
-#define PAGE_2_OFFSET 256
-
-
 /* set_tile emulates tile behaviour, but is actually a bitmap copy */
 void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
 {
     /* copy 8x8 block from page 1 (hidden page) to page 0 (visible page) */
-    vdp(TILE_X[tile], TILE_Y[tile] + PAGE_2_OFFSET, dst_x * 8, dst_y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_IMP);
+    vdp(TILE_X[tile], TILE_Y[tile], dst_x * 8, dst_y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_IMP);
 }
 
 
@@ -52,7 +49,7 @@ void video_init()
     set_palette(15, mines_palette);
 
     /* Move board and mines from RAM to second VRAM page */
-    write_vram(0x8000, 0x1800, mines_data);
+    write_vram(0x8000, mines_SIZE, mines_data);
 
     /* Set cursor sprite */
     set_sprite_pattern(cursor_pattern, PATTERN_ID);
@@ -82,7 +79,7 @@ void highlight_cell(minefield* mf, int x, int y)
         //vdp(CURSOR % 12 * 8, CURSOR / 12 * 8 + 256, x * 8, y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_XOR);
     } else {
         /* game over */   
-        vdp(EXPLOSION % 12 * 8, EXPLOSION / 12 * 8 + 256, x * 8, y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_IMP);
+        vdp(TILE_X[EXPLOSION], TILE_Y[EXPLOSION], x * 8, y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_IMP);
     }
 }
 
