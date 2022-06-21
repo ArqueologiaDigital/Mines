@@ -58,114 +58,79 @@ void video_init()
     set_palette();
 }
 
-#define TILE_OFFSET(x, y) (((y) << 8) | (x))
-uint16_t get_tile_offset(uint8_t tile)
+#define TILE_OFFSET(x, y) (((y) << 4) | (x))
+static inline uint8_t get_tile_offset(uint8_t tile)
 {
-    switch (tile) {
-    case ONE_BOMB:
-        return TILE_OFFSET(0, 0);
-    case TWO_BOMBS:
-        return TILE_OFFSET(1, 0);
-    case THREE_BOMBS:
-        return TILE_OFFSET(2, 0);
-    case FOUR_BOMBS:
-        return TILE_OFFSET(3, 0);
-    case FIVE_BOMBS:
-        return TILE_OFFSET(4, 0);
-    case SIX_BOMBS:
-        return TILE_OFFSET(5, 0);
-    case SEVEN_BOMBS:
-        return TILE_OFFSET(6, 0);
-    case EIGHT_BOMBS:
-        return TILE_OFFSET(7, 0);
-    case BLANK:
-        return TILE_OFFSET(8, 0);
-    case CURSOR:
-        return TILE_OFFSET(9, 0);
+    static const uint8_t tile2offset[MAX_VIDEO_TILES] = {
+        [ONE_BOMB] = TILE_OFFSET(0, 0),
+        [TWO_BOMBS] = TILE_OFFSET(1, 0),
+        [THREE_BOMBS] = TILE_OFFSET(2, 0),
+        [FOUR_BOMBS] = TILE_OFFSET(3, 0),
+        [FIVE_BOMBS] = TILE_OFFSET(4, 0),
+        [SIX_BOMBS] = TILE_OFFSET(5, 0),
+        [SEVEN_BOMBS] = TILE_OFFSET(6, 0),
+        [EIGHT_BOMBS] = TILE_OFFSET(7, 0),
+        [BLANK] = TILE_OFFSET(8, 0),
+        [CURSOR] = TILE_OFFSET(9, 0),
 
-    case BOMB:
-        return TILE_OFFSET(0, 1);
-    case FLAG:
-        return TILE_OFFSET(1, 1);
-    case QUESTION_MARK:
-        return TILE_OFFSET(2, 1);
-    case EXPLOSION:
-        return TILE_OFFSET(3, 1);
-    case GROUND:
+        [BOMB] = TILE_OFFSET(0, 1),
+        [FLAG] = TILE_OFFSET(1, 1),
+        [QUESTION_MARK] = TILE_OFFSET(2, 1),
+        [EXPLOSION] = TILE_OFFSET(3, 1),
+
+        [MINEFIELD_CORNER_TOP_LEFT] = TILE_OFFSET(0, 2),
+        [MINEFIELD_TOP_TEE] = TILE_OFFSET(1, 2),
+        [MINEFIELD_HORIZONTAL_TOP] = TILE_OFFSET(2, 2),
+        [MINEFIELD_HORIZONTAL_MIDDLE] = TILE_OFFSET(2, 3),
+        [MINEFIELD_HORIZONTAL_BOTTOM] = TILE_OFFSET(2, 5),
+        [MINEFIELD_CORNER_TOP_RIGHT] = TILE_OFFSET(4, 2),
+
+        [MINEFIELD_LEFT_TEE] = TILE_OFFSET(0, 3),
+        [MINEFIELD_CROSS] = TILE_OFFSET(1, 3),
+        [MINEFIELD_RIGHT_TEE] = TILE_OFFSET(4, 3),
+
+        [MINEFIELD_VERTICAL_LEFT] = TILE_OFFSET(0, 4),
+        [MINEFIELD_VERTICAL_MIDDLE] = TILE_OFFSET(2, 3),
+        [MINEFIELD_VERTICAL_RIGHT] = TILE_OFFSET(4, 4),
+        [CLOSED_CELL] = TILE_OFFSET(2, 4),
+
+        [MINEFIELD_CORNER_BOTTOM_LEFT] = TILE_OFFSET(0, 5),
+        [MINEFIELD_BOTTOM_TEE] = TILE_OFFSET(1, 5),
+        [MINEFIELD_CORNER_BOTTOM_RIGHT] = TILE_OFFSET(4, 5),
+
+        [CORNER_TOP_LEFT] = TILE_OFFSET(7, 2),
+        [CORNER_TOP_RIGHT] = TILE_OFFSET(10, 2),
+        [CORNER_BOTTOM_LEFT] = TILE_OFFSET(7, 5),
+        [CORNER_BOTTOM_RIGHT] = TILE_OFFSET(10, 5),
+
+        [TOP_BORDER__LEFT] = TILE_OFFSET(8, 2),
+        [TOP_BORDER__RIGHT] = TILE_OFFSET(9, 2),
+        [BOTTOM_BORDER__LEFT] = TILE_OFFSET(8, 5),
+        [BOTTOM_BORDER__RIGHT] = TILE_OFFSET(9, 5),
+
+        [LEFT_BORDER__TOP] = TILE_OFFSET(7, 3),
+        [LEFT_BORDER__BOTTOM] = TILE_OFFSET(7, 4),
+        [RIGHT_BORDER__TOP] = TILE_OFFSET(10, 3),
+        [RIGHT_BORDER__BOTTOM] = TILE_OFFSET(10, 4),
+    };
+
+    if (tile == GROUND) {
         switch (rand() & 15) {
-        case 0: return TILE_OFFSET(5, 3);
-        case 1: return TILE_OFFSET(6, 3);
-        case 2: return TILE_OFFSET(5, 4);
-        case 3: return TILE_OFFSET(6, 4);
-        default: return TILE_OFFSET(4, 1);
+        case 0:
+            return TILE_OFFSET(5, 3);
+        case 1:
+            return TILE_OFFSET(6, 3);
+        case 2:
+            return TILE_OFFSET(5, 4);
+        case 3:
+            return TILE_OFFSET(6, 4);
+        default:
+            return TILE_OFFSET(4, 1);
         }
-
-    case MINEFIELD_CORNER_TOP_LEFT:
-        return TILE_OFFSET(0, 2);
-    case MINEFIELD_TOP_TEE:
-        return TILE_OFFSET(1, 2);
-    case MINEFIELD_HORIZONTAL_TOP:
-        return TILE_OFFSET(2, 2);
-    case MINEFIELD_HORIZONTAL_MIDDLE:
-        return TILE_OFFSET(2, 3);
-    case MINEFIELD_HORIZONTAL_BOTTOM:
-        return TILE_OFFSET(2, 5);
-    case MINEFIELD_CORNER_TOP_RIGHT:
-        return TILE_OFFSET(4, 2);
-
-    case MINEFIELD_LEFT_TEE:
-        return TILE_OFFSET(0, 3);
-    case MINEFIELD_CROSS:
-        return TILE_OFFSET(1, 3);
-    case MINEFIELD_RIGHT_TEE:
-        return TILE_OFFSET(4, 3);
-
-    case MINEFIELD_VERTICAL_LEFT:
-        return TILE_OFFSET(0, 4);
-    case MINEFIELD_VERTICAL_MIDDLE:
-        return TILE_OFFSET(2, 3);
-    case MINEFIELD_VERTICAL_RIGHT:
-        return TILE_OFFSET(4, 4);
-    case CLOSED_CELL:
-        return TILE_OFFSET(2, 4);
-
-    case MINEFIELD_CORNER_BOTTOM_LEFT:
-        return TILE_OFFSET(0, 5);
-    case MINEFIELD_BOTTOM_TEE:
-        return TILE_OFFSET(1, 5);
-    case MINEFIELD_CORNER_BOTTOM_RIGHT:
-        return TILE_OFFSET(4, 5);
-
-    case CORNER_TOP_LEFT:
-        return TILE_OFFSET(7, 2);
-    case CORNER_TOP_RIGHT:
-        return TILE_OFFSET(10, 2);
-    case CORNER_BOTTOM_LEFT:
-        return TILE_OFFSET(7, 5);
-    case CORNER_BOTTOM_RIGHT:
-        return TILE_OFFSET(10, 5);
-
-    case TOP_BORDER__LEFT:
-        return TILE_OFFSET(8, 2);
-    case TOP_BORDER__RIGHT:
-        return TILE_OFFSET(9, 2);
-    case BOTTOM_BORDER__LEFT:
-        return TILE_OFFSET(8, 5);
-    case BOTTOM_BORDER__RIGHT:
-        return TILE_OFFSET(9, 5);
-
-    case LEFT_BORDER__TOP:
-        return TILE_OFFSET(7, 3);
-    case LEFT_BORDER__BOTTOM:
-        return TILE_OFFSET(7, 4);
-    case RIGHT_BORDER__TOP:
-        return TILE_OFFSET(10, 3);
-    case RIGHT_BORDER__BOTTOM:
-        return TILE_OFFSET(10, 4);
-
-    default:
-        return TILE_OFFSET(4, 1); // GROUND
     }
+
+    uint8_t off = tile2offset[tile];
+    return off ? off : tile2offset[GROUND];
 }
 
 /* set_tile emulates tile behaviour, but is actually a bitmap copy */
