@@ -6,5 +6,8 @@ all: $(SOURCES)
 	mkdir -p $(BUILDDIR)
 	gcc $(SOURCES) $(CFLAGS) -lncurses -o $(BUILDDIR)/mines
 
+run: all
+	./build/mines
+
 clean:
 	rm -rf $(BUILDDIR)

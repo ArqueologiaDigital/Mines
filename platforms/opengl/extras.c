@@ -1,4 +1,5 @@
 #include <GL/glut.h>
+#include <GL/freeglut_ext.h>
 #include "common.h"
 #include "game.h"
 #include "minefield.h"
@@ -84,6 +85,8 @@ void update_main_loop()
         case GAME_OVER:
             update_game_over();
             break;
+	case QUIT:
+	    glutLeaveMainLoop();
     }
 }
 
