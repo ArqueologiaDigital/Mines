@@ -36,16 +36,20 @@ void fill_minefield(minefield* mf, uint8_t num_bombs)
 			if ((CELL(mf, x, y) & HASBOMB)) continue;
 
 			uint8_t count = 0;
-			if (x > 0 && y > 0 && (CELL(mf, x-1, y-1) & HASBOMB)) count++;
-			if (x > 0 && (CELL(mf, x-1, y) & HASBOMB)) count++;
-			if (x > 0 && y < mf->height-1 && (CELL(mf, x-1, y+1) & HASBOMB)) count++;
+			if (x > 0) {
+				if (y > 0 && (CELL(mf, x-1, y-1) & HASBOMB)) count++;
+				if ((CELL(mf, x-1, y) & HASBOMB)) count++;
+				if (y < mf->height-1 && (CELL(mf, x-1, y+1) & HASBOMB)) count++;
+			}
 
 			if (y > 0 && (CELL(mf, x, y-1) & HASBOMB)) count++;
 			if (y < mf->height-1 && (CELL(mf, x, y+1) & HASBOMB)) count++;
 
-			if (x < mf->width-1 && y > 0 && (CELL(mf, x+1, y-1) & HASBOMB)) count++;
-			if (x < mf->width-1 && (CELL(mf, x+1, y) & HASBOMB)) count++;
-			if (x < mf->width-1 && y < mf->height-1 && (CELL(mf, x+1, y+1) & HASBOMB)) count++;
+			if (x < mf->width - 1) {
+				if (y > 0 && (CELL(mf, x+1, y-1) & HASBOMB)) count++;
+				if ((CELL(mf, x+1, y) & HASBOMB)) count++;
+				if (y < mf->height-1 && (CELL(mf, x+1, y+1) & HASBOMB)) count++;
+			}
 
 			// Store the count in the 4 lowest bits:
 			CELL(mf, x, y) |= count;
@@ -99,46 +103,60 @@ void open_cell(minefield* mf, uint8_t x, uint8_t y) {
 	if ((CELL(mf, x, y) & 0x0F) > 0)
 		return;
 
-	if (x-1 >= 0 && y-1 >= 0) open_cell(mf, x-1, y-1); // top-left
+	if (x - 1 >= 0) {
+		if (y-1 >= 0) open_cell(mf, x-1, y-1); // top-left
+		if (y+1 < mf->height) open_cell(mf, x-1, y+1); // bottom-left
+		open_cell(mf, x-1, y); // left
+	}
+
 	if (y-1 >= 0) open_cell(mf, x, y-1); // top
-	if (x+1 < mf->width && y-1 >= 0) open_cell(mf, x+1, y-1); // top-right
 
-	if (x-1 >= 0) open_cell(mf, x-1, y); // left
-	if (x+1 < mf->width) open_cell(mf, x+1, y); // right
+	if (x + 1 < mf->width) {
+		if (y-1 >= 0) open_cell(mf, x+1, y-1); // top-right
+		if (y+1 < mf->height) open_cell(mf, x+1, y+1); // bottom-right
+		open_cell(mf, x+1, y); // right
+	}
 
-	if (x-1 >= 0 && y+1 < mf->height) open_cell(mf, x-1, y+1); // bottom-left
 	if (y+1 < mf->height) open_cell(mf, x, y+1); // bottom
-	if (x+1 < mf->width && y+1 < mf->height) open_cell(mf, x+1, y+1); // bottom-right
 }
 
 
 void open_block(minefield* mf, uint8_t x, uint8_t y){
-	if (x-1 >= 0 && y-1 >= 0) open_cell(mf, x-1, y-1); // top-left
-	if (x-1 >= 0) open_cell(mf, x-1, y); // top
-	if (x-1 >= 0 && y+1 < mf->height) open_cell(mf, x-1, y+1); // top-right
+	if (x-1 >= 0) {
+		if (y-1 >= 0) open_cell(mf, x-1, y-1); // top-left
+		if (y+1 < mf->height) open_cell(mf, x-1, y+1); // top-right
+		open_cell(mf, x-1, y); // top
+	}
 
 	if (y-1 >= 0) open_cell(mf, x, y-1); // left
 	open_cell(mf, x, y); // center
 	if (y+1 < mf->height) open_cell(mf, x, y+1); // right
 
-	if (x+1 < mf->width && y-1 >= 0) open_cell(mf, x+1, y-1); // bottom-left
-	if (x+1 < mf->width) open_cell(mf, x+1, y); // bottom
-	if (x+1 < mf->width && y+1 < mf->height) open_cell(mf, x+1, y+1); // bottom-right
+	if (x+1 < mf->width) {
+		if (y-1 >= 0) open_cell(mf, x+1, y-1); // bottom-left
+		if (y+1 < mf->height) open_cell(mf, x+1, y+1); // bottom-right
+		open_cell(mf, x+1, y); // bottom
+	}
 }
 
 
 uint8_t count_surrounding_flags(minefield* mf, uint8_t x, uint8_t y){
 	uint8_t count = 0;
-	if (x-1 >= 0 && y-1 >= 0 && (CELL(mf, x-1, y-1) & HASFLAG)) count++; // top-left
-	if (x-1 >= 0 && (CELL(mf, x-1, y) & HASFLAG)) count++; // top
-	if (x-1 >= 0 && y+1 < mf->height && (CELL(mf, x-1, y+1) & HASFLAG)) count++; // top-right
+
+	if (x - 1 >= 0) {
+		if (y-1 >= 0 && (CELL(mf, x-1, y-1) & HASFLAG)) count++; // top-left
+		if ((CELL(mf, x-1, y) & HASFLAG)) count++; // top
+		if (y+1 < mf->height && (CELL(mf, x-1, y+1) & HASFLAG)) count++; // top-right
+	}
 
 	if (y-1 >= 0 && (CELL(mf, x, y-1) & HASFLAG)) count++; // left
 	if (y+1 < mf->height && (CELL(mf, x, y+1) & HASFLAG)) count++; // right
 
-	if (x+1 < mf->width && y-1 >= 0 && (CELL(mf, x+1, y-1) & HASFLAG)) count++; // bottom-left
-	if (x+1 < mf->width && (CELL(mf, x+1, y) & HASFLAG)) count++; // bottom
-	if (x+1 < mf->width && y+1 < mf->height && (CELL(mf, x+1, y+1) & HASFLAG)) count++; // bottom-right
+	if (x + 1 < mf->width) {
+		if (y-1 >= 0 && (CELL(mf, x+1, y-1) & HASFLAG)) count++; // bottom-left
+		if ((CELL(mf, x+1, y) & HASFLAG)) count++; // bottom
+		if (y+1 < mf->height && (CELL(mf, x+1, y+1) & HASFLAG)) count++; // bottom-right
+	}
 
 	return count;
 }
