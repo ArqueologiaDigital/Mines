@@ -142,7 +142,7 @@ static inline uint8_t get_tile_offset(uint8_t tile)
         [MINEFIELD_TOP_TEE] = TILE_OFFSET(1, 2),
         [MINEFIELD_HORIZONTAL_TOP] = TILE_OFFSET(2, 2),
         [MINEFIELD_HORIZONTAL_MIDDLE] = TILE_OFFSET(2, 3),
-        [MINEFIELD_HORIZONTAL_BOTTOM] = TILE_OFFSET(2, 5),
+        [MINEFIELD_HORIZONTAL_BOTTOM] = TILE_OFFSET(2, 4),
         [MINEFIELD_CORNER_TOP_RIGHT] = TILE_OFFSET(4, 2),
 
         [MINEFIELD_LEFT_TEE] = TILE_OFFSET(0, 3),
@@ -152,38 +152,38 @@ static inline uint8_t get_tile_offset(uint8_t tile)
         [MINEFIELD_VERTICAL_LEFT] = TILE_OFFSET(0, 4),
         [MINEFIELD_VERTICAL_MIDDLE] = TILE_OFFSET(2, 3),
         [MINEFIELD_VERTICAL_RIGHT] = TILE_OFFSET(4, 4),
-        [CLOSED_CELL] = TILE_OFFSET(2, 4),
+        [CLOSED_CELL] = TILE_OFFSET(10, 0),
 
-        [MINEFIELD_CORNER_BOTTOM_LEFT] = TILE_OFFSET(0, 5),
-        [MINEFIELD_BOTTOM_TEE] = TILE_OFFSET(1, 5),
-        [MINEFIELD_CORNER_BOTTOM_RIGHT] = TILE_OFFSET(4, 5),
+        [MINEFIELD_CORNER_BOTTOM_LEFT] = TILE_OFFSET(5, 4),
+        [MINEFIELD_BOTTOM_TEE] = TILE_OFFSET(1, 4),
+        [MINEFIELD_CORNER_BOTTOM_RIGHT] = TILE_OFFSET(6, 4),
 
-        [CORNER_TOP_LEFT] = TILE_OFFSET(7, 2),
-        [CORNER_TOP_RIGHT] = TILE_OFFSET(10, 2),
-        [CORNER_BOTTOM_LEFT] = TILE_OFFSET(7, 5),
-        [CORNER_BOTTOM_RIGHT] = TILE_OFFSET(10, 5),
+        [CORNER_TOP_LEFT] = TILE_OFFSET(7, 1),
+        [CORNER_TOP_RIGHT] = TILE_OFFSET(10, 1),
+        [CORNER_BOTTOM_LEFT] = TILE_OFFSET(7, 4),
+        [CORNER_BOTTOM_RIGHT] = TILE_OFFSET(10, 4),
 
-        [TOP_BORDER__LEFT] = TILE_OFFSET(8, 2),
-        [TOP_BORDER__RIGHT] = TILE_OFFSET(9, 2),
-        [BOTTOM_BORDER__LEFT] = TILE_OFFSET(8, 5),
-        [BOTTOM_BORDER__RIGHT] = TILE_OFFSET(9, 5),
+        [TOP_BORDER__LEFT] = TILE_OFFSET(8, 1),
+        [TOP_BORDER__RIGHT] = TILE_OFFSET(9, 1),
+        [BOTTOM_BORDER__LEFT] = TILE_OFFSET(8, 4),
+        [BOTTOM_BORDER__RIGHT] = TILE_OFFSET(9, 4),
 
-        [LEFT_BORDER__TOP] = TILE_OFFSET(7, 3),
-        [LEFT_BORDER__BOTTOM] = TILE_OFFSET(7, 4),
-        [RIGHT_BORDER__TOP] = TILE_OFFSET(10, 3),
-        [RIGHT_BORDER__BOTTOM] = TILE_OFFSET(10, 4),
+        [LEFT_BORDER__TOP] = TILE_OFFSET(7, 2),
+        [LEFT_BORDER__BOTTOM] = TILE_OFFSET(7, 3),
+        [RIGHT_BORDER__TOP] = TILE_OFFSET(10, 2),
+        [RIGHT_BORDER__BOTTOM] = TILE_OFFSET(10, 3),
     };
 
     if (tile == GROUND) {
         switch (rand() & 15) {
         case 0:
-            return TILE_OFFSET(5, 3);
+            return TILE_OFFSET(8, 2);
         case 1:
-            return TILE_OFFSET(6, 3);
+            return TILE_OFFSET(8, 3);
         case 2:
-            return TILE_OFFSET(5, 4);
+            return TILE_OFFSET(9, 2);
         case 3:
-            return TILE_OFFSET(6, 4);
+            return TILE_OFFSET(9, 3);
         default:
             return TILE_OFFSET(4, 1);
         }

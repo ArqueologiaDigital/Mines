@@ -46,8 +46,8 @@ with open("mines.xpm", "r") as mines:
       if bpc != 1:
         raise SyntaxError(f"Don't know how to read XPM with {bpc} bytes per char")
 
-      if num_colors != 15:
-        raise SyntaxError("Only know how to read XPMs with 15 colors")
+      if num_colors > 15:
+        raise SyntaxError("Only know how to read XPMs with at most 15 colors")
 
       state = STATE_READ_PALETTE
       continue
