@@ -305,7 +305,7 @@ void highlight_cell(minefield* mf, int x, int y)
 
 double minefield_angle = 0;
 
-extern void gl_main_loop();
+extern void update_main_loop();
 
 // Clears the current window and draws a triangle.
 void display() {
@@ -316,7 +316,7 @@ void display() {
 	minefield_angle += 0.001;
 	glRotatef(-60 + 5*sin(minefield_angle), 1, 0, 0);
 	glRotatef(5*sin(minefield_angle+90), 0, 1, 0);
-	gl_main_loop();
+	update_main_loop();
 	glPopMatrix();
 
 	// Flush drawing command buffer to make drawing happen as soon as possible.
