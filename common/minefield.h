@@ -36,5 +36,7 @@ typedef struct {
 } minefield;
 
 void open_cell(minefield* mf, uint8_t x, uint8_t y);
+void open_block(minefield* mf, uint8_t x, uint8_t y);
+uint8_t count_surrounding_flags(minefield* mf, uint8_t x, uint8_t y);
 
 #endif //#define MINEFIELD_H

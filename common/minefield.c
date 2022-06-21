@@ -111,3 +111,35 @@ void open_cell(minefield* mf, uint8_t x, uint8_t y) {
 	if (x+1 < mf->width && y+1 < mf->height) open_cell(mf, x+1, y+1); // bottom-right
 }
 
+
+void open_block(minefield* mf, uint8_t x, uint8_t y){
+	if (x-1 >= 0 && y-1 >= 0) open_cell(mf, x-1, y-1); // top-left
+	if (x-1 >= 0) open_cell(mf, x-1, y); // top
+	if (x-1 >= 0 && y+1 < mf->height) open_cell(mf, x-1, y+1); // top-right
+
+	if (y-1 >= 0) open_cell(mf, x, y-1); // left
+	open_cell(mf, x, y); // center
+	if (y+1 < mf->height) open_cell(mf, x, y+1); // right
+
+	if (x+1 < mf->width && y-1 >= 0) open_cell(mf, x+1, y-1); // bottom-left
+	if (x+1 < mf->width) open_cell(mf, x+1, y); // bottom
+	if (x+1 < mf->width && y+1 < mf->height) open_cell(mf, x+1, y+1); // bottom-right
+}
+
+
+uint8_t count_surrounding_flags(minefield* mf, uint8_t x, uint8_t y){
+	uint8_t count = 0;
+	if (x-1 >= 0 && y-1 >= 0 && (CELL(mf, x-1, y-1) & HASFLAG)) count++; // top-left
+	if (x-1 >= 0 && (CELL(mf, x-1, y) & HASFLAG)) count++; // top
+	if (x-1 >= 0 && y+1 < mf->height && (CELL(mf, x-1, y+1) & HASFLAG)) count++; // top-right
+
+	if (y-1 >= 0 && (CELL(mf, x, y-1) & HASFLAG)) count++; // left
+	if (y+1 < mf->height && (CELL(mf, x, y+1) & HASFLAG)) count++; // right
+
+	if (x+1 < mf->width && y-1 >= 0 && (CELL(mf, x+1, y-1) & HASFLAG)) count++; // bottom-left
+	if (x+1 < mf->width && (CELL(mf, x+1, y) & HASFLAG)) count++; // bottom
+	if (x+1 < mf->width && y+1 < mf->height && (CELL(mf, x+1, y+1) & HASFLAG)) count++; // bottom-right
+
+	return count;
+}
+

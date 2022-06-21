@@ -9,22 +9,6 @@
 #endif
 
 
-static uint8_t count_surrounding_flags(minefield* mf, uint8_t x, uint8_t y){
-	uint8_t count = 0;
-	if (CELL(mf, x-1, y-1) & HASFLAG) count++;
-	if (CELL(mf, x-1, y) & HASFLAG) count++;
-	if (CELL(mf, x-1, y+1) & HASFLAG) count++;
-
-	if (CELL(mf, x, y-1) & HASFLAG) count++;
-	if (CELL(mf, x, y+1) & HASFLAG) count++;
-
-	if (CELL(mf, x+1, y-1) & HASFLAG) count++;
-	if (CELL(mf, x+1, y) & HASFLAG) count++;
-	if (CELL(mf, x+1, y+1) & HASFLAG) count++;
-
-	return count;
-}
-
 void title_screen_loop(minefield* mf)
 {
 #ifdef DRAW_TITLE_SCREEN
@@ -156,17 +140,8 @@ void gameplay_loop(minefield* mf) {
 			break;
 
 		case MINE_INPUT_OPEN_BLOCK:
-			if (!has_bomb && (count_surrounding_flags(mf, x, y) == num_bombs_around)) {
-				open_cell(mf, x-1, y-1);
-				open_cell(mf, x-1, y);
-				open_cell(mf, x-1, y+1);
-				open_cell(mf, x, y-1);
-				open_cell(mf, x, y);
-				open_cell(mf, x, y+1);
-				open_cell(mf, x+1, y-1);
-				open_cell(mf, x+1, y);
-				open_cell(mf, x+1, y+1);
-			}
+			if (!has_bomb && (count_surrounding_flags(mf, x, y) == num_bombs_around))
+				open_block(mf, x, y);
 			break;
 
 		case MINE_INPUT_FLAG:
