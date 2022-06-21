@@ -7,8 +7,8 @@
 
 
 /**
-  * Set up memory and resources of the board. The default constructor is
-  * called if the `MINEFIELD_ALLOCATION` macro is not defined.
+  * Optional. Set up memory and resources of the board. The default
+  * constructor is called if the `MINEFIELD_ALLOCATION` macro is not defined.
   *
   * Implementation details
   * ----------------------
@@ -19,15 +19,15 @@
 minefield* init_minefield();
 
 /**
- * Set minefield to initial state, setting number of bombs and their
+ * Optional. Set minefield to initial state, setting number of bombs and their
  * positions too. A default initialisation function is called if the
  * `RESET_MINEFIELD` macro is not defined.
  */
 void reset_minefield(minefield* mf);
 
 /**
-  * Free memory and resources of the board. The default destructor is called
-  * if the `MINEFIELD_ALLOCATION` macro is not defined.
+  * Optional. Free memory and resources of the board. The default destructor
+  * is called if the `MINEFIELD_ALLOCATION` macro is not defined.
   *
   * Implementation details
   * ----------------------
@@ -36,14 +36,6 @@ void reset_minefield(minefield* mf);
   * this function.
   */
 void free_minefield(minefield* mf);
-
-#ifdef DRAW_TITLE_SCREEN
-/**
- * Optional. Draws a title screen message when the game starts. It will be
- * called at the start of the game if the `DRAW_TITLE_SCREEN` macro is defined.
- */
-void draw_title_screen(minefield* mf);
-#endif /* DRAW_TITLE_SCREEN */
 
 /**
  * Draws the background of the boardgame on screen.
@@ -56,6 +48,24 @@ void draw_minefield(minefield* mf);
  * Needs to be implemented on new platforms.
  */
 void draw_minefield_contents(minefield* mf);
+
+#ifdef MAIN_LOOP_REIMPLEMENTED
+/**
+ * Optional. Reimplements the game loop on platforms that process their own
+ * event loop. It will be called if the `MAIN_LOOP_REIMPLEMENTED` macro is
+ * defined.
+ */
+void platform_main_loop(minefield* mf);
+#endif /* MAIN_LOOP_REIMPLEMENTED */
+
+
+#ifdef DRAW_TITLE_SCREEN
+/**
+ * Optional. Draws a title screen message when the game starts. It will be
+ * called at the start of the game if the `DRAW_TITLE_SCREEN` macro is defined.
+ */
+void draw_title_screen(minefield* mf);
+#endif /* DRAW_TITLE_SCREEN */
 
 #ifdef DRAW_GAME_OVER
 /**

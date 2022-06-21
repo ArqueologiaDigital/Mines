@@ -1,4 +1,10 @@
+#include <GL/glut.h>
+#include "common.h"
+#include "game.h"
 #include "minefield.h"
+
+/* platform code can use game-defined functions */
+#include "main.h"
 
 
 static minefield* mf;
@@ -15,20 +21,77 @@ minefield* init_minefield()
 }
 
 
-void gl_main_loop()
+void update_title_screen()
+{
+    mf->state = PLAYING_GAME;
+    reset_minefield(mf);
+    draw_minefield(mf);
+}
+
+
+void update_game_over()
+{
+    draw_minefield_contents(mf);
+    draw_minefield(mf);
+
+    uint8_t input = input_read(KEYBOARD);
+    if (input == MINE_INPUT_IGNORED)
+        return;
+
+    switch (input) {
+        case MINE_INPUT_OPEN:
+        case MINE_INPUT_OPEN_BLOCK:
+        case MINE_INPUT_FLAG:
+            mf->state = TITLE_SCREEN;
+            break;
+
+        case MINE_INPUT_QUIT:
+            mf->state = QUIT;
+            break;
+
+        default:
+            /* Ignore cursor moves when game over */
+            break;
+    }
+}
+
+
+void update_gameplay()
+{
+    draw_minefield_contents(mf);
+    draw_minefield(mf);
+
+    uint8_t input = input_read(KEYBOARD);
+
+    if (input == MINE_INPUT_IGNORED) {
+        return;
+    }
+
+    update_gameplay_input(mf, input);
+}
+
+
+void update_main_loop()
 {
     switch (mf->state)
     {
         case TITLE_SCREEN:
-            title_screen_loop(mf);
+            update_title_screen();
             break;
         case PLAYING_GAME:
-            gameplay_loop(mf);
+            update_gameplay();
             break;
         case GAME_OVER:
-            game_over_loop(mf);
+            update_game_over();
             break;
     }
+}
+
+
+void platform_main_loop(minefield* mf)
+{
+    UNUSED(mf);
+    glutMainLoop();
 }
 
 
