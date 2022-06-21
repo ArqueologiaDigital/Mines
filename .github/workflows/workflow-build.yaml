@@ -29,7 +29,7 @@ jobs:
         include:
           - image: docker://pvmm/sdcc:latest
             platform: msx2
-          - image: docker://pvmm/ia16:minimal
+          - image: docker://pvmm/ia16:python3
             platform: msdos
           - image: docker://pvmm/opengl:latest
             platform: opengl
