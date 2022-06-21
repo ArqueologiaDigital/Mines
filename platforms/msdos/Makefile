@@ -5,7 +5,7 @@ CFLAGS := -Os -flto -Wall -pedantic -I../../common -I. -DNO_UNUSED_MACRO
 LDFLAGS := -li86 -flto
 SCREEN_RESOLUTION := -DSCREEN_WIDTH=320/8 -DSCREEN_HEIGHT=200/8 -DMINEFIELD_X_OFFSET=10 -DMINEFIELD_Y_OFFSET=2
 
-PYTHON := python
+PYTHON := python3
 
 all: $(SOURCES)
 	mkdir -p $(BUILDDIR)
