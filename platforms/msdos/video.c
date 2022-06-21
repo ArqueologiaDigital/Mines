@@ -2,60 +2,120 @@
 #include <conio.h>
 #include <dos.h>
 #include <libi86/string.h>
-#include <mines.xpm>
 #include <string.h>
 #include <time.h>
 
 #define SET_MODE 0x00
-#define WRITE_DOT 0x0C
 #define VIDEO_INT 0x10
 #define VGA_TEXT_MODE 0x03
 #define VGA_256_COLOR_MODE 0x13
 
-void set_mode(unsigned char mode)
+__asm__(".section \".rodata\"\n"
+        "mines_bin_start:\n"
+        ".incbin \"mines.bin\"\n"
+        "mines_bin_end:\n"
+        ".previous");
+extern const char mines_bin_start[];
+extern const char mines_bin_end[];
+
+struct img_header {
+    uint16_t width;
+    uint16_t height;
+    uint8_t num_colors;
+} __attribute__((packed));
+
+struct img_pal_entry {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+} __attribute__((packed));
+
+static char **mines_xpm;
+
+static void set_palette(int color, uint8_t r, uint8_t g, uint8_t b)
 {
-    union REGPACK regs;
-    memset(&regs, 0, sizeof(union REGPACK));
-    regs.h.ah = SET_MODE;
-    regs.h.al = mode;
-    intr(VIDEO_INT, &regs);
+    outp(0x3c8, color);
+    outp(0x3c9, r);
+    outp(0x3c9, g);
+    outp(0x3c9, b);
 }
 
-uint8_t hex2int(char c)
+static char **decode_mines_bin(void)
 {
-    if (c >= '0' && c <= '9')
-        return c - '0';
-    if (c >= 'a' && c <= 'f')
-        return c - 'a' + 10;
-    if (c >= 'A' && c <= 'F')
-        return c - 'A' + 10;
-    return 0xFF; // ERROR!
-}
+    struct img_header header;
+    const char *p;
 
-void set_palette()
-{
-    uint8_t index, r, g, b;
-    for (uint8_t i = 1; i <= 15; i++) {
-        index = mines_xpm[i][0];
-        r = (hex2int(mines_xpm[i][5]) << 4) | hex2int(mines_xpm[i][6]);
-        g = (hex2int(mines_xpm[i][7]) << 4) | hex2int(mines_xpm[i][8]);
-        b = (hex2int(mines_xpm[i][9]) << 4) | hex2int(mines_xpm[i][10]);
+    memcpy(&header, mines_bin_start, sizeof(struct img_header));
+    p = mines_bin_start + sizeof(struct img_header);
 
-        r = (uint8_t)((double)r) * 7 / 0xff;
-        g = (uint8_t)((double)g) * 7 / 0xff;
-        b = (uint8_t)((double)b) * 7 / 0xff;
+    char *outbuf = malloc(header.width * header.height);
+    if (!outbuf)
+        return NULL;
 
-        outp(0x3c8, index);
-        outp(0x3c9, r << 3);
-        outp(0x3c9, g << 3);
-        outp(0x3c9, b << 3);
+    for (uint8_t i = 0; i < header.num_colors; i++) {
+        struct img_pal_entry pal;
+
+        memcpy(&pal, p, sizeof(struct img_pal_entry));
+        p += sizeof(struct img_pal_entry);
+
+        set_palette(i, pal.r, pal.g, pal.b);
     }
+
+    char *outbufptr = outbuf;
+    uint8_t buffer;
+    uint8_t nibbles_in_buffer = 0;
+    uint8_t state = 0;
+    uint8_t count = 0;
+    while (p < mines_bin_end) {
+        if (!nibbles_in_buffer) {
+            buffer = *p++;
+            nibbles_in_buffer = 2;
+        }
+
+        uint8_t nibble = (buffer >> 4) & 0xf;
+        buffer <<= 4;
+        nibbles_in_buffer--;
+
+        if (state == 0) {
+            if (nibble == 0xf) {
+                state = 1;
+            } else {
+                *outbufptr++ = nibble;
+            }
+        } else if (state == 1) {
+            count = nibble + 3;
+            state = 2;
+        } else {
+            for (int i = 0; i < count; i++) {
+                *outbufptr++ = nibble;
+            }
+            state = 0;
+        }
+    }
+
+    char **out = malloc(header.height * sizeof(char *));
+    if (!out) {
+        free(outbuf);
+        return NULL;
+    }
+
+    for (int i = 0; i < header.height; i++) {
+        out[i] = outbuf;
+        outbuf += header.width;
+    }
+
+    return out;
 }
 
-void video_init()
+static void set_mode(unsigned char mode)
+{
+    intr(VIDEO_INT, &(union REGPACK){.h = {.ah = SET_MODE, .al = mode}});
+}
+
+static void video_init(void)
 {
     set_mode(VGA_256_COLOR_MODE);
-    set_palette();
+    mines_xpm = decode_mines_bin();
 }
 
 #define TILE_OFFSET(x, y) (((y) << 4) | (x))
@@ -140,8 +200,8 @@ static inline void set_tile_full(uint8_t dst_x, uint8_t dst_y, uint8_t tile, int
     uint8_t __far *video_seg_start =
         &video_seg[320 * (int)dst_y * 8 + (int)dst_x * 8];
     const uint16_t offs = get_tile_offset(tile);
-    const uint16_t off_high = 16 + 8 * (offs >> 8);
-    const uint16_t off_low = 8 * (offs & 0xff);
+    const uint16_t off_high = 8 * (offs >> 4);
+    const uint16_t off_low = 8 * (offs & 0xf);
 
     if (mask < 0) {
         for (uint8_t y = 0; y < 8; y++) {
@@ -170,7 +230,7 @@ void highlight_cell(minefield *mf, int x, int y)
     if (mf->state == GAME_OVER)
         set_tile(x, y, EXPLOSION);
     else
-        set_tile_full(x, y, CURSOR, '+');
+        set_tile_full(x, y, CURSOR, 2);
 }
 
 void platform_init()
@@ -186,6 +246,8 @@ void idle_loop(minefield *mf) {}
 
 void platform_shutdown()
 {
+    free(mines_xpm[0]);
+    free(mines_xpm);
     set_mode(VGA_TEXT_MODE);
     exit(0);
 }
