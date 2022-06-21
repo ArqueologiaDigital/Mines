@@ -6,7 +6,7 @@
 static const uint8_t *fuzz_data, *fuzz_data_end;
 
 /* main.c functions are not usually called directly, but the other way around, so we need to include it here. */
-extern void main_gameplay_loop(minefield* mf);
+extern void gameplay_loop(minefield* mf);
 
 uint8_t input_read(uint8_t source)
 {
@@ -44,15 +44,15 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	fuzz_data = data;
 	fuzz_data_end = data + size;
 
-	minefield mf;
+	minefield* mf;
 
-	setup_minefield(&mf, 10, 10, 5);
-	mf.state = PLAYING_GAME;
+	mf = init_minefield();
+	mf->state = PLAYING_GAME;
 
-	while (mf.state != QUIT)
-		gameplay_loop(&mf);
+	while (mf->state != QUIT)
+		gameplay_loop(mf);
 
-	free(mf.cells);
+    free(mf);
 	return 0;
 }
 

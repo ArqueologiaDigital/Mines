@@ -16,7 +16,7 @@ SC5TOOL := ./tools/SCREEN5
 BINTOOL := ./tools/MSXbin
 
 BUILDDIR := build
-TARGET := $(BUILDDIR)/minesweeper
+TARGET := $(BUILDDIR)/mines
 CODE := 0x4000
 DATA := 0xc000
 ROM_MAX := 0x8000
