@@ -125,11 +125,14 @@ int main(int argc, char **argv)
 
     printf("#include <stdint.h>\n\n");
 
+    printf("#define %s_WIDTH %u\n", argv[1], width);
+    printf("#define %s_HEIGHT %u\n\n", argv[1], height);
+
     printf("static const uint8_t %s_palette[] = {\n", argv[1]);
 
     for (int8_t i = 0; i <= colors; ++i) {
         if (palette[i].ci) {
-            printf("\t%2i, %u,%u,%u, /* %X, %X, %X */\n", palette[i].ci, palette[i].r, palette[i].g, palette[i].b,
+            printf("\t%2i, %u,%u,%u, /* 0x%02X, 0x%02X, 0x%02X */\n", palette[i].ci, palette[i].r, palette[i].g, palette[i].b,
                     palette[i].rr, palette[i].gg, palette[i].bb);
         }
     }
@@ -158,6 +161,8 @@ int main(int argc, char **argv)
     }
 
     if (pos > 0) printf("\n");
-    printf("};\n/* %s_size = %i */\n", argv[1], pos / 2);
+    printf("};\n\n");
+
+    printf("#define %s_SIZE %u\n", argv[1], pos / 2);
 }
 
