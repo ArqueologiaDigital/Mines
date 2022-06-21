@@ -11,13 +11,17 @@
 /* Assets */
 #include "mines.h"
 #include "cursor.h"
+#include "tile_coords.c"
+
+
+#define PAGE_2_OFFSET 256
 
 
 /* set_tile emulates tile behaviour, but is actually a bitmap copy */
 void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
 {
     /* copy 8x8 block from page 1 (hidden page) to page 0 (visible page) */
-    vdp(tile % 12 * 8, tile / 12 * 8 + 256, dst_x * 8, dst_y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_IMP);
+    vdp(TILE_X[tile], TILE_Y[tile] + PAGE_2_OFFSET, dst_x * 8, dst_y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_IMP);
 }
 
 
