@@ -72,7 +72,7 @@ minefield* init_minefield()
 	minefield* mf = calloc(1, sizeof(minefield));
 	mf->width = 10;
 	mf->height = 10;
-	mf->cells = calloc(mf->width * mf->height, sizeof(uint8_t));
+	mf->cells = calloc(mf->width, mf->height);
 
 	return mf;
 }
