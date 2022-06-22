@@ -14,6 +14,7 @@ HEXTOOL := hex2bin
 #HEXTOOL := ./tools/MSXhex
 SC5TOOL := ./tools/SCREEN5
 BINTOOL := ./tools/MSXbin
+TILE_FILE := mines.xpm
 
 BUILDDIR := build
 TARGET := $(BUILDDIR)/mines
@@ -60,14 +61,14 @@ $(BUILDDIR)/crt0.rel: crt0.z80
 $(BUILDDIR)/video.rel: video.c mines.h
 	$(Z80_CC) $(Z80_CFLAGS) -c $< -o $@
 
-mines.h: mines.xpm $(SC5TOOL)
+mines.h: $(TILE_FILE) $(SC5TOOL)
 	$(SC5TOOL) mines > $@
 
 $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
 
 $(SC5TOOL): tools/SCREEN5.c
-	make -C tools
+	XPM=$(TILE_FILE) make -C tools
 
 clean:
 	rm -rf $(OBJECTS) $(COMMON) build mines.h

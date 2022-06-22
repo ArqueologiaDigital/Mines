@@ -4,7 +4,13 @@
 #include <string.h>
 #include <stdint.h>
 #include <alloca.h>
-#include "mines.xpm"
+
+#ifdef XPM_FILE
+# include XPM_FILE
+#else
+# include "mines.xpm"
+# define XPM_FILE mines_xpm
+#endif
 
 
 #define MAX_COLORS 16
@@ -25,7 +31,7 @@ struct palette {
 void register_color(struct palette* palette, int index, int8_t hw_color, int cpp)
 {
     unsigned int rr, gg, bb;
-    const char* s = mines_xpm[index + 1];
+    const char* s = XPM_DATA[index + 1];
 
     sscanf(&s[cpp], "\tc #%02x%02x%02x", &rr, &gg, &bb);
     rr = rr & 0xff;
@@ -67,7 +73,7 @@ int8_t find_color(struct palette* palette, int colors, const char* const pos, in
 bool is_used_color(const char* const cs, int cpp, int colors, int width, int height)
 {
     for (int y = 0; y < height ; ++y) {
-        const char* pos = mines_xpm[y + colors + 1];
+        const char* pos = XPM_DATA[y + colors + 1];
 
         for (int x = 0; x < width; x++) {
             if (strncmp(pos, cs, cpp) == 0) {
@@ -94,7 +100,7 @@ int main(int argc, char **argv)
         exit(-1);
     }
 
-    sscanf(mines_xpm[0], "%d %d %d %d", &width, &height, &colors, &cpp);
+    sscanf(XPM_DATA[0], "%d %d %d %d", &width, &height, &colors, &cpp);
     if (width & 1) {
         fprintf(stderr, SCREEN5 ": expects even width\n");
         exit(-2);
@@ -110,7 +116,7 @@ int main(int argc, char **argv)
 
     /* find used colors first */
     for (int c = 0; c < colors; ++c) {
-        char* s = mines_xpm[c + 1];
+        char* s = XPM_DATA[c + 1];
         fprintf(stderr, "color [%s]\n", s);
         if (is_used_color(s, cpp, colors, width, height) != false) {
             ++used_colors;
@@ -141,7 +147,7 @@ int main(int argc, char **argv)
     unsigned int pos = 0;
 
     for (int y = 0; y < height ; ++y) {
-        const char* line = mines_xpm[y + colors + 1];
+        const char* line = XPM_DATA[y + colors + 1];
 
         for (int x = 0; x < width; x += 2) {
             uint8_t pixel1, pixel2;
