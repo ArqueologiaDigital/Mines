@@ -1,7 +1,4 @@
 #include "video-tiles.h"
-#include <conio.h>
-#include <dos.h>
-#include <libi86/string.h>
 #include <string.h>
 #include <time.h>
 
@@ -32,12 +29,17 @@ struct img_pal_entry {
 
 static char **mines_xpm;
 
+static inline void outb(uint16_t port, uint8_t value)
+{
+    asm __volatile("outb %0, %1" : : "Ral"(value), "Nd"(port));
+}
+
 static void set_palette(int color, uint8_t r, uint8_t g, uint8_t b)
 {
-    outp(0x3c8, color);
-    outp(0x3c9, r);
-    outp(0x3c9, g);
-    outp(0x3c9, b);
+    outb(0x3c8, color);
+    outb(0x3c9, r);
+    outb(0x3c9, g);
+    outb(0x3c9, b);
 }
 
 static char **decode_mines_bin(void)
@@ -107,9 +109,9 @@ static char **decode_mines_bin(void)
     return out;
 }
 
-static void set_mode(unsigned char mode)
+static inline void set_mode(unsigned char mode)
 {
-    intr(VIDEO_INT, &(union REGPACK){.h = {.ah = SET_MODE, .al = mode}});
+    asm __volatile("int $16\n" : : "a"((uint16_t)(SET_MODE << 8 | mode)));
 }
 
 static void video_init(void)
@@ -196,7 +198,7 @@ static inline uint8_t get_tile_offset(uint8_t tile)
 /* set_tile emulates tile behaviour, but is actually a bitmap copy */
 static inline void set_tile_full(uint8_t dst_x, uint8_t dst_y, uint8_t tile, int8_t mask)
 {
-    static uint8_t __far *video_seg = MK_FP(0xa000, 0);
+    static uint8_t __far *video_seg = (uint8_t __far *)0xa0000000;
     uint8_t __far *video_seg_start =
         &video_seg[320 * (int)dst_y * 8 + (int)dst_x * 8];
     const uint16_t offs = get_tile_offset(tile);
@@ -205,7 +207,11 @@ static inline void set_tile_full(uint8_t dst_x, uint8_t dst_y, uint8_t tile, int
 
     if (mask < 0) {
         for (uint8_t y = 0; y < 8; y++) {
-            _fmemcpy(video_seg_start, &mines_xpm[off_high + y][off_low], 8);
+            /* FIXME: use rep movsb here instead? */
+            const char *data = &mines_xpm[off_high + y][off_low];
+            for (uint8_t x = 0; x < 8; x++) {
+                video_seg_start[x] = data[x];
+            }
             video_seg_start += 320;
         }
     } else {
@@ -222,7 +228,7 @@ static inline void set_tile_full(uint8_t dst_x, uint8_t dst_y, uint8_t tile, int
 
 void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
 {
-    return set_tile_full(dst_x, dst_y, tile, -1);
+    set_tile_full(dst_x, dst_y, tile, -1);
 }
 
 void highlight_cell(minefield *mf, int x, int y)
