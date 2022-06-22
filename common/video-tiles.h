@@ -1,11 +1,54 @@
 #ifndef VIDEO_TILES_H
 #define VIDEO_TILES_H
 
+
 #include <stdint.h>
 #include "minefield.h"
 
-void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile);
+
+/**
+ * [Required] Set the tile at (`x`, `y`) tile coordinates to the tile defined
+ * by `tile` index.
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * See [tile_index](#tile_index) for tile index values.
+ */
+void set_tile(uint8_t x, uint8_t y, uint8_t tile);
+
+/**
+ * [Provided] Draws a cell identified by `tile` index on the board.
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * See [tile_index](#tile_index) for tile index values.
+ */
+void draw_single_cell(minefield* mf, uint8_t x, uint8_t y);
+
+/**
+ * [Provided] Draw the background image that surrounds the board.
+ *
+ * Note: some platforms use the `GROUND` tile to cover the whole background
+ * area.
+ *
+ * See [tile_index](#tile_index) for the index value of the `GROUND` tile.
+ */
 void draw_scenario();
+
+/**
+ * [Required] Draw a tile or sprite cursor on the specified board position
+ * defined by the (`x`, `y`) coordinates.
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * If game status is `GAME_OVER`, the current cursor should be replaced by
+ * (or drawn together with) an `EXPLOSION` tile.
+ *
+ * See [tile_index](#tile_index) for the index value of the `EXPLOSION` tile.
+ */
 void highlight_cell(minefield* mf, int x, int y);
 
 enum {
