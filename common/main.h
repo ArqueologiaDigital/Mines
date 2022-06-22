@@ -1,13 +1,9 @@
 #include "minefield.h"
 
-#ifndef MAIN_LOOP_REIMPLEMENTED
+void title_screen_update(minefield* mf);
 
-void game_over_loop(minefield* mf);
+void gameplay_update(minefield* mf);
 
-void gameplay_loop(minefield* mf);
-
-void main_loop(minefield* mf);
-
-#endif /* MAIN_LOOP_REIMPLEMENTED */
+void game_over_update(minefield* mf);
 
 void update_gameplay_input(minefield* mf, uint8_t input);

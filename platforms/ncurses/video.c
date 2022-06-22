@@ -154,7 +154,7 @@ void draw_minefield(minefield* mf)
     refresh();
 }
 
-void idle_loop(minefield* mf)
+void idle_update(minefield* mf)
 {
 }
 

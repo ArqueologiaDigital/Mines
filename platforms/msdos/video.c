@@ -248,7 +248,7 @@ void platform_init()
     draw_scenario();
 }
 
-void idle_loop(minefield *mf) {}
+void idle_update(minefield *mf) {}
 
 void platform_shutdown()
 {

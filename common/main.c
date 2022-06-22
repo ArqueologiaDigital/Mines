@@ -53,6 +53,7 @@ void update_gameplay_input(minefield* mf, uint8_t input)
 					mf->cells[mf->current_cell] |= HASFLAG;
 				}
 			}
+			mf->changed = true;
 			break;
 
 		case MINE_INPUT_QUIT:
@@ -64,20 +65,16 @@ void update_gameplay_input(minefield* mf, uint8_t input)
 }
 
 
-#ifndef MAIN_LOOP_REIMPLEMENTED
-void title_screen_loop(minefield* mf)
+inline void title_screen_update(minefield* mf)
 {
 #ifdef DRAW_TITLE_SCREEN
-	uint8_t input;
-
 	// TODO: platform dependent title screen, animations, music etc.
 	draw_title_screen(mf);
 
-	do {
-		idle_loop(mf); // useful for doing other things
-		               // such as running animations
-		input = input_read(KEYBOARD);
-	} while (input == MINE_INPUT_IGNORED);
+	uint8_t input = input_read(KEYBOARD);
+	if (input == MINE_INPUT_IGNORED) {
+		return;
+	}
 	debug("\nkey code = ", input);
 
 	switch (input) {
@@ -103,20 +100,18 @@ void title_screen_loop(minefield* mf)
 }
 
 
-void game_over_loop(minefield* mf)
+inline void game_over_update(minefield* mf)
 {
 #ifdef DRAW_GAME_OVER
 	draw_game_over(mf);
 #else
 	draw_minefield_contents(mf);
 #endif
-	uint8_t input;
 
-	do {
-		idle_loop(mf); // useful for doing other things
-		               // such as running animations
-		input = input_read(KEYBOARD);
-	} while (input == MINE_INPUT_IGNORED);
+	uint8_t input = input_read(KEYBOARD);
+	if (input == MINE_INPUT_IGNORED) {
+		return;
+	}
 	debug("\nkey code = ", input);
 
 	switch (input) {
@@ -135,21 +130,18 @@ void game_over_loop(minefield* mf)
 }
 
 
-void gameplay_loop(minefield* mf)
+inline void gameplay_update(minefield* mf)
 {
 	draw_minefield_contents(mf);
 
-	uint8_t input;
-	do {
-		idle_loop(mf); // useful for doing other things
-		               // such as running animations
-		input = input_read(KEYBOARD);
-	} while (input == MINE_INPUT_IGNORED);
+	uint8_t input = input_read(KEYBOARD);
+	if (input == MINE_INPUT_IGNORED) {
+		return;
+	}
 	debug("\nkey code = ", input);
 
 	update_gameplay_input(mf, input);
 }
-#endif /* MAIN_LOOP_REIMPLEMENTED */
  
 
 #if !defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)
@@ -162,19 +154,23 @@ int main() {
 #ifdef MAIN_LOOP_REIMPLEMENTED
 	platform_main_loop(mf);
 #else
-	while (mf->state != QUIT)
+	while (mf->state != QUIT) {
 		switch (mf->state)
 		{
 			case TITLE_SCREEN:
-				title_screen_loop(mf);
+				title_screen_update(mf);
 				break;
 			case PLAYING_GAME:
-				gameplay_loop(mf);
+				gameplay_update(mf);
 				break;
 			case GAME_OVER:
-				game_over_loop(mf);
+				game_over_update(mf);
 				break;
 		}
+
+		idle_update(mf); // useful for doing other things
+		               // such as running animations
+	}
 #endif /* MAIN_LOOP_REIMPLEMENTED */
 
 	free_minefield(mf);
