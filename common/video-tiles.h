@@ -18,7 +18,7 @@
 void set_tile(uint8_t x, uint8_t y, uint8_t tile);
 
 /**
- * [Provided] Draws a cell identified by `tile` index on the board.
+ * [Provided] Draws the cell at (`x`, `y`) board coordinates on the screen.
  *
  * Implementation details
  * ----------------------
@@ -38,8 +38,7 @@ void draw_single_cell(minefield* mf, uint8_t x, uint8_t y);
 void draw_scenario();
 
 /**
- * [Required] Draw a tile or sprite cursor on the specified board position
- * defined by the (`x`, `y`) coordinates.
+ * [Required] Draw a tile or sprite cursor on the board.
  *
  * Implementation details
  * ----------------------
@@ -49,7 +48,7 @@ void draw_scenario();
  *
  * See [tile_index](#tile_index) for the index value of the `EXPLOSION` tile.
  */
-void highlight_cell(minefield* mf, int x, int y);
+void highlight_current_cell(minefield* mf);
 
 enum {
 	/*	NOTE:

@@ -69,16 +69,15 @@ void put_cursor(uint8_t x, uint8_t y)
 }
 
 
-void highlight_cell(minefield* mf, int x, int y)
+void highlight_current_cell(minefield* mf)
 {
     bool finished = mf->state == GAME_OVER;
+    uint8_t x = CELL_X(mf, mf->current_cell) * 2 + MINEFIELD_X_OFFSET + 1;
+    uint8_t y = CELL_Y(mf, mf->current_cell) * 2 + MINEFIELD_Y_OFFSET + 1;
 
     if (!finished) {
         put_cursor(x * 8 - 3, y * 8 - 3);
-        /* merge cursor block with tile from page 0 (visible page) */
-        //vdp(CURSOR % 12 * 8, CURSOR / 12 * 8 + 256, x * 8, y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_XOR);
     } else {
-        /* game over */   
         vdp(TILE_X[EXPLOSION], TILE_Y[EXPLOSION], x * 8, y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_IMP);
     }
 }

@@ -6,9 +6,9 @@
 #include <stdbool.h>
 
 #define CELL_INDEX(mf, x, y)  ((x) + (y) * mf->width)
-#define CELL(mf,x,y)          mf->cells[CELL_INDEX(mf, x, y)]
-#define CURRENT_CELL_X(mf)    mf->current_cell % mf->width
-#define CURRENT_CELL_Y(mf)    mf->current_cell / mf->width
+#define CELL(mf, x, y)        mf->cells[CELL_INDEX(mf, x, y)]
+#define CELL_X(mf, index)     ((index) % mf->width)
+#define CELL_Y(mf, index)     ((index) / mf->width)
 
 /* game state */
 enum {

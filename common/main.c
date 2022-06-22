@@ -14,23 +14,27 @@ void update_gameplay_input(minefield* mf, uint8_t input)
 
 	switch (input) {
 		case MINE_INPUT_LEFT:
-			if (mf->current_cell % mf->width > 0)
+			if (mf->current_cell % mf->width > 0) {
 				mf->current_cell--;
+			}
 			break;
 
 		case MINE_INPUT_RIGHT:
-			if (mf->current_cell % mf->width < mf->width - 1)
+			if (mf->current_cell % mf->width < mf->width - 1) {
 				mf->current_cell++;
+			}
 			break;
 
 		case MINE_INPUT_UP:
-			if (mf->current_cell > mf->width - 1)
+			if (mf->current_cell > mf->width - 1) {
 				mf->current_cell -= mf->width;
+			}
 			break;
 
 		case MINE_INPUT_DOWN:
-			if (mf->current_cell < num_cells - mf->width)
+			if (mf->current_cell < num_cells - mf->width) {
 				mf->current_cell += mf->width;
+			}
 			break;
 
 		case MINE_INPUT_OPEN:

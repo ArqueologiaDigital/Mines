@@ -302,8 +302,11 @@ void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
 	glPopMatrix();
 }
 
-void highlight_cell(minefield* mf, int x, int y)
+void highlight_current_cell(minefield* mf)
 {
+    uint8_t x = CELL_X(mf, mf->current_cell) * 2 + MINEFIELD_X_OFFSET + 1;
+    uint8_t y = CELL_Y(mf, mf->current_cell) * 2 + MINEFIELD_Y_OFFSET + 1;
+
     if (mf->state == GAME_OVER)
         set_tile(x, y, EXPLOSION);
     else
