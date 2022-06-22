@@ -3,7 +3,7 @@
 #include "video-tiles.h"
 #include <stdlib.h>
 #include <time.h>
-#define bool uint8_t
+#include <stdbool.h>
 
 #define SOUND_COMMAND ((uint8_t*) 0xC800)
 #define HWCFG ((uint8_t*) 0xC804)
@@ -137,7 +137,7 @@ void update_sprite_position(minefield* mf)
 
 void blink_cursor(minefield* mf); //prototype
 
-void idle_loop(minefield* mf)
+void idle_update(minefield* mf)
 {
 	update_sprite_position(mf);
 	blink_cursor(mf);

@@ -76,6 +76,6 @@ void draw_game_over(minefield* mf);
 /**
  * [Required] Runs things in background, like music and animations.
  */
-void idle_loop(minefield* mf);
+void idle_update(minefield* mf);
 
 #endif /* GAME_H */

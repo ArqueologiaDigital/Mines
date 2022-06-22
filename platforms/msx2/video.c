@@ -92,7 +92,7 @@ void platform_init()
 }
 
 
-void idle_loop(minefield* mf)
+void idle_update(minefield* mf)
 {
     mf;
 }

@@ -99,7 +99,8 @@ void draw_brick(int w, int h, int z)
 	glPopMatrix();
 }
 
-void draw_minefield_border(int w, int h, int stems) {
+void draw_minefield_border(int w, int h, int stems)
+{
 	GLUquadricObj *q = gluNewQuadric();
 	float th = w/10.0;
 	int n = 2;
@@ -146,7 +147,8 @@ void draw_minefield_border(int w, int h, int stems) {
 	}
 }
 
-void draw_bomb(int w, int h){
+void draw_bomb(int w, int h)
+{
 	w*=0.7;
 
 	GLUquadricObj *q = gluNewQuadric();
@@ -173,13 +175,15 @@ void draw_bomb(int w, int h){
 	}
 }
 
-void draw_explosion(int w, int h){
+void draw_explosion(int w, int h)
+{
 // TODO: At least change color.
 //       Maybe draw something completely different.
 	draw_bomb(w, h);
 }
 	
-void draw_flag(int w, int h){
+void draw_flag(int w, int h)
+{
 	draw_brick(w, h, 2);
 
 	glPushMatrix();
@@ -191,7 +195,8 @@ void draw_flag(int w, int h){
 	glPopMatrix();
 }
 
-void draw_question_mark(int w, int h){
+void draw_question_mark(int w, int h)
+{
 	draw_brick(w, h, 2);
 
 	glPushMatrix();
@@ -203,7 +208,8 @@ void draw_question_mark(int w, int h){
 	glPopMatrix();
 }
 
-void draw_cursor(int w, int h){
+void draw_cursor(int w, int h)
+{
 	GLUquadricObj *q = gluNewQuadric();
 	int n=20;
 
@@ -219,7 +225,8 @@ void draw_cursor(int w, int h){
 	}
 }
 
-void draw_number(int w, int h, int n, float r, float g, float b){
+void draw_number(int w, int h, int n, float r, float g, float b)
+{
 	glPushMatrix();
 	glTranslated(-w/2 + 0.2*w, -h/2, 0);
 	glScalef(0.1, 0.1, 0.1);
@@ -308,7 +315,8 @@ double minefield_angle = 0;
 extern void update_main_loop();
 
 // Clears the current window and draws a triangle.
-void display() {
+void display()
+{
 	// Set every pixel in the frame buffer to the current clear color.
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

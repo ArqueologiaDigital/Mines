@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #define CELL_INDEX(mf, x, y)  ((x) + (y) * mf->width)
 #define CELL(mf,x,y)          mf->cells[CELL_INDEX(mf, x, y)]
@@ -33,6 +34,7 @@ typedef struct {
 	uint8_t height;
 	uint8_t current_cell;
 	uint8_t* cells;
+	bool changed;
 } minefield;
 
 void open_cell(minefield* mf, uint8_t x, uint8_t y);
