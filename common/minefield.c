@@ -30,8 +30,13 @@ void fill_minefield(minefield* mf, uint8_t num_bombs)
 
 	// Place bombs:
 	while (num_bombs--) {
-		uint8_t x = random_number(0, mf->width - 1);
-		uint8_t y = random_number(0, mf->height - 1);
+		uint8_t x, y;
+
+		do {
+			x = random_number(0, mf->width - 1);
+			y = random_number(0, mf->height - 1);
+		} while (CELL(mf, x, y) & HASBOMB);
+
 		CELL(mf, x, y) |= HASBOMB;
 	}
 
