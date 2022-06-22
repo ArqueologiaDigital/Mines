@@ -7,12 +7,12 @@ Licensed under GNU General Public License version 2 (or later)
 
 For specific build & runtime/debug dependencies, please check the individual README.md files for each of the available ports below:
 
-- [MSDOS](platforms/msdos/README.md) (partially working)
-- [ncurses](platforms/ncurses/README.md) (partially working)
-- [GunSmoke JAMMA board](platforms/gunsmoke/README.md) (partially working)
-- [MSX2](platforms/msx2/README.md) (partially working)
-- [OpenGL](platforms/opengl/README.md) (partially working)
-- [C64](platforms/c64/README.md) (boilerplate)
+- [MSDOS / VGA mode 13h](platforms/msdos/README.md): OK
+- [Text terminal using ncurses lib](platforms/ncurses/README.md): OK
+- [GunSmoke JAMMA board](platforms/gunsmoke/README.md): wip; slightly broken
+- [MSX2 (screen 5)](platforms/msx2/README.md) OK
+- [OpenGL](platforms/opengl/README.md) OK, but with glitchy colors
+- [Commodore 64](platforms/c64/README.md): just a boilerplate, please consider contributing an initial implementation!
 
 ### How to create your own
 
