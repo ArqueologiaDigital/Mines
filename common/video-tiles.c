@@ -43,10 +43,7 @@ void draw_minefield_contents(minefield* mf)
 		}
 	}
 
-	uint8_t x = CURRENT_CELL_X(mf);
-	uint8_t y = CURRENT_CELL_Y(mf);
-	highlight_cell(mf, MINEFIELD_X_OFFSET + x * 2 + 1,
-	               MINEFIELD_Y_OFFSET + y * 2 + 1);
+	highlight_current_cell(mf);
 }
 
 

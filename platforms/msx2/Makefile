@@ -59,7 +59,7 @@ $(BUILDDIR)/crt0.rel: crt0.z80
 	$(Z80_AS) -g -o $@ $<
 
 $(BUILDDIR)/video.rel: video.c mines.h
-	$(Z80_CC) $(Z80_CFLAGS) -c $< -o $@
+	$(Z80_CC) $(Z80_CFLAGS) $(SCREEN_RESOLUTION) -c $< -o $@
 
 mines.h: $(TILE_FILE) $(SC5TOOL)
 	$(SC5TOOL) mines > $@

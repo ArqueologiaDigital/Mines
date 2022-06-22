@@ -109,8 +109,8 @@ void set_scroll_y(int pos)
 
 void update_sprite_position(minefield* mf)
 {
-	uint8_t x = CURRENT_CELL_X(mf);
-	uint8_t y = CURRENT_CELL_Y(mf);
+	uint8_t x = CELL_X(mf, mf->current_cell);
+	uint8_t y = CELL_Y(mf, mf->current_cell);
 	target_x = 8 * (MINEFIELD_X_OFFSET + x * 2 + 1);
 	target_y = 8 * (MINEFIELD_Y_OFFSET + y * 2 + 1);
 
@@ -169,9 +169,10 @@ void set_color(int x, int y, char color)
 
 #define HIGHLIGHT_CELL_COLOR 4
 #define GRID_COLOR 14
-void highlight_cell(minefield* mf, int x, int y)
+void highlight_current_cell(minefield* mf)
 {
-    UNUSED(mf)
+    uint8_t x = CELL_X(mf, mf->current_cell) * 2 + MINEFIELD_X_OFFSET + 1;
+    uint8_t y = CELL_Y(mf, mf->current_cell) * 2 + MINEFIELD_Y_OFFSET + 1;
 #if 0
 //Experimental:
 	char color = HIGHLIGHT_CELL_COLOR;
