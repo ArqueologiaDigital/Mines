@@ -149,6 +149,13 @@ inline void gameplay_update(minefield* mf)
  
 
 #if !defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)
+
+#ifdef __GNUC__
+/* This is required for the MS-DOS port because otherwise
+ * the linker won't see the call to main() from our _start,
+ * and throw all the code away. */
+__attribute__((used))
+#endif
 int main() {
 	platform_init();
 
