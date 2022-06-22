@@ -13,6 +13,7 @@ For specific build & runtime/debug dependencies, please check the individual REA
 - [MSX2 (screen 5)](platforms/msx2/README.md): OK
 - [OpenGL](platforms/opengl/README.md): OK, but with glitchy colors.
 - [PSX](platforms/psx/README.md): WIP; Grid shows up but background is glitchy.
+- [Vectrex](platforms/vectrex/README.md): Crude initial boilerplate; currently broken.
 - [Commodore 64](platforms/c64/README.md): Just a boilerplate; Please consider contributing an initial implementation!
 
 ### How to create your own
