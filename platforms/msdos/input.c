@@ -55,18 +55,28 @@ uint8_t input_read(uint8_t source)
     return MINE_INPUT_IGNORED;
 }
 
-int random_number(int min_num, int max_num)
+static inline uint16_t nearly_divisionless(uint16_t s)
 {
-    int result = 0, low_num = 0, hi_num = 0;
+    /* 16-bit version of Lemire's "Nearly Divisionless Random Integer
+     * Generation" routine. Paper: https://arxiv.org/abs/1805.10941 */
+    uint16_t x = rand();
+    uint32_t m = (uint32_t)x * (uint32_t)s;
+    uint16_t l = (uint32_t)m;
 
-    if (min_num < max_num) {
-        low_num = min_num;
-        hi_num = max_num + 1; // include max_num in output
-    } else {
-        low_num = max_num + 1; // include max_num in output
-        hi_num = min_num;
+    if (l < s) {
+        uint32_t t = -s % s;
+
+        while (l < t) {
+            x = rand();
+            m = (uint32_t)x * (uint32_t)s;
+            l = (uint32_t)m;
+        }
     }
 
-    result = (rand() % (hi_num - low_num)) + low_num;
-    return result;
+    return m >> 16;
+}
+
+int random_number(int min_num, int max_num)
+{
+    return nearly_divisionless(max_num - min_num) + min_num;
 }
