@@ -251,8 +251,75 @@ void highlight_current_cell(minefield *mf)
     old_y = y;
 }
 
+#ifdef USE_DEBUG_MODE
+/* Thanks to OSDev Wiki for the serial initialization sequence! */
+
+#define SERIAL_PORT_ADDR 0x3f8
+static inline uint8_t inb(uint16_t port)
+{
+    uint8_t value;
+    asm __volatile("inb %1, %0" : "=Ral"(value) : "Nd"(port));
+    return value;
+}
+
+static void serial_debug_init(void)
+{
+    outb(SERIAL_PORT_ADDR + 1, 0x00);
+    outb(SERIAL_PORT_ADDR + 3, 0x80);
+    outb(SERIAL_PORT_ADDR + 0, 0x03);
+    outb(SERIAL_PORT_ADDR + 1, 0x00);
+    outb(SERIAL_PORT_ADDR + 3, 0x03);
+    outb(SERIAL_PORT_ADDR + 2, 0xC7);
+    outb(SERIAL_PORT_ADDR + 4, 0x0B);
+    outb(SERIAL_PORT_ADDR + 4, 0x0F);
+}
+
+static int serial_can_transmit(void)
+{
+    return inb(SERIAL_PORT_ADDR + 5) & 0x20;
+}
+
+static int serial_has_byte() { return inb(SERIAL_PORT_ADDR + 5) & 1; }
+
+void debug_msg(char *msg)
+{
+    while (*msg) {
+        while (!serial_can_transmit())
+            ;
+        outb(SERIAL_PORT_ADDR, *msg++);
+    }
+}
+
+void debug(char *msg, uint8_t value)
+{
+    static const char hex[] = "01234567890abcdef";
+    char v[3] = {hex[value >> 4], hex[value & 0xf], 0};
+
+    debug_msg(msg);
+    debug_msg(v);
+}
+
+void debug_break()
+{
+    debug_msg("\r\nPress any key to resume");
+
+    while (!serial_has_byte())
+        ;
+    inb(SERIAL_PORT_ADDR);
+}
+
+void debug_mode(uint8_t mode)
+{
+    debug("debug_mode unimplemented: ", mode);
+}
+#endif
+
 void platform_init()
 {
+#ifdef USE_DEBUG_MODE
+    serial_debug_init();
+#endif
+
     // Init random number generator:
     srand(time(NULL));
 

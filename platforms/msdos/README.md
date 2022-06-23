@@ -31,3 +31,20 @@ Since we currently lack Debian packages for gcc-ia16, I have built mine from sou
 - export PATH=$PATH:/home/fsanches/devel/github_tkchia/build-ia16/prefix/bin
 
 **Note:** Adjust your PATH environment variable according to your own personal username.
+
+### Debugging
+
+If built with `USE_DEBUG_MODE` set, the game will send the debugging
+information through the serial port on 0x3f8 at 38400 8N1.
+
+If using DOSBox, one can configure it like so:
+
+```
+serial1=nullmodem transparent:1 server:localhost port:2323
+```
+
+And then use some utility like `nc` to wait for debugging messages:
+
+```
+$ nc -l -p 2323
+```
