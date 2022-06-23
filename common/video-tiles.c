@@ -119,6 +119,7 @@ void draw_minefield(minefield* mf)
 
 void draw_scenario()
 {
+#ifdef SCREEN_WIDTH
 	uint8_t x,y;
 
 	for (x = 1; x < SCREEN_WIDTH - 1; x++) {
@@ -151,4 +152,5 @@ void draw_scenario()
 		set_tile(x, 0, TOP_BORDER__RIGHT);
 		set_tile(x, SCREEN_HEIGHT - 1, BOTTOM_BORDER__RIGHT);
 	}
+#endif
 }
