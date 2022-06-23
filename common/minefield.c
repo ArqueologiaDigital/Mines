@@ -185,7 +185,7 @@ void maybe_game_won(minefield* mf)
 		for (uint8_t y = 0; y < mf->height; y++) {
 			uint8_t cell = CELL(mf, x, y);
 
-			if (!(cell & ISOPEN) && !(cell & HASFLAG)) {
+			if (!(cell & ISOPEN) && (!(cell & HASFLAG) || !(cell & HASBOMB))) {
 				return;
 			}
 		}
