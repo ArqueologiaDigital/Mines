@@ -127,7 +127,7 @@ int random_number(int min, int max);
  * ----------------------
  *
  * You can undefine `USE_DEBUG_MODE` macro to transform all the debug macros
- * into empty macros, so no penalties are imposed on the release version.
+ * into empty macros, so no additional code is generated on the release version.
  */
 void debug_mode(uint8_t mode);
 
@@ -138,7 +138,7 @@ void debug_mode(uint8_t mode);
  * ----------------------
  *
  * You can undefine `USE_DEBUG_MODE` macro to transform all the debug macros
- * into empty macros, so no penalties are imposed on the release version.
+ * into empty macros, so no additional code is generated on the release version.
  */
 void debug_msg(char* msg);
 
@@ -150,7 +150,7 @@ void debug_msg(char* msg);
  * ----------------------
  *
  * You can undefine `USE_DEBUG_MODE` macro to transform all the debug macros
- * into empty macros, so no penalties are imposed on the release version.
+ * into empty macros, so no additional code is generated on the release version.
  */
 void debug(char* msg, uint8_t value);
 
@@ -161,18 +161,18 @@ void debug(char* msg, uint8_t value);
  * ----------------------
  *
  * You can undefine `USE_DEBUG_MODE` macro to transform all the debug macros
- * into empty macros, so no penalties are imposed on the release version.
+ * into empty macros, so no additional code is generated on the release version.
  */
 void debug_break();
 
 /**
- * [Optional] Breaks execution if not `ok`.
+ * Breaks execution if not `ok` and displays optional message after the `ok` parameter.
  *
  * Implementation details
  * ----------------------
  *
  * You can undefine `USE_DEBUG_MODE` macro to transform all the debug macros
- * into empty macros, so no penalties are imposed on the release version.
+ * into empty macros, so no additional code is generated on the release version.
  *
  * Regular C `assert`-like macros are not appropriate for graphics mode, so
  * Mines leverages some debug functions to implements its own.
@@ -180,13 +180,27 @@ void debug_break();
  * This macro requires that the platform's C compiler supports stringification
  * of arguments in macros. Otherwise, the `NO_STRINGIFICATION` macro should be
  * defined first.
+ *
+ * This macro can use variable argument support (variadic macros) to include a
+ * message in case of assertion failure, but you can set NO_VARIADIC first to
+ * disable this feature.
  */
 #ifndef NO_STRINGIFICATION
-#define assert(ok) \
-	do { if (!(ok)) { debug_msg("Assertion `" #ok "' failed.\nPaused "); debug_break(); } } while(0)
-#else
-#define assert(ok) \
-	do { if (!(ok)) { debug_msg("Assertion failed.\nPaused "); debug_break(); } } while(0)
+# ifndef NO_VARIADIC
+#  define assert(ok, ...) \
+	do { if (!(ok)) { debug_msg("Assertion `" #ok "' failed. " __VA_ARGS__ "\nPaused\n"); debug_break(); } } while(0)
+# else /* NO_VARIADIC */
+#  define assert(ok) \
+	do { if (!(ok)) { debug_msg("Assertion `" #ok "' failed.\nPaused\n"); debug_break(); } } while(0)
+# endif /* NO_VARIADIC */
+#else /* NO_STRINGIFICATION */
+# ifndef NO_VARIADIC
+#  define assert(ok, ...) \
+	do { if (!(ok)) { debug_msg("Assertion failed. " __VA_ARGS__ "\nPaused\n"); debug_break(); } } while(0)
+# else /* NO_VARIADIC */
+#  define assert(ok) \
+	do { if (!(ok)) { debug_msg("Assertion failed.\nPaused\n"); debug_break(); } } while(0)
+# endif /* NO_VARIADIC */
 #endif /* NO_STRINGIFICATION */
 
 #else
@@ -196,7 +210,12 @@ void debug_break();
 #define debug(x, y)
 #define debug_msg(x)
 #define debug_break()
-#define assert(x)
+
+# ifndef NO_VARIADIC
+#  define assert(x, ...)
+# else
+#  define assert(x)
+# endif /* NO_VARIADIC */
 
 #endif /* USE_DEBUG_MODE */
 
