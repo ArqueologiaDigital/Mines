@@ -178,3 +178,18 @@ uint8_t count_surrounding_flags(minefield* mf, uint8_t x, uint8_t y)
 	return count;
 }
 
+
+void maybe_game_won(minefield* mf)
+{
+	for (uint8_t x = 0; x < mf->width; x++) {
+		for (uint8_t y = 0; y < mf->height; y++) {
+			uint8_t cell = CELL(mf, x, y);
+
+			if (!(cell & ISOPEN) && !(cell & HASFLAG)) {
+				return;
+			}
+		}
+	}
+
+	mf->state = GAME_WON;
+}

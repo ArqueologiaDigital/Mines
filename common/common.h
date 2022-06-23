@@ -194,6 +194,7 @@ void debug_break();
 /* empty macros */
 #define debug_mode(x)
 #define debug(x, y)
+#define debug_msg(x)
 #define debug_break()
 #define assert(x)
 
