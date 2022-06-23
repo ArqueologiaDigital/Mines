@@ -54,9 +54,7 @@ void video_init()
     /* Set cursor sprite */
     set_sprite_pattern(cursor_pattern, PATTERN_ID);
     put_sprite_colors(cursor_colors, SPRITE_ID);
-
-    /* Set it to invisible */
-    put_cursor(0, 209);
+    hide_cursor();
 
     enable_screen();
 }
@@ -69,16 +67,24 @@ void put_cursor(uint8_t x, uint8_t y)
 }
 
 
+void hide_cursor()
+{
+    put_cursor(0, 209);
+}
+
+
 void highlight_current_cell(minefield* mf)
 {
-    bool finished = mf->state == GAME_OVER;
     uint8_t x = CELL_X(mf, mf->current_cell) * 2 + MINEFIELD_X_OFFSET + 1;
     uint8_t y = CELL_Y(mf, mf->current_cell) * 2 + MINEFIELD_Y_OFFSET + 1;
 
-    if (!finished) {
+    if (mf->state == PLAYING_GAME) {
         put_cursor(x * 8 - 3, y * 8 - 3);
-    } else {
+    } else if (mf->state == GAME_OVER) {
+        hide_cursor();
         vdp(TILE_X[EXPLOSION], TILE_Y[EXPLOSION], x * 8, y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_IMP);
+    } else {
+        hide_cursor();
     }
 }
 

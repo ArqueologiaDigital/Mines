@@ -65,6 +65,8 @@ void put_sprite_colors(uint8_t* src, uint8_t index) SDCCCALL0;
 
 void put_cursor(uint8_t x, uint8_t y);
 
+void hide_cursor();
+
 struct sprite_attr {
     uint8_t y;
     uint8_t x;
