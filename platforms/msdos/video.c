@@ -8,7 +8,7 @@
 
 __asm__(".section \".rodata\"\n"
         "mines_bin_start:\n"
-        ".incbin \"mines.bin\"\n"
+        ".incbin \"build/mines.bin\"\n"
         "mines_bin_end:\n"
         ".previous");
 extern const char mines_bin_start[];

@@ -7,8 +7,8 @@
 
 
 /**
- * [Required] Set the tile at (`x`, `y`) tile coordinates to the tile defined
- * by `tile` index.
+ * [Required] Set the tile position at the (`x`, `y`) coordinates with `tile`
+ * index.
  *
  * Implementation details
  * ----------------------
