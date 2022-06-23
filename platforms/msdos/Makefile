@@ -9,7 +9,7 @@ PYTHON := python3
 
 all: $(SOURCES)
 	mkdir -p $(BUILDDIR)
-	$(PYTHON) ./compress-mines-xpm.py mines.bin
+	$(PYTHON) ./compress-mines-xpm.py build/mines.bin
 	$(CC) $(SOURCES) $(CFLAGS) $(LDFLAGS) $(SCREEN_RESOLUTION) -o $(BUILDDIR)/mines.com
 
 run: all
