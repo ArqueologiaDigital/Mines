@@ -18,12 +18,14 @@
   */
 minefield* init_minefield();
 
+
 /**
  * [Optional] Set minefield to initial state, setting number of bombs and their
  * positions too. A default initialisation function is called if the
  * `RESET_MINEFIELD` macro is not defined.
  */
 void reset_minefield(minefield* mf);
+
 
 /**
   * [Optional] Free memory and resources of the board. The default destructor
@@ -37,15 +39,18 @@ void reset_minefield(minefield* mf);
   */
 void free_minefield(minefield* mf);
 
+
 /**
  * [Provided] Draws the background of the boardgame on screen.
  */
 void draw_minefield(minefield* mf);
 
+
 /**
  * [Provided] Draws the playfield of the boardgame on screen.
  */
 void draw_minefield_contents(minefield* mf);
+
 
 #ifdef MAIN_LOOP_REIMPLEMENTED
 /**
@@ -65,6 +70,7 @@ void platform_main_loop(minefield* mf);
 void draw_title_screen(minefield* mf);
 #endif /* DRAW_TITLE_SCREEN */
 
+
 #ifdef DRAW_GAME_OVER
 /**
  * [Optional] Draws a game over message when the game ends. It will be called
@@ -72,6 +78,7 @@ void draw_title_screen(minefield* mf);
  */
 void draw_game_over(minefield* mf);
 #endif /* DRAW_GAME_OVER */
+
 
 /**
  * [Required] Runs things in background, like music and animations.

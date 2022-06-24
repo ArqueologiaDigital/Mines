@@ -11,9 +11,7 @@
 #include <sys/ioctl.h>
 #include <assert.h>
 
-
 #define NUM_TICKS 1
-
 
 /* terminal size */
 int rows;

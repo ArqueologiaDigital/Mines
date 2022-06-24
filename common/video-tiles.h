@@ -17,6 +17,7 @@
  */
 void set_tile(uint8_t x, uint8_t y, uint8_t tile);
 
+
 /**
  * [Provided] Draws the cell at (`x`, `y`) board coordinates on the screen.
  *
@@ -27,6 +28,7 @@ void set_tile(uint8_t x, uint8_t y, uint8_t tile);
  */
 void draw_single_cell(minefield* mf, uint8_t x, uint8_t y);
 
+
 /**
  * [Provided] Draw the background image that surrounds the board.
  *
@@ -36,6 +38,7 @@ void draw_single_cell(minefield* mf, uint8_t x, uint8_t y);
  * See [tile_index](#tile_index) for the index value of the `GROUND` tile.
  */
 void draw_scenario();
+
 
 /**
  * [Required] Draw a tile or sprite cursor on the board.
@@ -50,12 +53,13 @@ void draw_scenario();
  */
 void highlight_current_cell(minefield* mf);
 
+
 enum {
-	/*	NOTE:
-		The tile codes for the number
-		of bombs *MUST* be sequential
-		because the video code assumes
-		that to be the case.	*/
+    /*    NOTE:
+        The tile codes for the number
+        of bombs *MUST* be sequential
+        because the video code assumes
+        that to be the case.    */
     ONE_BOMB,
     TWO_BOMBS,
     THREE_BOMBS,

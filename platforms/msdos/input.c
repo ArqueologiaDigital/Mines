@@ -3,13 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Uncomment this to see the keyboard scan code
-// values drawn to screen using game tiles:
-//#define DEBUGGING
-
-#ifdef DEBUGGING
-#include "video-tiles.h"
-#endif
 
 static inline uint8_t getch(void)
 {
@@ -18,15 +11,10 @@ static inline uint8_t getch(void)
     return key;
 }
 
+
 uint8_t input_read(uint8_t source)
 {
     char c = getch();
-
-#ifdef DEBUGGING
-    set_tile(6, 10, ONE_BOMB + c % 10 - 1);
-    set_tile(5, 10, ONE_BOMB + (c / 10) % 10 - 1);
-    set_tile(4, 10, ONE_BOMB + (c / 100) % 10 - 1);
-#endif
 
     if (c == 0 || c == -32) {
         c = getch();
@@ -55,6 +43,7 @@ uint8_t input_read(uint8_t source)
     return MINE_INPUT_IGNORED;
 }
 
+
 static inline uint16_t nearly_divisionless(uint16_t s)
 {
     /* 16-bit version of Lemire's "Nearly Divisionless Random Integer
@@ -75,6 +64,7 @@ static inline uint16_t nearly_divisionless(uint16_t s)
 
     return m >> 16;
 }
+
 
 int random_number(int min_num, int max_num)
 {

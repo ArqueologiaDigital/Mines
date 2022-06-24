@@ -39,8 +39,8 @@ void update_main_loop()
             draw_minefield(mf);
             game_over_update(mf);
             break;
-	case QUIT:
-	    glutLeaveMainLoop();
+    case QUIT:
+        glutLeaveMainLoop();
     }
 }
 

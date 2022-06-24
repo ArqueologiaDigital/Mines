@@ -3,6 +3,7 @@
 
 static unsigned int rand_seed = 1;
 
+
 int rand(void)
 {
     /* 16-bit xorshift PRNG */
@@ -11,6 +12,7 @@ int rand(void)
     rand_seed ^= rand_seed << 8;
     return rand_seed;
 }
+
 
 void srand(unsigned int v) { rand_seed = v; }
 
@@ -31,6 +33,7 @@ time_t time(time_t *t)
     return ret;
 }
 
+
 void *malloc(size_t v)
 {
     static char heap[4096];
@@ -46,6 +49,7 @@ void *malloc(size_t v)
     return old_heap_ptr;
 }
 
+
 void *calloc(size_t elem_size, size_t num)
 {
     size_t alloc_size = elem_size * num;
@@ -60,8 +64,10 @@ void *calloc(size_t elem_size, size_t num)
     return ptr;
 }
 
+
 void free(void *ptr) {
 }
+
 
 __asm__(".globl _start\n"
         "_start:\n"
