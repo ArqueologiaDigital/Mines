@@ -6,12 +6,31 @@
 #include <ncurses.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/ioctl.h>
 #include <assert.h>
+
+
+#define NUM_TICKS 1
+
+
+/* terminal size */
+int rows;
+int cols;
 
 
 // TODO: perhaps part of this should move to a platform.c file
 void platform_init()
 {
+    struct winsize size;
+    if (ioctl(0, TIOCGWINSZ, (char *) &size) < 0) {
+        rows = 80;
+        cols = 25;
+    }
+    rows = size.ws_row;
+    cols = size.ws_col;
+
     // Initialize ncurses library and setup colors
     initscr();
     start_color();
@@ -33,6 +52,8 @@ void platform_init()
     init_pair(CLOSED_CELL_COLOR, COLOR_WHITE, COLOR_BLACK);
     init_pair(FLAG_COLOR, COLOR_WHITE, COLOR_RED);
     init_pair(QUESTION_MARK_COLOR, COLOR_RED, COLOR_WHITE);
+    // disable waiting-for-input getch
+    nodelay(stdscr, true);
 
     // Init random number generator:
     srand(time(NULL));
@@ -172,21 +193,23 @@ void highlight_current_cell(minefield* mf)
 
 void draw_title_screen(minefield* mf)
 {
-    clear();
-
     move(1,4);
     attron(COLOR_PAIR(TEXT_COLOR));
     printw("Mines!");
 
     move(MINEFIELD_Y_OFFSET + mf->height * 2 + 2, 1);
-    printw("Press any key to start!");
+    printw("         ");
+
+    move(MINEFIELD_Y_OFFSET + mf->height * 2 + 3, 1);
+    printw("Press any key to start!             ");
+    move(MINEFIELD_Y_OFFSET + mf->height * 2 + 3, 24);
+
     refresh();
 }
 
 
 void draw_game_over(minefield* mf)
 {
-    clear();
     draw_minefield(mf);
 
     move(MINEFIELD_Y_OFFSET + mf->height * 2 + 2, 1);
@@ -204,8 +227,49 @@ void draw_game_over(minefield* mf)
 }
 
 
+void update_fps(float fps)
+{
+    char s[20];
+    snprintf(s, 20, "%.2f fps", fps);
+    move(0, cols - strlen(s));
+    printw(s);
+
+    refresh();
+}
+
+
+void wait_tick()
+{
+    static int frames = 0;
+    static int total = 0;
+    static float fps = 0.0;
+    // update screen 60 times per second
+    static double interval = NUM_TICKS * 1000 / 60;
+    static clock_t last_time = 0;
+    clock_t current = clock();
+    long elapsed = current - last_time;
+
+    // wait the remaining time in the frame
+    usleep(interval > elapsed ? interval - elapsed : 0);
+
+    frames++;
+    total += interval > elapsed ? interval : elapsed;
+
+    if (total >= 1000) {
+        fps = frames * ((float) 1000) / total;
+        total -= 1000;
+        update_fps(fps);
+        frames = 0;
+    }
+
+    last_time = current;
+}
+
+
 void idle_update(minefield* mf)
 {
+    // update everything first, then wait for the next frame
+    wait_tick();
 }
 
 

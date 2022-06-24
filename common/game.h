@@ -75,6 +75,12 @@ void draw_game_over(minefield* mf);
 
 /**
  * [Required] Runs things in background, like music and animations.
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * Refresh game state, like animation and music and when finished just call
+ * `wait_ticks()` to wait for the next frame.
  */
 void idle_update(minefield* mf);
 
