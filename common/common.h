@@ -166,6 +166,19 @@ void debug(char* msg, uint8_t value);
 void debug_break();
 
 /**
+ * [Optional] Wait for the remaining time until the next frame. It should be the
+ * last thing called inside `idle_update()`.
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * No assumption is made about how many frames per second the `wait_tick()`
+ * function will try to deliver. Values should probably be around the 60/30/15
+ * fps interval.
+ */
+void wait_tick();
+
+/**
  * Breaks execution if not `ok` and displays optional message after the `ok` parameter.
  *
  * Implementation details

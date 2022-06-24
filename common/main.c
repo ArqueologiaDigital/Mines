@@ -189,7 +189,7 @@ int main() {
 		}
 
 		idle_update(mf); // useful for doing other things
-		               // such as running animations
+		                 // such as running animations
 	}
 #endif /* MAIN_LOOP_REIMPLEMENTED */
 

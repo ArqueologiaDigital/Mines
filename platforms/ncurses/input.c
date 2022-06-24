@@ -2,11 +2,13 @@
 #include "minefield.h"
 #include <ncurses.h>
 #include <stdlib.h>
+#include <time.h>
 
 
 uint8_t input_read(uint8_t source)
 {
 	int c = getch();
+
 	if (c == KEY_LEFT) {
 		return MINE_INPUT_LEFT;
 	} else if (c == KEY_RIGHT) {
@@ -24,6 +26,7 @@ uint8_t input_read(uint8_t source)
 	} else if (c == (int)'q' || c == (int)'Q') {
 		return MINE_INPUT_QUIT;
 	}
+
 	return MINE_INPUT_IGNORED;
 }
 
