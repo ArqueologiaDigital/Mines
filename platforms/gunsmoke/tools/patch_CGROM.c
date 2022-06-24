@@ -1,5 +1,5 @@
 #include "mines.xpm"
-#include "video-tiles.h"
+#include "video-tile-codes.h"
 #include <stdio.h>
 #include <stdlib.h>
 

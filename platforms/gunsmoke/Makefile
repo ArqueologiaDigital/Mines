@@ -55,7 +55,7 @@ mines.xpm: mines.png
 #mines_background.xpm: mines_background.xcf
 #	convert mines_background.xcf mines_background.xpm
 
-tools/patch_CGROM: mines.xpm tools/patch_CGROM.c char_codes.h
+tools/patch_CGROM: mines.xpm tools/patch_CGROM.c ../../common/video-tile-codes.h
 	$(CC) -I../../common -I. tools/patch_CGROM.c -o tools/patch_CGROM
 
 #tools/patch_BGROM: mines_background.xpm tools/patch_BGROM.c
