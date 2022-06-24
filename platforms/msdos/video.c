@@ -28,10 +28,12 @@ struct img_pal_entry {
 
 static char **mines_xpm;
 
+
 static inline void outb(uint16_t port, uint8_t value)
 {
     asm __volatile("outb %0, %1" : : "Ral"(value), "Nd"(port));
 }
+
 
 static void set_palette(int color, uint8_t r, uint8_t g, uint8_t b)
 {
@@ -40,6 +42,7 @@ static void set_palette(int color, uint8_t r, uint8_t g, uint8_t b)
     outb(0x3c9, g);
     outb(0x3c9, b);
 }
+
 
 static char **decode_mines_bin(void)
 {
@@ -108,16 +111,19 @@ static char **decode_mines_bin(void)
     return out;
 }
 
+
 static inline void set_mode(unsigned char mode)
 {
     asm __volatile("int $16\n" : : "a"((uint16_t)(SET_MODE << 8 | mode)));
 }
+
 
 static void video_init(void)
 {
     set_mode(VGA_256_COLOR_MODE);
     mines_xpm = decode_mines_bin();
 }
+
 
 #define TILE_OFFSET(x, y) (((y) << 4) | (x))
 static inline uint8_t get_tile_offset(uint8_t tile)
@@ -194,6 +200,7 @@ static inline uint8_t get_tile_offset(uint8_t tile)
     return off ? off : tile2offset[GROUND];
 }
 
+
 /* set_tile emulates tile behaviour, but is actually a bitmap copy */
 static inline void set_tile_full(uint8_t dst_x, uint8_t dst_y, uint8_t tile, int8_t mask)
 {
@@ -225,10 +232,12 @@ static inline void set_tile_full(uint8_t dst_x, uint8_t dst_y, uint8_t tile, int
     }
 }
 
+
 void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
 {
     set_tile_full(dst_x, dst_y, tile, -1);
 }
+
 
 void highlight_current_cell(minefield *mf)
 {
@@ -251,6 +260,7 @@ void highlight_current_cell(minefield *mf)
     old_y = y;
 }
 
+
 #ifdef USE_DEBUG_MODE
 /* Thanks to OSDev Wiki for the serial initialization sequence! */
 
@@ -261,6 +271,7 @@ static inline uint8_t inb(uint16_t port)
     asm __volatile("inb %1, %0" : "=Ral"(value) : "Nd"(port));
     return value;
 }
+
 
 static void serial_debug_init(void)
 {
@@ -274,12 +285,18 @@ static void serial_debug_init(void)
     outb(SERIAL_PORT_ADDR + 4, 0x0F);
 }
 
+
 static int serial_can_transmit(void)
 {
     return inb(SERIAL_PORT_ADDR + 5) & 0x20;
 }
 
-static int serial_has_byte() { return inb(SERIAL_PORT_ADDR + 5) & 1; }
+
+static int serial_has_byte()
+{
+    return inb(SERIAL_PORT_ADDR + 5) & 1;
+}
+
 
 void debug_msg(char *msg)
 {
@@ -290,6 +307,7 @@ void debug_msg(char *msg)
     }
 }
 
+
 void debug(char *msg, uint8_t value)
 {
     static const char hex[] = "01234567890abcdef";
@@ -298,6 +316,7 @@ void debug(char *msg, uint8_t value)
     debug_msg(msg);
     debug_msg(v);
 }
+
 
 void debug_break()
 {
@@ -308,11 +327,13 @@ void debug_break()
     inb(SERIAL_PORT_ADDR);
 }
 
+
 void debug_mode(uint8_t mode)
 {
     debug("debug_mode unimplemented: ", mode);
 }
 #endif
+
 
 void platform_init()
 {
@@ -327,7 +348,9 @@ void platform_init()
     draw_scenario();
 }
 
+
 void idle_update(minefield *mf) {}
+
 
 void platform_shutdown()
 {

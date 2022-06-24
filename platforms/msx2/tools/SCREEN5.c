@@ -120,7 +120,8 @@ int main(int argc, char **argv)
         fprintf(stderr, "color [%s]\n", s);
         if (is_used_color(s, cpp, colors, width, height) != false) {
             ++used_colors;
-	    fprintf(stderr, "pixel '%.*s' registered as color #%i from table at %i'\n", cpp, s, used_colors, c + 1);
+            fprintf(stderr, "pixel '%.*s' registered as color #%i from table at %i'\n",
+                    cpp, s, used_colors, c + 1);
             register_color(palette, c, used_colors, cpp);
         }
     }
@@ -130,16 +131,16 @@ int main(int argc, char **argv)
     }
 
     printf("#include <stdint.h>\n\n");
-
     printf("#define %s_WIDTH %u\n", argv[1], width);
     printf("#define %s_HEIGHT %u\n\n", argv[1], height);
-
     printf("static const uint8_t %s_palette[] = {\n", argv[1]);
 
     for (int8_t i = 0; i <= colors; ++i) {
         if (palette[i].ci) {
-            printf("\t%2i, %u,%u,%u, /* 0x%02X, 0x%02X, 0x%02X */\n", palette[i].ci, palette[i].r, palette[i].g, palette[i].b,
-                    palette[i].rr, palette[i].gg, palette[i].bb);
+            printf("\t%2i, %u,%u,%u, /* 0x%02X, 0x%02X, 0x%02X */\n",
+                   palette[i].ci,
+                   palette[i].r, palette[i].g, palette[i].b,
+                   palette[i].rr, palette[i].gg, palette[i].bb);
         }
     }
 
@@ -162,7 +163,7 @@ int main(int argc, char **argv)
 
             printf("0x%02X,", (pixel1 << 4) | pixel2);
 
-	    pos += 2;
+        pos += 2;
         }
     }
 

@@ -2,9 +2,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-
 #include <stdint.h>
-
 
 #define MINE_INPUT_IGNORED 0
 #define MINE_INPUT_LEFT       (1<<0)
@@ -32,6 +30,7 @@
 #define UNUSED(x)
 #endif /* UNUSED_MACRO */
 
+
 /**
  * [Required] Platform-specific initialisation code
  *
@@ -43,6 +42,7 @@
  */
 void platform_init();
 
+
 /**
  * [Required] Platform-specific shutdown code
  *
@@ -53,6 +53,7 @@ void platform_init();
  * allocations etc.
  */
 void platform_shutdown();
+
 
 /**
  * [Required] Reads input from controller or keyboard, including all the buttons
@@ -86,6 +87,7 @@ void platform_shutdown();
  */
 uint8_t input_read(uint8_t source);
 
+
 /**
  * [Required] Returns a pseudo-random integer in the mathematical range
  * [`min_num`, `max_num`]. If `min_num` is greater than `max_num`, they will be
@@ -102,6 +104,7 @@ uint8_t input_read(uint8_t source);
  * reproducible behavior is not a requirement.
  */
 int random_number(int min, int max);
+
 
 #ifdef USE_DEBUG_MODE
 
@@ -131,6 +134,7 @@ int random_number(int min, int max);
  */
 void debug_mode(uint8_t mode);
 
+
 /**
  * [Optional] Send text message to emulator for debugging (printing).
  *
@@ -141,6 +145,7 @@ void debug_mode(uint8_t mode);
  * into empty macros, so no additional code is generated on the release version.
  */
 void debug_msg(char* msg);
+
 
 /**
  * [Optional] Send message to emulator for debugging (printing) along with a
@@ -154,6 +159,7 @@ void debug_msg(char* msg);
  */
 void debug(char* msg, uint8_t value);
 
+
 /**
  * [Optional] Pause emulator at debug_break function.
  *
@@ -164,6 +170,7 @@ void debug(char* msg, uint8_t value);
  * into empty macros, so no additional code is generated on the release version.
  */
 void debug_break();
+
 
 /**
  * [Optional] Wait for the remaining time until the next frame. It should be the
@@ -177,6 +184,7 @@ void debug_break();
  * fps interval.
  */
 void wait_tick();
+
 
 /**
  * Breaks execution if not `ok` and displays optional message after the `ok` parameter.
@@ -201,18 +209,18 @@ void wait_tick();
 #ifndef NO_STRINGIFICATION
 # ifndef NO_VARIADIC
 #  define assert(ok, ...) \
-	do { if (!(ok)) { debug_msg("Assertion `" #ok "' failed. " __VA_ARGS__ "\nPaused\n"); debug_break(); } } while(0)
+    do { if (!(ok)) { debug_msg("Assertion `" #ok "' failed. " __VA_ARGS__ "\nPaused\n"); debug_break(); } } while(0)
 # else /* NO_VARIADIC */
 #  define assert(ok) \
-	do { if (!(ok)) { debug_msg("Assertion `" #ok "' failed.\nPaused\n"); debug_break(); } } while(0)
+    do { if (!(ok)) { debug_msg("Assertion `" #ok "' failed.\nPaused\n"); debug_break(); } } while(0)
 # endif /* NO_VARIADIC */
 #else /* NO_STRINGIFICATION */
 # ifndef NO_VARIADIC
 #  define assert(ok, ...) \
-	do { if (!(ok)) { debug_msg("Assertion failed. " __VA_ARGS__ "\nPaused\n"); debug_break(); } } while(0)
+    do { if (!(ok)) { debug_msg("Assertion failed. " __VA_ARGS__ "\nPaused\n"); debug_break(); } } while(0)
 # else /* NO_VARIADIC */
 #  define assert(ok) \
-	do { if (!(ok)) { debug_msg("Assertion failed.\nPaused\n"); debug_break(); } } while(0)
+    do { if (!(ok)) { debug_msg("Assertion failed.\nPaused\n"); debug_break(); } } while(0)
 # endif /* NO_VARIADIC */
 #endif /* NO_STRINGIFICATION */
 

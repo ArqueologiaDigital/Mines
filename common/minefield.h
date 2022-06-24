@@ -12,13 +12,13 @@
 
 /* game state */
 enum {
-	TITLE_SCREEN = 1,
-	PLAYING_GAME = 2,
-	GAME_OVER = 3,
-	GAME_WON = 4,
-	ENTER_HISCORE_SCREEN = 5,
-	HIGHSCORES_LIST_SCREEN = 6,
-	QUIT = 7,
+    TITLE_SCREEN = 1,
+    PLAYING_GAME = 2,
+    GAME_OVER = 3,
+    GAME_WON = 4,
+    ENTER_HISCORE_SCREEN = 5,
+    HIGHSCORES_LIST_SCREEN = 6,
+    QUIT = 7,
 };
 
 // Note:
@@ -30,12 +30,12 @@ enum {
 #define HASQUESTIONMARK (1 << 7)
 
 typedef struct {
-	uint8_t state;
-	uint8_t width;
-	uint8_t height;
-	uint8_t current_cell;
-	uint8_t* cells;
-	bool changed;
+    uint8_t state;
+    uint8_t width;
+    uint8_t height;
+    uint8_t current_cell;
+    uint8_t* cells;
+    bool changed;
 } minefield;
 
 void open_cell(minefield* mf, uint8_t x, uint8_t y);
