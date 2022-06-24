@@ -24,12 +24,15 @@ int cols;
 void platform_init()
 {
     struct winsize size;
+
     if (ioctl(0, TIOCGWINSZ, (char *) &size) < 0) {
-        rows = 80;
-        cols = 25;
+        // You should probably get a better terminal emulator
+        cols = 80;
+        rows = 25;
+    } else {
+        rows = size.ws_row;
+        cols = size.ws_col;
     }
-    rows = size.ws_row;
-    cols = size.ws_col;
 
     // Initialize ncurses library and setup colors
     initscr();
