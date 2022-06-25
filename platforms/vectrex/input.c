@@ -26,19 +26,27 @@ uint8_t input_read(uint8_t source)
 }
 
 
-int random_number(int min_num, int max_num)
+inline uint8_t vectrex_bios_Random(){
+    // This routine generates a random 1-byte number,
+    // and places it in the A register.
+    register uint8_t number __asm__("a");
+    __asm__ __volatile("jsr 0xf517");
+    return number;
+}
+
+int random_number(int min, int max)
 {
-	int result = 0, low_num = 0, hi_num = 0;
+    int low, hi;
 
-	if (min_num < max_num)
-	{
-		low_num = min_num;
-		hi_num = max_num + 1; // include max_num in output
-	} else {
-		low_num = max_num + 1; // include max_num in output
-		hi_num = min_num;
-	}
+    if (min < max)
+    {
+        low = min;
+        hi = max;
+    } else {
+        low = max;
+        hi = min;
+    }
 
-	result = (rand() % (hi_num - low_num)) + low_num;
-	return result;
+    ++hi;
+    return (vectrex_bios_Random() % (hi - low)) + low;
 }
