@@ -56,11 +56,13 @@ void update_gameplay_input(minefield* mf, uint8_t input)
         case MINE_INPUT_FLAG:
             if (!(mf->cells[mf->current_cell] & ISOPEN)) {
                 if (mf->cells[mf->current_cell] & HASFLAG) {
+                    mf->mines++;
                     mf->cells[mf->current_cell] &= ~HASFLAG;
                     mf->cells[mf->current_cell] |= HASQUESTIONMARK;
                 } else if (mf->cells[mf->current_cell] & HASQUESTIONMARK) {
                     mf->cells[mf->current_cell] &= ~HASQUESTIONMARK;
                 } else {
+                    mf->mines--;
                     mf->cells[mf->current_cell] |= HASFLAG;
                     maybe_game_won(mf);
                 }
@@ -144,6 +146,14 @@ inline void game_over_update(minefield* mf)
 
 inline void gameplay_update(minefield* mf)
 {
+#ifdef DRAW_COUNTER
+    draw_counter(mf);
+#endif /* DRAW_COUNTER */
+
+#ifdef DRAW_TIMER
+    draw_timer(mf);
+#endif /* DRAW_TIMER */
+
     draw_minefield_contents(mf);
 
     uint8_t input = input_read(KEYBOARD);

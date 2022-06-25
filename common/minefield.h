@@ -35,6 +35,7 @@ typedef struct {
     uint8_t height;
     uint8_t current_cell;
     uint8_t* cells;
+    int8_t mines;
     bool changed;
 } minefield;
 
