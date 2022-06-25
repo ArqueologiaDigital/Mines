@@ -11,6 +11,9 @@ project(
 # Screen resolution macros
 add_compile_definitions(MINEFIELD_X_OFFSET=10)
 add_compile_definitions(MINEFIELD_Y_OFFSET=2)
+# Other macros
+add_compile_definitions(DRAW_TITLE_SCREEN=true)
+add_compile_definitions(MINEFIELD_ALLOCATION=overwrite)
 
 # Files to be included
 file(GLOB _sources ../../common/*.c;*.c)
