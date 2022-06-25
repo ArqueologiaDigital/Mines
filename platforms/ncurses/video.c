@@ -17,6 +17,10 @@
 int rows;
 int cols;
 
+/* timer */
+uint8_t minutes = 0;
+uint8_t seconds = 0;
+
 
 // TODO: perhaps part of this should move to a platform.c file
 void platform_init()
@@ -194,7 +198,7 @@ void highlight_current_cell(minefield* mf)
 
 void draw_title_screen(minefield* mf)
 {
-    move(1,4);
+    move(1, 4);
     attron(COLOR_PAIR(TEXT_COLOR));
     printw("Mines!");
 
@@ -206,6 +210,24 @@ void draw_title_screen(minefield* mf)
     move(MINEFIELD_Y_OFFSET + mf->height * 2 + 3, 24);
 
     refresh();
+}
+
+
+void draw_timer(minefield* mf)
+{
+    move(MINEFIELD_Y_OFFSET + 4, MINEFIELD_X_OFFSET + mf->width * 5);
+    printw("Time elapsed:");
+    move(MINEFIELD_Y_OFFSET + 5, MINEFIELD_X_OFFSET + mf->width * 5);
+    printw("%02i:%02i", minutes, seconds);
+}
+
+
+void draw_counter(minefield* mf)
+{
+    move(MINEFIELD_Y_OFFSET + 1, MINEFIELD_X_OFFSET + mf->width * 5);
+    printw("Mines left:");
+    move(MINEFIELD_Y_OFFSET + 2, MINEFIELD_X_OFFSET + mf->width * 5);
+    printw("%02i", mf->mines);
 }
 
 
@@ -242,13 +264,13 @@ void update_fps(float fps)
 void wait_tick()
 {
     static int frames = 0;
-    static int total = 0;
+    static long total = 0;
     static float fps = 0.0;
     // update screen 60 times per second
-    static double interval = NUM_TICKS * 1000 / 60;
+    static double interval = NUM_TICKS * 1000000 / 60;
     static clock_t last_time = 0;
     clock_t current = clock();
-    long elapsed = current - last_time;
+    long elapsed = 1000000 * ((double)(current - last_time)) / CLOCKS_PER_SEC;
 
     // wait the remaining time in the frame
     usleep(interval > elapsed ? interval - elapsed : 0);
@@ -256,11 +278,17 @@ void wait_tick()
     frames++;
     total += interval > elapsed ? interval : elapsed;
 
-    if (total >= 1000) {
-        fps = frames * ((float) 1000) / total;
-        total -= 1000;
+    if (total >= 1000000) {
+        fps = frames * ((float) 1000000) / total;
+        total -= 1000000;
         update_fps(fps);
         frames = 0;
+
+        // update timer
+        if (++seconds > 59) {
+            seconds = 0;
+            minutes++;
+        }
     }
 
     last_time = current;

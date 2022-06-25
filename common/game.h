@@ -21,22 +21,22 @@ minefield* init_minefield();
 
 /**
  * [Optional] Set minefield to initial state, setting number of bombs and their
- * positions too. A default initialisation function is called if the
+ * positions in the grid. A default initialisation function is called if the
  * `RESET_MINEFIELD` macro is not defined.
  */
 void reset_minefield(minefield* mf);
 
 
 /**
-  * [Optional] Free memory and resources of the board. The default destructor
-  * is called if the `MINEFIELD_ALLOCATION` macro is not defined.
-  *
-  * Implementation details
-  * ----------------------
-  *
-  * The same resources allocated by `init_minefield()` should be released by
-  * this function.
-  */
+ * [Optional] Free memory and resources of the board. The default destructor
+ * is called if the `MINEFIELD_ALLOCATION` macro is not defined.
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * The same resources allocated by `init_minefield()` should be released by
+ * this function.
+ */
 void free_minefield(minefield* mf);
 
 
@@ -50,6 +50,34 @@ void draw_minefield(minefield* mf);
  * [Provided] Draws the playfield of the boardgame on screen.
  */
 void draw_minefield_contents(minefield* mf);
+
+
+#ifdef DRAW_COUNTER
+/**
+ * [Required] Draws the mine counter on the screen.
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * The set of tile characters must include all the digits and the negative
+ * sign, since the counter can become negative.
+ */
+void draw_counter(minefield* mf);
+#endif /* DRAW_COUNTER */
+
+
+#ifdef DRAW_TIMER
+/**
+ * [Required] Display time elapsed since the start of the game.
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * The set of tile characters must include all the digits and the colon
+ * to separate minutes and seconds.
+ */
+void draw_timer(minefield* mf);
+#endif /* DRAW_TIMER */
 
 
 #ifdef MAIN_LOOP_REIMPLEMENTED

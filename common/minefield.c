@@ -19,25 +19,26 @@ void game_over(minefield* mf)
 
 
 #ifndef RESET_MINEFIELD
-void fill_minefield(minefield* mf, uint8_t num_bombs)
+void fill_minefield(minefield* mf)
 {
     // Clear the minefield:
-    for (uint8_t x = 0; x < mf->width; x++) {
-        for (uint8_t y = 0; y < mf->height; y++) {
-            CELL(mf, x, y) = 0;
+    for (uint8_t x1 = 0; x1 < mf->width; x1++) {
+        for (uint8_t y1 = 0; y1 < mf->height; y1++) {
+            CELL(mf, x1, y1) = 0;
         }
     }
 
-    // Place bombs:
-    while (num_bombs--) {
-        uint8_t x, y;
+    // Place mines:
+    uint8_t mines = mf->mines;
+    while (mines--) {
+        uint8_t x2, y2;
 
         do {
-            x = random_number(0, mf->width - 1);
-            y = random_number(0, mf->height - 1);
-        } while (CELL(mf, x, y) & HASBOMB);
+            x2 = random_number(0, mf->width - 1);
+            y2 = random_number(0, mf->height - 1);
+        } while (CELL(mf, x2, y2) & HASBOMB);
 
-        CELL(mf, x, y) |= HASBOMB;
+        CELL(mf, x2, y2) |= HASBOMB;
     }
 
     // Compute neighbouring bombs:
@@ -94,9 +95,9 @@ void free_minefield(minefield* mf)
 #ifndef RESET_MINEFIELD
 void reset_minefield(minefield* mf)
 {
-    uint8_t num_bombs = random_number(10, 30);
-    debug("num_bombs = ", num_bombs);
-    fill_minefield(mf, num_bombs);
+    mf->mines = random_number(10, 30);
+    debug("num_bombs = ", mf->mines);
+    fill_minefield(mf);
 }
 #endif /* RESET_MINEFIELD */
 
