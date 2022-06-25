@@ -1,6 +1,3 @@
-# PSn00bSDK example CMake script
-# (C) 2021 spicyjpeg - MPL licensed
-
 cmake_minimum_required(VERSION 3.20)
 
 project(
@@ -11,11 +8,18 @@ project(
 	HOMEPAGE_URL ""
 )
 
-psn00bsdk_add_executable(mines STATIC main.c)
+# Screen resolution macros
+add_compile_definitions(MINEFIELD_X_OFFSET=10)
+add_compile_definitions(MINEFIELD_Y_OFFSET=2)
+
+# Files to be included
+file(GLOB _sources ../../common/*.c;*.c)
+message("FILES ${_sources}")
+psn00bsdk_add_executable(mines STATIC ${_sources})
 
 psn00bsdk_add_cd_image(
 	iso      # Target name
-	mines    # Output file name (= template.bin + template.cue)
+	mines    # Output file name (= mines.bin + mines.cue)
 	iso.xml  # Path to config file
 	DEPENDS mines
 )
