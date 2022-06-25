@@ -3,6 +3,12 @@
 #include <psxetc.h>
 #include <psxgte.h>
 #include <psxgpu.h>
+#include "../../common/video-tiles.h"
+
+// Define display/draw environments for double buffering
+DISPENV disp[2];
+DRAWENV draw[2];
+int db;
 
 void init_gl() {
 	// This not only resets the GPU but it also installs the library's
@@ -37,7 +43,9 @@ void init_gl() {
 	FntOpen(0, 8, 320, 224, 0, 100);
 }
 
-void update_display() {
+// Display function
+void display()
+{
 	// Flip buffer index
 	db = !db;
 	
@@ -54,8 +62,43 @@ void update_display() {
 	
 	// Enable display output, ResetGraph() disables it by default
 	SetDispMask(1);
+	
 }
 
 void platform_init() {
+	int counter;
+
+	// Init stuff	
 	init_gl();
+	
+	// Main loop
+	counter = 0;
+	while(1)
+	{
+	
+		// Print the obligatory hello world and counter to show that the
+		// program isn't locking up to the last created text stream
+		FntPrint(-1, "HELLO WORLD\n");
+		FntPrint(-1, "COUNTER=%d\n", counter);
+		
+		// Draw the last created text stream
+		FntFlush(-1);
+		
+		// Update display
+		display();
+		
+		// Increment the counter
+		counter++;
+	}
+	
 }
+
+void platform_shutdown() {
+}
+
+void set_tile(uint8_t x, uint8_t y, uint8_t tile) {
+}
+
+void highlight_current_cell(minefield* mf) {}
+
+void idle_update(minefield* mf) {}
