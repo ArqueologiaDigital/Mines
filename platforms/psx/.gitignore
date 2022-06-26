@@ -1,2 +1,7 @@
 *.bin
 build
+*.mcd
+*.frag
+*.lua
+*.vert
+pcsx.json
