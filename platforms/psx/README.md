@@ -32,7 +32,7 @@ cmake --version
 
 ```sh
 sudo mkdir /usr/local/mipsel-none-elf
-cp /usr/local/mipsel-none-elf
+cd /usr/local/mipsel-none-elf
 sudo wget https://github.com/Lameguy64/PSn00bSDK/releases/download/v0.19/gcc-mipsel-none-elf-11.1.0-linux.zip
 sudo unzip gcc-mipsel-none-elf-11.1.0-linux.zip
 ```
