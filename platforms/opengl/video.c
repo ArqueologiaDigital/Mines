@@ -154,17 +154,13 @@ void draw_minefield_border(int w, int h, int stems)
 }
 
 
-void draw_bomb(int w, int h)
+void draw_mine_shape(int w, int h)
 {
-    w*=0.7;
-
     GLUquadricObj *q = gluNewQuadric();
-    int n=20;
-
-    glColor3f(0.4, 0.3, 0.3);
+    int n = 20;
 
     glPushMatrix();
-    glutSolidSphere(w*0.75, 25, 25);
+    glutSolidSphere(w * 0.75, 25, 25);
     glPopMatrix();
 
     glPushMatrix();
@@ -172,7 +168,7 @@ void draw_bomb(int w, int h)
     gluCylinder(q, w/5.0, w/5.0, w*0.2, n, n);
     glPopMatrix();
 
-    for (int i=0; i<4; i++){
+    for (int i=0; i<4; i++) {
         glPushMatrix();
         glRotatef(90*i, 0, 0, 1);
         glRotatef(90, 1, 0, 0);
@@ -185,9 +181,15 @@ void draw_bomb(int w, int h)
 
 void draw_explosion(int w, int h)
 {
-// TODO: At least change color.
-//       Maybe draw something completely different.
-    draw_bomb(w, h);
+    glColor3f(1.0, 0.1, 0.1);
+    draw_mine_shape(w, h);
+}
+
+
+void draw_bomb(int w, int h)
+{
+    glColor3f(0.4, 0.3, 0.3);
+    draw_mine_shape(w * 0.7, h);
 }
 
 
@@ -260,10 +262,10 @@ void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
     glPushMatrix();
     glTranslatef(-250 + 12 * dst_x,  -120 + 12 * (25-dst_y),  0);
 
-    switch(tile){
+    switch(tile) {
         case ONE_BOMB: draw_number(12, 12, 1, 0, 0, 1); break;
         case TWO_BOMBS: draw_number(12, 12, 2, 0, 1, 0); break;
-        case THREE_BOMBS: draw_number(12, 12, 3, 0, 0, 1); break;;
+        case THREE_BOMBS: draw_number(12, 12, 3, 0, 0, 1); break;
         case FOUR_BOMBS: draw_number(12, 12, 4, 1, 1, 0); break;
         case FIVE_BOMBS:  draw_number(12, 12, 5, 1, 0, 1); break;
         case SIX_BOMBS: draw_number(12, 12, 6, 1, 1, 0); break;
@@ -328,7 +330,7 @@ void highlight_current_cell(minefield* mf)
 
     if (mf->state == GAME_OVER)
         set_tile(x, y, EXPLOSION);
-    else
+    else if (mf->state == PLAYING_GAME)
         set_tile(x, y, CURSOR);
 }
 
