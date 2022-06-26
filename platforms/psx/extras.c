@@ -2,13 +2,13 @@
 
 minefield* init_minefield()
 {
-    // TODO - sizeof seems to be crashing the emulator!
+    // TODO - calloc seems to be crashing the emulator!
     //minefield* mf = calloc(1, sizeof(minefield));
     minefield* mf = malloc(1);
     mf->width = 10;
     mf->height = 10;
     //mf->cells = calloc(mf->width, mf->height);
-    mf->cells = malloc(1);
+    mf->cells = malloc(mf->width);
 
     return mf;
 }
