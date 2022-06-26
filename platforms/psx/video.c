@@ -90,6 +90,7 @@ void set_tile(uint8_t x, uint8_t y, uint8_t tile_type) {
         case MINEFIELD_HORIZONTAL_TOP:
         case MINEFIELD_HORIZONTAL_MIDDLE:
         case MINEFIELD_HORIZONTAL_BOTTOM:
+        case MINEFIELD_CROSS:
             setRGB0(tile, 0, 63, 0);
             break;
         case CURSOR:
