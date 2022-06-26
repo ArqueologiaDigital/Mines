@@ -2,7 +2,7 @@
 
 minefield* init_minefield()
 {
-    // TODO - understand why calloc doesn't work :(
+    // TODO - sizeof seems to be crashing the emulator!
     //minefield* mf = calloc(1, sizeof(minefield));
     minefield* mf = malloc(1);
     mf->width = 10;
@@ -19,3 +19,12 @@ void free_minefield(minefield* mf)
     free(mf->cells);
     free(mf);
 }
+
+void platform_init() {
+    int counter;
+
+    // Init stuff   
+    init_gl();
+    start_pad();
+}
+

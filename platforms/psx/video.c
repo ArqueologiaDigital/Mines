@@ -5,10 +5,16 @@
 #include <psxgpu.h>
 #include "../../common/video-tiles.h"
 
+#define OTLEN 8
+
 // Define display/draw environments for double buffering
 DISPENV disp[2];
 DRAWENV draw[2];
 int db;
+
+u_long ot[2][OTLEN];
+char pribuff[2][32768];
+char *nextpri;
 
 void init_gl() {
     // This not only resets the GPU but it also installs the library's
@@ -62,20 +68,29 @@ void display()
     
     // Enable display output, ResetGraph() disables it by default
     SetDispMask(1);
-    
-}
 
-void platform_init() {
-    int counter;
-
-    // Init stuff   
-    init_gl();
+    DrawOTag(ot[db]+OTLEN-1);
 }
 
 void platform_shutdown() {
 }
 
-void set_tile(uint8_t x, uint8_t y, uint8_t tile) {
+void set_tile(uint8_t x, uint8_t y, uint8_t tile_uint) {
+    TILE *tile;
+
+    ClearOTagR(ot[db], OTLEN);
+    tile = (TILE*)nextpri;
+
+    setTile(tile);
+    setXY0(tile, x, y);
+    setWH(tile, 32, 32);
+    setRGB0(tile, 255, 255, 0);
+
+    addPrim(ot[db], tile);
+
+    // TODO - sizeof seems to be crashing the emulator!
+    //nextpri += sizeof(TILE);
+    display();
 }
 
 void highlight_current_cell(minefield* mf) {}
@@ -85,6 +100,7 @@ void idle_update(minefield* mf) {}
 void draw_title_screen(minefield* mf) {
     FntPrint(-1, "MINESWEEPER\n");
     FntPrint(-1, "BROUGHT TO YOU BY ARQUEOLOGIA DIGITAL\n");
+    FntPrint(-1, "PRESS START\n");
     FntFlush(-1);
     display();  
 }

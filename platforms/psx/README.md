@@ -54,6 +54,12 @@ Download the [pcsx-redux](https://github.com/grumpycoders/pcsx-redux) emulator f
 
 Unzip and then run the .AppImage file.
 
+Copy the .AppImage file to your /usr/local/bin
+
+```sh
+sudo cp PCSX-Redux-HEAD-x86_64.AppImage /usr/local/bin/pcsx-redux
+```
+
 ## Building the project
 
 ```sh
@@ -64,3 +70,5 @@ make build
 You can then open PCSX-Redux, click on File > Open ISO, then select the file on build/mines.bin. Then, click on Emulation > Run.
 
 You can also burn the build to a CD or load it on your favorite emulator.
+
+Alternatively, if you have PCSX on your PATH, you can just run `make run`.
