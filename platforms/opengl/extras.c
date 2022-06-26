@@ -34,6 +34,7 @@ void update_main_loop()
             draw_minefield(mf);
             gameplay_update(mf);
             break;
+        case GAME_WON:
         case GAME_OVER:
             draw_minefield_contents(mf);
             draw_minefield(mf);
