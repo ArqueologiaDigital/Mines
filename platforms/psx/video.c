@@ -54,6 +54,7 @@ void display()
 {
     // Flip buffer index
     db = !db;
+    nextpri = pribuff[db];
     
     // Wait for all drawing to complete
     DrawSync(0);
@@ -88,8 +89,7 @@ void set_tile(uint8_t x, uint8_t y, uint8_t tile_uint) {
 
     addPrim(ot[db], tile);
 
-    // TODO - sizeof seems to be crashing the emulator!
-    //nextpri += sizeof(TILE);
+    nextpri += sizeof(TILE);
     display();
 }
 
