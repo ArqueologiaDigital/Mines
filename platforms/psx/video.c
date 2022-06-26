@@ -57,8 +57,6 @@ void display()
     nextpri = pribuff[db];
 }
 
-void platform_shutdown();
-
 void set_tile(uint8_t x, uint8_t y, uint8_t tile_uint) {
     debug("x axis = ", x);
     debug("y axis = ", y);
