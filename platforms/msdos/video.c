@@ -207,7 +207,7 @@ static inline void set_tile_full(uint8_t dst_x, uint8_t dst_y, uint8_t tile, int
 {
     static uint8_t __far *video_seg = (uint8_t __far *)0xa0000000;
     uint8_t __far *video_seg_start =
-        &video_seg[320 * (int)dst_y * 8 + (int)dst_x * 8];
+        &video_seg[320 * (unsigned int)dst_y * 8 + (unsigned int)dst_x * 8];
     const uint16_t offs = get_tile_offset(tile);
     const uint16_t off_high = 8 * (offs >> 4);
     const uint16_t off_low = 8 * (offs & 0xf);
