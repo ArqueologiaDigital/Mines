@@ -25,7 +25,6 @@ uint8_t input_read(uint8_t source)
 	return key;
 }
 
-
 inline uint8_t vectrex_bios_Random(){
     // This routine generates a random 1-byte number,
     // and places it in the A register.

@@ -4,15 +4,7 @@
 
 .area	_HOME
 .area	_CODE
-.area	_INITIALIZER
-.area	_GSINIT
-.area	_GSFINAL
-
 .area	_DATA
-.area	_INITIALIZED
-.area	_BSEG
-.area	_BSS
-.area	_HEAP
 
 
 .area   _HEADER (ABS)
@@ -29,19 +21,16 @@
 
 init:
 	;; IMPLEMENT-ME!
-	;; Stack at the top of memory.
-	;;ld	sp,#0xF000
 	;;call gsinit  ;; Initialise global variables
-	;;call _main
-	;;jp	init
-	jmp _main
+	jsr _main
+	jmp	init
 
 .area	_CODE
 
 _exit::
 ;;	jmp init
 
-.area   _GSINIT
+;; .area   _GSINIT
 gsinit::
 	;; IMPLEMENT-ME!
 	;;ld bc, #l__INITIALIZER
@@ -53,5 +42,6 @@ gsinit::
 	;;ldir
 gsinit_next:
 
-.area   _GSFINAL
+;; .area   _GSFINAL
 ;;	ret
+
