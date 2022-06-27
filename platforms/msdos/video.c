@@ -142,6 +142,7 @@ static inline uint8_t get_tile_offset(uint8_t tile)
 
         [BOMB] = TILE_OFFSET(0, 1),
         [FLAG] = TILE_OFFSET(1, 1),
+        [EMPTY_FLAG] = TILE_OFFSET(1, 1),
         [QUESTION_MARK] = TILE_OFFSET(2, 1),
         [EXPLOSION] = TILE_OFFSET(3, 1),
 
@@ -345,7 +346,6 @@ void platform_init()
     srand(time(NULL));
 
     video_init();
-    draw_scenario();
 }
 
 

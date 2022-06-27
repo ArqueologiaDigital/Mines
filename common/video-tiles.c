@@ -1,4 +1,5 @@
 #include "video-tiles.h"
+#include "common.h"
 #include "minefield.h"
 
 
@@ -22,7 +23,11 @@ void draw_single_cell(minefield* mf, uint8_t x, uint8_t y)
         }
     } else {
         if (cell & HASFLAG) {
-            set_tile(x, y, FLAG);
+            if (mf->state != GAME_OVER) {
+                set_tile(x, y, FLAG);
+            } else if (!(cell & HASBOMB)) {
+                set_tile(x, y, EMPTY_FLAG);
+            }
         } else if (cell & HASQUESTIONMARK) {
             set_tile(x, y, QUESTION_MARK);
         } else {

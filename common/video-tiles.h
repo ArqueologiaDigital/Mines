@@ -29,17 +29,6 @@ void draw_single_cell(minefield* mf, uint8_t x, uint8_t y);
 
 
 /**
- * [Provided] Draw the background image that surrounds the board.
- *
- * Note: some platforms use the `GROUND` tile to cover the whole background
- * area.
- *
- * See [tile_index](#tile_index) for the index value of the `GROUND` tile.
- */
-void draw_scenario();
-
-
-/**
  * [Required] Draw a tile or sprite cursor on the board.
  *
  * Implementation details

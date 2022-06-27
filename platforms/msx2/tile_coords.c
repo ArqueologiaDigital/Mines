@@ -14,6 +14,7 @@ static const uint8_t TILE_X[MAX_VIDEO_TILES] = {
     [EIGHT_BOMBS] = TILE_POS_X(7, 0),
     [BLANK] = TILE_POS_X(8, 0),
     [CURSOR] = TILE_POS_X(9, 0),
+    [EMPTY_FLAG] = TILE_POS_X(10, 0),
 
     [BOMB] = TILE_POS_X(0, 1),
     [FLAG] = TILE_POS_X(1, 1),
@@ -71,6 +72,7 @@ static const uint16_t TILE_Y[MAX_VIDEO_TILES] = {
     [EIGHT_BOMBS] = TILE_POS_Y(7, 0),
     [BLANK] = TILE_POS_Y(8, 0),
     [CURSOR] = TILE_POS_Y(9, 0),
+    [EMPTY_FLAG] = TILE_POS_Y(10, 0),
 
     [BOMB] = TILE_POS_Y(0, 1),
     [FLAG] = TILE_POS_Y(1, 1),

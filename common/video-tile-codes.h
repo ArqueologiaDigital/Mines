@@ -55,6 +55,7 @@ enum {
     MINEFIELD_CORNER_BOTTOM_RIGHT,
 
     /* Insert new tiles here */
+    EMPTY_FLAG,
 
     MAX_VIDEO_TILES,
 };

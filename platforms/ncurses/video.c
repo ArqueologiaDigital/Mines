@@ -113,6 +113,10 @@ void set_tile(uint8_t x, uint8_t y, uint8_t tile)
             attron(COLOR_PAIR(FLAG_COLOR));
             printw("F");
             break;
+        case EMPTY_FLAG:
+            attron(COLOR_PAIR(FLAG_COLOR));
+            printw("F̸");
+            break;
         case QUESTION_MARK:
             attron(COLOR_PAIR(QUESTION_MARK_COLOR));
             printw("?");
