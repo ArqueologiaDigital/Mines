@@ -16,7 +16,7 @@ int db;
 
 u_long ot[2][OTLEN];
 char pribuff[2][32768];
-char *nextpri;
+char *nextpri = pribuff[0];
 
 void init_gl() {
     ResetGraph(0);
@@ -27,18 +27,16 @@ void init_gl() {
     SetDefDrawEnv(&draw[0], 0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT);
     SetDefDrawEnv(&draw[1], 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     
-    //setRGB0(&draw[0], 0, 96, 0);
-    //setRGB0(&draw[1], 0, 96, 0);
+    SetDispMask(1);
+    setRGB0(&draw[0], 0, 96, 0);
+    setRGB0(&draw[1], 0, 96, 0);
     //draw[0].isbg = 1;
     //draw[1].isbg = 1;
     
     PutDispEnv(&disp[db]);
     PutDrawEnv(&draw[db]);
 
-    // Load test font
 	FntLoad(960, 0);
-
-	// Open up a test font text stream of 100 characters
 	FntOpen(0, 8, 320, 224, 0, 100);
 }
 
@@ -49,14 +47,12 @@ void display()
 
     PutDispEnv(&disp[db]);
     PutDrawEnv(&draw[db]);
-    
-    SetDispMask(1);
 
-    DrawOTag(ot[db] + OTLEN - 1);
+    DrawOTag(ot[db][OTLEN - 1]);
 
     db = !db;
 
-    DrawOTag(ot[db] + OTLEN - 1);
+    DrawOTag(ot[db][OTLEN - 1]);
     nextpri = pribuff[db];
 }
 
@@ -101,7 +97,7 @@ void set_tile(uint8_t x, uint8_t y, uint8_t tile_type) {
             break;
     }
 
-    addPrim(ot[db], tile);
+    addPrim(ot[db][OTLEN - 1], tile);
 
     nextpri += sizeof(TILE);
     display();
