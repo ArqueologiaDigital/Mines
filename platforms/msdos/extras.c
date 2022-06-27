@@ -36,15 +36,21 @@ time_t time(time_t *t)
 
 void *malloc(size_t v)
 {
-    static char heap[4096];
+    static char heap[5000];
     static char *heap_ptr = heap;
     char *old_heap_ptr;
 
+    if (sizeof(heap) - (heap_ptr - heap) < v) {
+        asm __volatile("int $16\n"
+                       "jmp exit"
+                       :
+                       : "a"((uint16_t)0));
+
+        return NULL;
+    }
+
     old_heap_ptr = heap_ptr;
     heap_ptr += v;
-
-    if (heap_ptr > heap + sizeof(heap))
-        return NULL;
 
     return old_heap_ptr;
 }
