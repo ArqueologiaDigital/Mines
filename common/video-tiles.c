@@ -23,7 +23,7 @@ void draw_single_cell(minefield* mf, uint8_t x, uint8_t y)
         }
     } else {
         if (cell & HASFLAG) {
-            if (mf->state != GAME_OVER) {
+            if (mf->state == PLAYING_GAME) {
                 set_tile(x, y, FLAG);
             } else if (!(cell & HASBOMB)) {
                 set_tile(x, y, EMPTY_FLAG);

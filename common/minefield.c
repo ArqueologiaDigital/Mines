@@ -10,7 +10,8 @@ void game_over(minefield* mf)
     // show all bomb locations
     for (uint8_t x = 0; x < mf->width; x++) {
         for (uint8_t y = 0; y < mf->height; y++) {
-            if (CELL(mf, x, y) & HASBOMB) {
+            uint8_t cell = CELL(mf, x, y);
+            if (!(cell & HASFLAG) && (cell & HASBOMB)) {
                 CELL(mf, x, y) |= ISOPEN;
             }
         }
