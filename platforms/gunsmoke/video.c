@@ -44,6 +44,7 @@ uint8_t get_tile_color(uint8_t tile){
         case CURSOR: return 12;
         case BOMB: return 10;
         case FLAG: return 9;
+        case EMPTY_FLAG: return 9;
         case QUESTION_MARK: return 9;
         case EXPLOSION: return 0;
         case GROUND: return 128;

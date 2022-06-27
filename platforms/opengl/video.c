@@ -276,6 +276,7 @@ void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
 
         case BOMB: draw_bomb(12, 12); break;
         case FLAG: draw_flag(12, 12); break;
+        case EMPTY_FLAG: draw_flag(12, 12); break;
         case QUESTION_MARK: draw_question_mark(12, 12); break;
         case EXPLOSION: draw_explosion(12, 12); break;
         case GROUND: break;
@@ -411,7 +412,6 @@ void platform_init()
     srand(time(NULL));
 
     init_gl();
-    draw_scenario();
 }
 
 

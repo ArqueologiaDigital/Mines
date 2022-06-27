@@ -178,6 +178,9 @@ int main() {
     platform_init();
 
     minefield* mf = init_minefield();
+
+    draw_scenario();
+
     mf->state = TITLE_SCREEN;
 
 #ifdef MAIN_LOOP_REIMPLEMENTED

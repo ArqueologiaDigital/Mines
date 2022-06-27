@@ -52,6 +52,23 @@ void draw_minefield(minefield* mf);
 void draw_minefield_contents(minefield* mf);
 
 
+/**
+ * [Required] Draw the background image that surrounds the board.
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * If coding a tile-based platform that uses **video-tiles.h** header, you can
+ * use the definition in **video-tiles.c** instead of creating your own.
+ *
+ * Note: some tile-based platforms use the `GROUND` tile to cover the whole
+ * background area.
+ *
+ * See [tile_index](#tile_index) for the index value of the `GROUND` tile.
+ */
+void draw_scenario();
+
+
 #ifdef DRAW_COUNTER
 /**
  * [Required] Draws the mine counter on the screen.

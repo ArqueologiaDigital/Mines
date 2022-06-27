@@ -93,7 +93,6 @@ void platform_init()
 {
     set_random_seed(read_clock());
     video_init();
-    draw_scenario();
 }
 
 
