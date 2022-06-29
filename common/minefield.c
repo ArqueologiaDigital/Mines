@@ -1,22 +1,6 @@
 #include "common.h" 
 #include "minefield.h"
-
-
-void game_over(minefield* mf)
-{
-    mf->changed = true;
-    mf->state = GAME_OVER;
-
-    // show all bomb locations
-    for (uint8_t x = 0; x < mf->width; x++) {
-        for (uint8_t y = 0; y < mf->height; y++) {
-            uint8_t cell = CELL(mf, x, y);
-            if (!(cell & HASFLAG) && (cell & HASBOMB)) {
-                CELL(mf, x, y) |= ISOPEN;
-            }
-        }
-    }
-}
+#include "game.h"
 
 
 #ifndef RESET_MINEFIELD
@@ -112,7 +96,8 @@ void open_cell(minefield* mf, uint8_t x, uint8_t y)
         CELL(mf, x, y) |= ISOPEN;
 
         if (CELL(mf, x, y) & HASBOMB) {
-            game_over(mf);
+            mf->state = GAME_OVER;
+            draw_minefield_contents(mf);
             return;
         }
     }

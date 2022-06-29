@@ -95,9 +95,9 @@ inline void title_screen_update(minefield* mf)
         case MINE_INPUT_OPEN:
         case MINE_INPUT_OPEN_BLOCK:
         case MINE_INPUT_FLAG:
+            mf->state = PLAYING_GAME;
             reset_minefield(mf);
             draw_minefield(mf);
-            mf->state = PLAYING_GAME;
             break;
         case MINE_INPUT_QUIT:
             mf->state = QUIT;
