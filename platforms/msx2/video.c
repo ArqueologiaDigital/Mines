@@ -80,9 +80,6 @@ void highlight_current_cell(minefield* mf)
 
     if (mf->state == PLAYING_GAME) {
         put_cursor(x * 8 - 3, y * 8 - 3);
-    } else if (mf->state == GAME_OVER) {
-        hide_cursor();
-        vdp(TILE_X[EXPLOSION], TILE_Y[EXPLOSION], x * 8, y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_IMP);
     } else {
         hide_cursor();
     }

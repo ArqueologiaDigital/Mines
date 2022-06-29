@@ -188,15 +188,7 @@ void highlight_current_cell(minefield* mf)
 {
     uint8_t x = CELL_X(mf, mf->current_cell) * 2 + MINEFIELD_X_OFFSET + 1;
     uint8_t y = CELL_Y(mf, mf->current_cell) * 2 + MINEFIELD_Y_OFFSET + 1;
-
-    if (mf->state == PLAYING_GAME) {
-        put_cursor(x, y);
-    } else if (mf->state == GAME_OVER) {
-        set_tile(x, y, EXPLOSION);
-        hide_cursor(x, y);
-    } else {
-        hide_cursor(x, y);
-    }
+    put_cursor(x, y);
 }
 
 
