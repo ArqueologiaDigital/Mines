@@ -6,34 +6,34 @@
 void draw_single_cell(minefield* mf, uint8_t x, uint8_t y)
 {
     const uint8_t cell = CELL(mf, x, y);
+    uint8_t tile = CLOSED_CELL;
 
-    x = (x << 1) + MINEFIELD_X_OFFSET + 1;
-    y = (y << 1) + MINEFIELD_Y_OFFSET + 1;
+    x = x * 2 + MINEFIELD_X_OFFSET + 1;
+    y = y * 2 + MINEFIELD_Y_OFFSET + 1;
 
-    if (cell & ISOPEN) {
-        if (cell & HASBOMB) {
-            set_tile(x, y, BOMB);
-        } else {
-            uint8_t count = cell & 0x0F;
-            if (count > 0 && count < 9) {
-                set_tile(x, y, ONE_BOMB + count - 1);
-        } else {
-                set_tile(x, y, BLANK);
-            }
-        }
-    } else {
+    if (mf->state != PLAYING_GAME) {
         if (cell & HASFLAG) {
-            if (mf->state == PLAYING_GAME) {
-                set_tile(x, y, FLAG);
-            } else if (!(cell & HASBOMB)) {
-                set_tile(x, y, EMPTY_FLAG);
-            }
-        } else if (cell & HASQUESTIONMARK) {
-            set_tile(x, y, QUESTION_MARK);
-        } else {
-            set_tile(x, y, CLOSED_CELL);
+            set_tile(x, y, cell & HASBOMB ? FLAG : EMPTY_FLAG);
+            return;
+        }
+        if (cell & HASBOMB) {
+            set_tile(x, y, cell & ISOPEN ? EXPLOSION : BOMB);
+            return;
         }
     }
+
+    if (cell & ISOPEN) {
+        uint8_t count = cell & 0x0F;
+        if (count > 0 && count < 9)
+            tile = ONE_BOMB + count - 1;
+        else
+            tile = BLANK;
+    } else if (cell & HASFLAG)
+        tile = FLAG;
+    else if (cell & HASQUESTIONMARK)
+        tile = QUESTION_MARK;
+
+    set_tile(x, y, tile);
 }
 
 
