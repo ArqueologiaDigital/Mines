@@ -243,19 +243,17 @@ void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
 void highlight_current_cell(minefield *mf)
 {
     uint8_t x = CELL_X(mf, mf->current_cell);
-    uint8_t x2 = x * 2 + MINEFIELD_X_OFFSET + 1;
+    uint8_t target_x = x * 2 + MINEFIELD_X_OFFSET + 1;
     uint8_t y = CELL_Y(mf, mf->current_cell);
-    uint8_t y2 = y * 2 + MINEFIELD_Y_OFFSET + 1;
+    uint8_t target_y = y * 2 + MINEFIELD_Y_OFFSET + 1;
     static uint8_t old_x = 0;
     static uint8_t old_y = 0;
 
     // remove old cursor position
     draw_single_cell(mf, old_x, old_y);
 
-    if (mf->state == GAME_OVER)
-        set_tile(x2, y2, EXPLOSION);
-    else
-        set_tile_full(x2, y2, CURSOR, 2);
+    if (mf->state == PLAYING_GAME)
+        set_tile_full(target_x, target_y, CURSOR, 2);
 
     old_x = x;
     old_y = y;
