@@ -30,9 +30,11 @@ void init_gl() {
     SetDispMask(1);
     setRGB0(&draw[0], 0, 96, 0);
     setRGB0(&draw[1], 0, 96, 0);
-    //draw[0].isbg = 1;
-    //draw[1].isbg = 1;
+    draw[0].isbg = 1;
+    draw[1].isbg = 1;
     
+    db = 0;
+
     PutDispEnv(&disp[db]);
     PutDrawEnv(&draw[db]);
 
@@ -42,6 +44,8 @@ void init_gl() {
 
 void display()
 {
+    db = !db;
+    nextpri = pribuff[db];
     DrawSync(0);
     VSync(0);
 
@@ -50,10 +54,7 @@ void display()
 
     DrawOTag(ot[db][OTLEN - 1]);
 
-    db = !db;
-
-    DrawOTag(ot[db][OTLEN - 1]);
-    nextpri = pribuff[db];
+    //DrawOTag(ot[db][OTLEN - 1]);
 }
 
 void set_tile(uint8_t x, uint8_t y, uint8_t tile_type) {
