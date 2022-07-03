@@ -5,6 +5,7 @@
 #include <psxgpu.h>
 #include "../../common/video-tiles.h"
 #include "../../common/common.h"
+#include "../../common/main.h"
 
 #define OTLEN 8
 #define TILESIZE 10
@@ -30,10 +31,10 @@ void init_gl() {
     SetDefDrawEnv(&draw[1], 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     
     SetDispMask(1);
-    setRGB0(&draw[0], 0, 96, 0);
-    setRGB0(&draw[1], 0, 96, 0);
-    //draw[0].isbg = 1;
-    //draw[1].isbg = 1;
+    setRGB0(&draw[0], 0, 0, 96);
+    setRGB0(&draw[1], 0, 0, 96);
+    draw[0].isbg = 1;
+    draw[1].isbg = 1;
 
     PutDispEnv(&disp[db]);
     PutDrawEnv(&draw[db]);
@@ -53,9 +54,7 @@ void display()
     DrawOTag(&ot[db][OTLEN - 1]);
 
     db = !db;
-    // This is the code to draw on both framebuffers
-    // But isn't working on real hw
-    //DrawOTag(ot[db][OTLEN - 1]);
+
     nextpri = pribuff[db];
 }
 
@@ -95,7 +94,6 @@ void set_tile_color(TILE *tile, uint8_t tile_type) {
 
 void set_tile(uint8_t x, uint8_t y, uint8_t tile_type) {
     TILE *tile;
-    ClearOTagR(ot[db], OTLEN);
     tile = (TILE*)nextpri;
 
     setTile(tile);
@@ -105,7 +103,6 @@ void set_tile(uint8_t x, uint8_t y, uint8_t tile_type) {
     addPrim(ot[db][OTLEN - 1], tile);
 
     nextpri += sizeof(TILE);
-    display();
 }
 
 void highlight_current_cell(minefield* mf) {
@@ -130,9 +127,30 @@ void highlight_current_cell(minefield* mf) {
 
 void idle_update(minefield* mf) {}
 
-void draw_title_screen(minefield* mf) {
-    // Need this on real HW!
+void platform_main_loop(minefield* mf) {
     ClearOTagR(ot[db], OTLEN);
+    while (mf->state != QUIT) {
+        switch (mf->state)
+        {
+            case TITLE_SCREEN:
+                title_screen_update(mf);
+                break;
+            case PLAYING_GAME:
+                gameplay_update(mf);
+                break;
+            case GAME_WON:
+            case GAME_OVER:
+                game_over_update(mf);
+                break;
+        }
+
+        //display();
+        idle_update(mf); // useful for doing other things
+                         // such as running animations
+    }
+}
+
+void draw_title_screen(minefield* mf) {
     FntPrint(-1, "MINESWEEPER\n");
     FntPrint(-1, "BROUGHT TO YOU BY ARQUEOLOGIA DIGITAL\n");
     FntPrint(-1, "PRESS START\n");
