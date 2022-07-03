@@ -3,10 +3,10 @@
 
 enum {
     /*    NOTE:
-        The tile codes for the number
-        of bombs *MUST* be sequential
-        because the video code assumes
-        that to be the case.    */
+        The tile codes for the number of
+        bombs *MUST* be sequential because
+        the video code assumes that to be
+        the case. */
     ONE_BOMB,
     TWO_BOMBS,
     THREE_BOMBS,
@@ -56,6 +56,26 @@ enum {
 
     /* Insert new tiles here */
     EMPTY_FLAG,
+    BOMB_ICON,
+    AMPERSAND,
+    COLON,
+    NO_SIGN,
+    MINUS_SIGN,
+
+    /*    NOTE:
+        The digits *MUST* be sequential
+        because the video code assumes
+        that to be the case. */
+    ZERO_DIGIT,
+    ONE_DIGIT,
+    TWO_DIGIT,
+    THREE_DIGIT,
+    FOUR_DIGIT,
+    FIVE_DIGIT,
+    SIX_DIGIT,
+    SEVEN_DIGIT,
+    EIGHT_DIGIT,
+    NINE_DIGIT,
 
     MAX_VIDEO_TILES,
 };
