@@ -30,10 +30,8 @@ void init_gl() {
     SetDispMask(1);
     setRGB0(&draw[0], 0, 96, 0);
     setRGB0(&draw[1], 0, 96, 0);
-    draw[0].isbg = 1;
-    draw[1].isbg = 1;
-    
-    db = 0;
+    //draw[0].isbg = 1;
+    //draw[1].isbg = 1;
 
     PutDispEnv(&disp[db]);
     PutDrawEnv(&draw[db]);
@@ -44,17 +42,19 @@ void init_gl() {
 
 void display()
 {
-    db = !db;
-    nextpri = pribuff[db];
     DrawSync(0);
     VSync(0);
 
     PutDispEnv(&disp[db]);
     PutDrawEnv(&draw[db]);
 
-    DrawOTag(ot[db][OTLEN - 1]);
+    DrawOTag(&ot[db][OTLEN - 1]);
 
+    db = !db;
+    // This is the code to draw on both framebuffers
+    // But isn't working on real hw
     //DrawOTag(ot[db][OTLEN - 1]);
+    nextpri = pribuff[db];
 }
 
 void set_tile(uint8_t x, uint8_t y, uint8_t tile_type) {
@@ -127,6 +127,8 @@ void highlight_current_cell(minefield* mf) {
 void idle_update(minefield* mf) {}
 
 void draw_title_screen(minefield* mf) {
+    // Need this on real HW!
+    ClearOTagR(ot[db], OTLEN);
     FntPrint(-1, "MINESWEEPER\n");
     FntPrint(-1, "BROUGHT TO YOU BY ARQUEOLOGIA DIGITAL\n");
     FntPrint(-1, "PRESS START\n");
