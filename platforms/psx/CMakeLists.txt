@@ -15,6 +15,7 @@ add_compile_definitions(MINEFIELD_Y_OFFSET=5)
 add_compile_definitions(USE_DEBUG_MODE=true)
 add_compile_definitions(DRAW_TITLE_SCREEN=true)
 add_compile_definitions(MINEFIELD_ALLOCATION=overwrite)
+add_compile_definitions(MAIN_LOOP_REIMPLEMENTED=true)
 
 # Files to be included
 file(GLOB _sources ../../common/*.c;*.c)
