@@ -9,6 +9,8 @@
 #define OTLEN 8
 #define TILESIZE 10
 #define TILESKIP 9
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 240
 
 DISPENV disp[2];
 DRAWENV draw[2];

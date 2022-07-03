@@ -9,8 +9,6 @@ project(
 )
 
 # Screen resolution macros
-add_compile_definitions(SCREEN_WIDTH=320)
-add_compile_definitions(SCREEN_HEIGHT=240)
 add_compile_definitions(MINEFIELD_X_OFFSET=6)
 add_compile_definitions(MINEFIELD_Y_OFFSET=5)
 # Other macros
