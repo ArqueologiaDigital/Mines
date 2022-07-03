@@ -2,6 +2,8 @@
 
 Using [PSn00bSDK](https://github.com/Lameguy64/PSn00bSDK).
 
+![screenshot](screenshot.jpg)
+
 ## Installing the SDK
 
 **Do it preferably on your /tmp**

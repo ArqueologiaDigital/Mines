@@ -13,6 +13,7 @@ For specific build & runtime/debug dependencies, please check the individual REA
 - [MSX2 (screen 5)](platforms/msx2/README.md) OK
 - [OpenGL](platforms/opengl/README.md) OK, but with glitchy colors
 - [Commodore 64](platforms/c64/README.md): just a boilerplate, please consider contributing an initial implementation!
+- [PSX](platforms/psx/README.md): wip; grid shows up but background is glitchy
 
 ### How to create your own
 
