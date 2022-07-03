@@ -57,15 +57,7 @@ void display()
     nextpri = pribuff[db];
 }
 
-void set_tile(uint8_t x, uint8_t y, uint8_t tile_type) {
-    TILE *tile;
-    ClearOTagR(ot[db], OTLEN);
-    tile = (TILE*)nextpri;
-
-    setTile(tile);
-    setXY0(tile, x * TILESKIP, y * TILESKIP);
-    setWH(tile, TILESIZE, TILESIZE);
-
+void set_tile_color(TILE *tile, uint8_t tile_type) {
     switch (tile_type) {
         case MINEFIELD_CORNER_TOP_LEFT: 
         case MINEFIELD_CORNER_TOP_RIGHT:
@@ -97,7 +89,17 @@ void set_tile(uint8_t x, uint8_t y, uint8_t tile_type) {
             setRGB0(tile, 31, 128, 0);
             break;
     }
+}
 
+void set_tile(uint8_t x, uint8_t y, uint8_t tile_type) {
+    TILE *tile;
+    ClearOTagR(ot[db], OTLEN);
+    tile = (TILE*)nextpri;
+
+    setTile(tile);
+    setXY0(tile, x * TILESKIP, y * TILESKIP);
+    setWH(tile, TILESIZE, TILESIZE);
+    set_tile_color(tile, tile_type);
     addPrim(ot[db][OTLEN - 1], tile);
 
     nextpri += sizeof(TILE);
