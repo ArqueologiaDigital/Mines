@@ -13,12 +13,35 @@
 #include "cursor.h"
 #include "tile_coords.c"
 
+/* Time controls */
+uint8_t seconds = 0;
+uint8_t minutes = 0;
 
-/* set_tile emulates tile behaviour, but is actually a bitmap copy */
-void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
+typedef void (*Callback)(void);
+const uint16_t HTIMI = 0xfd9f;
+
+
+void vblank_hook()
 {
-    /* copy 8x8 block from page 1 (hidden page) to page 0 (visible page) */
-    vdp(TILE_X[tile], TILE_Y[tile], dst_x * 8, dst_y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_IMP);
+    static uint8_t ticks = 0;
+
+    /* Update timer */
+    if (++ticks > 59) {
+        ticks = 0;
+
+        if (++seconds > 59) {
+            seconds = 0;
+
+            minutes++;
+            if (minutes > 59) {
+                minutes = 0;
+            }
+            debug("minutes: ", minutes);
+        }
+        debug("seconds: ", seconds);
+    }
+
+    /* TODO: play song */
 }
 
 
@@ -28,7 +51,7 @@ void video_init()
 
     set_colors(15, 1, 1);
 
-    /* Setting SCREEN5, 16x16 sprites, display disabled, vblank disabled */
+    /* Setting SCREEN5, 16x16 sprites, display disabled, vblank enabled */
     write_vdp(0, 6);
     write_vdp(1, 0x62);
 
@@ -56,7 +79,21 @@ void video_init()
     put_sprite_colors(cursor_colors, SPRITE_ID);
     hide_cursor();
 
+    /* Set 60Hz hook */
+    __asm__("di");
+    *((uint8_t*) HTIMI) = 0xc3;                 // jump opcode
+    *((Callback*) (HTIMI + 1)) = vblank_hook;   // + address
+    __asm__("ei");
+
     enable_screen();
+}
+
+
+/* set_tile emulates tile behaviour, but is actually a bitmap copy */
+void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
+{
+    /* copy 8x8 block from page 1 (hidden page) to page 0 (visible page) */
+    vdp(TILE_X[tile], TILE_Y[tile], dst_x * 8, dst_y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_IMP);
 }
 
 
