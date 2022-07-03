@@ -2,7 +2,8 @@
 
 Using [PSn00bSDK](https://github.com/Lameguy64/PSn00bSDK).
 
-![screenshot](screenshot.jpg)
+![Emulator screenshot](screenshot.jpg)
+![Running on real hardware](running_on_real_hardware.jpg)
 
 ## Installing the SDK
 
