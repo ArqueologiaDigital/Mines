@@ -74,3 +74,21 @@ You can then open PCSX-Redux, click on File > Open ISO, then select the file on 
 You can also burn the build to a CD or load it on your favorite emulator.
 
 Alternatively, if you have PCSX on your PATH, you can just run `make run`.
+
+## Running on real hardware
+
+Follow this [tutorial](https://www.schnappy.xyz/?building_a_serial_psx_cable) to make your own serial cable. 
+
+Finding a link cable in Brazil can be tricky, your best bet is to find one on MercadoLivre. 
+
+Download UNIROM from [here](https://github.com/JonathanDotCel/unirom8_bootdisc_and_firmware_for_ps1/releases) and burn it to a CD. Also, clone [nops](https://github.com/JonathanDotCel/NOTPSXSerial) and install [mono](https://www.monodevelop.com/download/). 
+
+You can test the cable by trying to find RX and GND first. Make your connections (using a breadboard) (remember that the TX on the serial cable end should go to RX) and turn on the PlayStation with the Unirom CD inside. Keep `screen /dev/ttyUSB0 115200` running with your FTDI connected. If you've got the RX and GND right, you should see the message `Unirom TTY redirect installed!`. If not, change the cable and restart the console. 
+
+To test TX, you can try to upload the .exe file from the build directory using nops. Go to the nops directory, copy mines.exe to there, then:
+
+```sh
+mono nops.exe /exe mines.exe /m /dev/ttyUSB0
+```
+
+If you've got TX right, you should see `Sending chunk...` messages on your terminal and hopefully the game should start.
