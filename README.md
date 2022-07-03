@@ -9,11 +9,11 @@ For specific build & runtime/debug dependencies, please check the individual REA
 
 - [MSDOS / VGA mode 13h](platforms/msdos/README.md): OK
 - [Text terminal using ncurses lib](platforms/ncurses/README.md): OK
-- [GunSmoke JAMMA board](platforms/gunsmoke/README.md): wip; slightly broken
-- [MSX2 (screen 5)](platforms/msx2/README.md) OK
-- [OpenGL](platforms/opengl/README.md) OK, but with glitchy colors
-- [Commodore 64](platforms/c64/README.md): just a boilerplate, please consider contributing an initial implementation!
-- [PSX](platforms/psx/README.md): wip; grid shows up but background is glitchy
+- [GunSmoke JAMMA board](platforms/gunsmoke/README.md): WIP; Slightly broken input handling.
+- [MSX2 (screen 5)](platforms/msx2/README.md): OK
+- [OpenGL](platforms/opengl/README.md): OK, but with glitchy colors.
+- [PSX](platforms/psx/README.md): WIP; Grid shows up but background is glitchy.
+- [Commodore 64](platforms/c64/README.md): Just a boilerplate; Please consider contributing an initial implementation!
 
 ### How to create your own
 
