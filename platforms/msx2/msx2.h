@@ -33,6 +33,10 @@
 /* VDP operation (combine it with pixel operation above) */
 #define VDP_LMMM            0b10010000
 
+/* vblank hook, 60 times per second */
+#define HTIMI               0xfd9f
+
+
 void write_vdp(uint8_t reg, uint8_t data) SDCCCALL0;
 
 void write_vram(uint16_t dst, uint16_t len, uint8_t *src) SDCCCALL0;

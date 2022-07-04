@@ -13,15 +13,19 @@
 #include "cursor.h"
 #include "tile_coords.c"
 
-/* Time controls */
-uint8_t seconds = 0;
-uint8_t minutes = 0;
-
 typedef void (*Callback)(void);
-const uint16_t HTIMI = 0xfd9f;
+
+/* Time controls */
+uint8_t seconds = 0; /* makeshift BCD counter */
+uint8_t minutes = 0; /* makeshift BCD counter */
+
+/* Mine control */
+bool negative = false;
+uint8_t units; /* makeshift BCD counter */
+uint8_t decimals; /* makeshift BCD counter */
 
 
-void vblank_hook()
+inline void count_bcd_time()
 {
     static uint8_t ticks = 0;
 
@@ -29,18 +33,26 @@ void vblank_hook()
     if (++ticks > 59) {
         ticks = 0;
 
-        if (++seconds > 59) {
-            seconds = 0;
+        if ((++seconds & 0b1111) > 9) {
+            seconds += 6; /* carry the digit by adding 6 */
 
-            minutes++;
-            if (minutes > 59) {
-                minutes = 0;
+            if (seconds > 0x59) {
+                seconds = 0;
+
+                if ((++minutes & 0b1111) > 9)
+                    minutes += 6; /* carry the digit by adding 6 */
+
+                if (minutes > 99)
+                    minutes = 0;
             }
-            debug("minutes: ", minutes);
         }
-        debug("seconds: ", seconds);
     }
+}
 
+
+void vblank_hook()
+{
+    count_bcd_time();
     /* TODO: play song */
 }
 
@@ -127,6 +139,42 @@ void platform_init()
 {
     set_random_seed(read_clock());
     video_init();
+}
+
+
+void update_timer(minefield* mf)
+{
+    mf;
+
+    uint8_t unit = minutes & 0b1111;
+    uint8_t decimal = (minutes >> 4) & 0b1111;
+    set_tile(25, 6, ZERO_DIGIT + decimal);
+    set_tile(26, 6, ZERO_DIGIT + unit);
+    set_tile(27, 6, COLON);
+
+    unit = seconds & 0b1111;
+    decimal = (seconds >> 4) & 0b1111;
+    set_tile(28, 6, ZERO_DIGIT + decimal);
+    set_tile(29, 6, ZERO_DIGIT + unit);
+}
+
+
+inline void count_bcd_mines(const minefield* mf)
+{
+    negative = mf->mines < 0;
+    int8_t tmp = negative ? -mf->mines : mf->mines;
+
+    units = tmp % 10;
+    decimals = tmp / 10;
+}
+
+
+void update_counter(minefield* mf)
+{
+    count_bcd_mines(mf);
+    set_tile(27, 3, negative ? MINUS_SIGN : NO_SIGN);
+    set_tile(28, 3, ZERO_DIGIT + decimals);
+    set_tile(29, 3, ZERO_DIGIT + units);
 }
 
 
