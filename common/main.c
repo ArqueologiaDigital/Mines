@@ -98,6 +98,9 @@ inline void title_screen_update(minefield* mf)
             mf->state = PLAYING_GAME;
             reset_minefield(mf);
             draw_minefield(mf);
+#ifdef ENABLE_TIMER
+            reset_timer();
+#endif /* ENABLE_TIMER */
             break;
         case MINE_INPUT_QUIT:
             mf->state = QUIT;
@@ -110,6 +113,9 @@ inline void title_screen_update(minefield* mf)
     mf->state = PLAYING_GAME;
     reset_minefield(mf);
     draw_minefield(mf);
+#ifdef ENABLE_TIMER
+    reset_timer();
+#endif /* ENABLE_TIMER */
 #endif
 }
 
@@ -148,13 +154,13 @@ inline void gameplay_update(minefield* mf)
 {
     draw_minefield_contents(mf);
 
-#ifdef UPDATE_TIMER
-    update_timer(mf);
-#endif /* UPDATE_TIMER */
+#ifdef ENABLE_TIMER
+    update_timer();
+#endif /* ENABLE_TIMER */
 
-#ifdef UPDATE_COUNTER
+#ifdef ENABLE_COUNTER
     update_counter(mf);
-#endif /* UPDATE_COUNTER */
+#endif /* ENABLE_COUNTER */
 
     uint8_t input = input_read(KEYBOARD);
     if (input == MINE_INPUT_IGNORED) {

@@ -16,31 +16,30 @@
 typedef void (*Callback)(void);
 
 /* Time controls */
+uint8_t ticks = 0; /* add one tick each time HTIMI is called */
 uint8_t seconds = 0; /* makeshift BCD counter */
 uint8_t minutes = 0; /* makeshift BCD counter */
 
 /* Mine control */
 bool negative = false;
-uint8_t units; /* makeshift BCD counter */
-uint8_t decimals; /* makeshift BCD counter */
+uint8_t units = 0; /* makeshift BCD counter */
+uint8_t decimals = 0; /* makeshift BCD counter */
 
 
 inline void count_bcd_time()
 {
-    static uint8_t ticks = 0;
-
     /* Update timer */
     if (++ticks > 59) {
-        ticks = 0;
+        ticks = 0; /* 60 ticks make a second at 60Hz */
 
         if ((++seconds & 0b1111) > 9) {
-            seconds += 6; /* carry the digit by adding 6 */
+            seconds += 6; /* carry the BCD digit by adding 6 */
 
             if (seconds > 0x59) {
                 seconds = 0;
 
                 if ((++minutes & 0b1111) > 9)
-                    minutes += 6; /* carry the digit by adding 6 */
+                    minutes += 6; /* carry the BCD digit by adding 6 */
 
                 if (minutes > 99)
                     minutes = 0;
@@ -142,6 +141,15 @@ void platform_init()
 }
 
 
+void reset_timer()
+{
+    debug_msg("reset_timer() called\n");
+    ticks = 0;
+    seconds = 0;
+    minutes = 0;
+}
+
+
 void update_timer(minefield* mf)
 {
     mf;
@@ -172,9 +180,9 @@ inline void count_bcd_mines(const minefield* mf)
 void update_counter(minefield* mf)
 {
     count_bcd_mines(mf);
-    set_tile(27, 3, negative ? MINUS_SIGN : NO_SIGN);
-    set_tile(28, 3, ZERO_DIGIT + decimals);
-    set_tile(29, 3, ZERO_DIGIT + units);
+    set_tile(25, 3, negative ? MINUS_SIGN : NO_SIGN);
+    set_tile(26, 3, ZERO_DIGIT + decimals);
+    set_tile(27, 3, ZERO_DIGIT + units);
 }
 
 
