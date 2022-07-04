@@ -8,7 +8,7 @@ Licensed under GNU General Public License version 2 (or later)
 For specific build & runtime/debug dependencies, please check the individual README.md files for each of the available ports below:
 
 - [MSX2 (screen 5)](platforms/msx2/README.md): OK
-- [MSDOS / VGA mode 13h](platforms/msdos/README.md): OK
+- [MSDOS (VGA mode 13h)](platforms/msdos/README.md): OK
 - [Text terminal using ncurses lib](platforms/ncurses/README.md): OK
 - [OpenGL](platforms/opengl/README.md): OK, but with glitchy colors.
 - [GunSmoke JAMMA board](platforms/gunsmoke/README.md): Slightly broken input handling.
