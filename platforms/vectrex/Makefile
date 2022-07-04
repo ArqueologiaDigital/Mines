@@ -8,21 +8,20 @@ MAME := ~/mame/mame
 
 all: $(SOURCES)
 	mkdir -p $(BUILDDIR)
-	$(CC) -Wl,-T,vectrex.lnk -o mines.srec $(CFLAGS) $(SCREEN_RESOLUTION) $(SOURCES)
-	objcopy --input-target=srec --output-target=binary mines.srec mines.vec
-	split mines.vec -b8k
-	rm xab
-	mv xaa mines.vec
-	rm mines.srec
+	$(CC) -Wl,-T,vectrex.lnk -o $(BUILDDIR)/mines.srec $(CFLAGS) $(SCREEN_RESOLUTION) $(SOURCES)
+	objcopy --input-target=srec --output-target=binary $(BUILDDIR)/mines.srec $(BUILDDIR)/mines.vec
+	split $(BUILDDIR)/mines.vec -b8k
+	mv xaa $(BUILDDIR)/mines.vec
+	rm xa*
 
 run: all
-	$(MAME) -rp $(ROMPATH) vectrex -cart mines.vec
+	$(MAME) -rp $(ROMPATH) vectrex -cart $(BUILDDIR)/mines.vec
 
 debug: all
-	$(MAME) -rp $(ROMPATH) vectrex -cart mines.vec -debug
+	$(MAME) -rp $(ROMPATH) vectrex -cart $(BUILDDIR)/mines.vec -debug
 
 dump: all
-	hexdump -C mines.vec | less
+	hexdump -C $(BUILDDIR)/mines.vec | less
 
 clean:
 	rm -rf $(BUILDDIR)

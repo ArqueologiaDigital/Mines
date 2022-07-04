@@ -1,0 +1,4 @@
+-b .data=0xC900
+-b .vector=0xFFF0
+-g __argc=0
+-g __argv=0
