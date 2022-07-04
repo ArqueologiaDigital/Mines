@@ -69,39 +69,51 @@ void draw_minefield_contents(minefield* mf);
 void draw_scenario(minefield* mf);
 
 
-#ifdef UPDATE_COUNTER
+#ifdef ENABLE_COUNTER
 /**
  * [Optional] Display mine counter on screen.
  *
  * Implementation details
  * ----------------------
  *
- * If `UPDATE_COUNTER` is not defined, the mine counter will not be displayed
- * and updated during the game loop.
+ * If `ENABLE_COUNTER` is not defined, this function will not be called and
+ * the mine counter will not be displayed and updated during the game loop.
  *
  * The set of tile characters must include all the digits and the negative
- * sign, since the counter can become negative.
+ * sign, since the counter may become negative.
  */
 void update_counter(minefield* mf);
-#endif /* UPDATE_COUNTER */
+#endif /* ENABLE_COUNTER */
 
-
-#ifdef UPDATE_TIMER
+#ifdef ENABLE_TIMER
 /**
- * [Optional] Display elapsed time on screen.
+ * [Optional] Display elapsed time on the screen.
  *
  * Implementation details
  * ----------------------
  *
- * If `UPDATE_TIMER` is not defined, the timer will not be displayed and
- * updated during the game loop.
+ * If `ENABLE_TIMER` is not defined, this function will not be called
+ * and the timer will not be displayed and updated during the game loop.
  *
  * The set of tile characters must include all the digits and the colon
  * to separate minutes and seconds.
  */
-void update_timer(minefield* mf);
-#endif /* UPDATE_TIMER */
+void update_timer();
 
+/**
+ * [Optional] Reset elapsed time before new game starts.
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * If `ENABLE_TIMER` is not defined, this function will not be called
+ * and the timer will not be displayed and updated during the game loop.
+ *
+ * The set of tile characters must include all the digits and the colon
+ * to separate minutes and seconds.
+ */
+void reset_timer();
+#endif /* ENABLE_TIMER */
 
 #ifdef MAIN_LOOP_REIMPLEMENTED
 /**
