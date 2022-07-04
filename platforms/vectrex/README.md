@@ -1,6 +1,10 @@
 ## Vectrex port
 
 - Tested with MAME (you can use the `make run` for that)
+- Currently broken. Needs more work to at least figure out which Vectrex BIOS routines are useful for drawing vectors on the screen.
+- Current linking rules are not ideal as the RAM address range ends up being included in the ROM file, which is incorrect.
+- There may be a way of making cartridges larger than 8Kbytes. For now the Makefile simply crops the generated ROM file (mines.vec) to get rid of those higher addresses used by RAM. This ugly hack needs to be properly fixed.
+- The built ROM does boot on MAME's vectrex driver and the game name can be seen on the splash screen, meaning that at least the ROM headers seem fine.
 
 ![screenshot](screenshot.png)
 
