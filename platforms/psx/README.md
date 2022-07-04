@@ -14,7 +14,7 @@ Using [PSn00bSDK](https://github.com/Lameguy64/PSn00bSDK).
 
 ```sh
 # Install deps
-sudo apt install git build-essential make
+sudo apt install git build-essential make ninja-build
 
 # Warning: this will uninstall your current version of cmake! 
 
