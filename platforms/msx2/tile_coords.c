@@ -57,6 +57,20 @@ static const uint8_t TILE_X[MAX_VIDEO_TILES] = {
     [LEFT_BORDER__BOTTOM] = TILE_POS_X(7, 4),
     [RIGHT_BORDER__TOP] = TILE_POS_X(10, 3),
     [RIGHT_BORDER__BOTTOM] = TILE_POS_X(10, 4),
+
+    [COLON] = TILE_POS_X(0, 6),
+    [NO_SIGN] = TILE_POS_X(12, 6),
+    [MINUS_SIGN] = TILE_POS_X(1, 6),
+    [ZERO_DIGIT] = TILE_POS_X(2, 6),
+    [ONE_DIGIT] = TILE_POS_X(3, 6),
+    [TWO_DIGIT] = TILE_POS_X(4, 6),
+    [THREE_DIGIT] = TILE_POS_X(5, 6),
+    [FOUR_DIGIT] = TILE_POS_X(6, 6),
+    [FIVE_DIGIT] = TILE_POS_X(7, 6),
+    [SIX_DIGIT] = TILE_POS_X(8, 6),
+    [SEVEN_DIGIT] = TILE_POS_X(9, 6),
+    [EIGHT_DIGIT] = TILE_POS_X(10, 6),
+    [NINE_DIGIT] = TILE_POS_X(11, 6),
 };
 
 
@@ -116,4 +130,18 @@ static const uint16_t TILE_Y[MAX_VIDEO_TILES] = {
     [LEFT_BORDER__BOTTOM] = TILE_POS_Y(7, 4),
     [RIGHT_BORDER__TOP] = TILE_POS_Y(10, 3),
     [RIGHT_BORDER__BOTTOM] = TILE_POS_Y(10, 4),
+
+    [COLON] = TILE_POS_Y(0, 6),
+    [NO_SIGN] = TILE_POS_Y(12, 6),
+    [MINUS_SIGN] = TILE_POS_Y(1, 6),
+    [ZERO_DIGIT] = TILE_POS_Y(2, 6),
+    [ONE_DIGIT] = TILE_POS_Y(3, 6),
+    [TWO_DIGIT] = TILE_POS_Y(4, 6),
+    [THREE_DIGIT] = TILE_POS_Y(5, 6),
+    [FOUR_DIGIT] = TILE_POS_Y(6, 6),
+    [FIVE_DIGIT] = TILE_POS_Y(7, 6),
+    [SIX_DIGIT] = TILE_POS_Y(8, 6),
+    [SEVEN_DIGIT] = TILE_POS_Y(9, 6),
+    [EIGHT_DIGIT] = TILE_POS_Y(10, 6),
+    [NINE_DIGIT] = TILE_POS_Y(11, 6),
 };
