@@ -53,7 +53,7 @@ void draw_minefield_contents(minefield* mf);
 
 
 /**
- * [Required] Draw the background image that surrounds the board.
+ * [Optional] Draw the background image that surrounds the board.
  *
  * Implementation details
  * ----------------------
@@ -66,35 +66,41 @@ void draw_minefield_contents(minefield* mf);
  *
  * See [tile_index](#tile_index) for the index value of the `GROUND` tile.
  */
-void draw_scenario();
+void draw_scenario(minefield* mf);
 
 
-#ifdef DRAW_COUNTER
+#ifdef UPDATE_COUNTER
 /**
- * [Required] Draws the mine counter on the screen.
+ * [Optional] Display mine counter on screen.
  *
  * Implementation details
  * ----------------------
+ *
+ * If `UPDATE_COUNTER` is not defined, the mine counter will not be displayed
+ * and updated during the game loop.
  *
  * The set of tile characters must include all the digits and the negative
  * sign, since the counter can become negative.
  */
-void draw_counter(minefield* mf);
-#endif /* DRAW_COUNTER */
+void update_counter(minefield* mf);
+#endif /* UPDATE_COUNTER */
 
 
-#ifdef DRAW_TIMER
+#ifdef UPDATE_TIMER
 /**
- * [Required] Display time elapsed since the start of the game.
+ * [Optional] Display elapsed time on screen.
  *
  * Implementation details
  * ----------------------
  *
+ * If `UPDATE_TIMER` is not defined, the timer will not be displayed and
+ * updated during the game loop.
+ *
  * The set of tile characters must include all the digits and the colon
  * to separate minutes and seconds.
  */
-void draw_timer(minefield* mf);
-#endif /* DRAW_TIMER */
+void update_timer(minefield* mf);
+#endif /* UPDATE_TIMER */
 
 
 #ifdef MAIN_LOOP_REIMPLEMENTED

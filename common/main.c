@@ -146,15 +146,15 @@ inline void game_over_update(minefield* mf)
 
 inline void gameplay_update(minefield* mf)
 {
-#ifdef DRAW_COUNTER
-    draw_counter(mf);
-#endif /* DRAW_COUNTER */
-
-#ifdef DRAW_TIMER
-    draw_timer(mf);
-#endif /* DRAW_TIMER */
-
     draw_minefield_contents(mf);
+
+#ifdef UPDATE_TIMER
+    update_timer(mf);
+#endif /* UPDATE_TIMER */
+
+#ifdef UPDATE_COUNTER
+    update_counter(mf);
+#endif /* UPDATE_COUNTER */
 
     uint8_t input = input_read(KEYBOARD);
     if (input == MINE_INPUT_IGNORED) {
@@ -179,7 +179,7 @@ int main() {
 
     minefield* mf = init_minefield();
 
-    draw_scenario();
+    draw_scenario(mf);
 
     mf->state = TITLE_SCREEN;
 
