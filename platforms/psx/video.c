@@ -45,6 +45,8 @@ void init_gl() {
 
 void display()
 {
+    debug("calling drawsync", 0);
+    DrawSync(0);
     debug("calling vsync", 0);
     VSync(0);
 
@@ -53,8 +55,6 @@ void display()
 
     debug("calling drawotag", 0);
     DrawOTag(ot[db][OTLEN - 1]);
-    debug("calling drawsync", 0);
-    DrawSync(0);
 
     db = !db;
 
@@ -96,6 +96,8 @@ void set_tile_color(TILE *tile, uint8_t tile_type) {
 }
 
 void set_tile(uint8_t x, uint8_t y, uint8_t tile_type) {
+    // needed on real hw but we don't have to clean the whole ot
+    ClearOTagR(ot[db], OTLEN - 4);
     TILE *tile;
     tile = (TILE*)nextpri;
 
