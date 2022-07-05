@@ -3,6 +3,7 @@
  * http://lameguy64.net/tutorials/pstutorials/chapter1/4-controllers.html
  */
 #include <stdint.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <psxapi.h>
 #include <psxgpu.h>
@@ -36,5 +37,6 @@ uint8_t input_read(uint8_t source) {
 }
 
 int random_number(int min, int max) {
-    return 0;
+    srand(GetRCnt(0));
+    return (rand() % max);
 }
