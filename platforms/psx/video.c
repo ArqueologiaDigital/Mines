@@ -54,7 +54,7 @@ void display()
     PutDrawEnv(&draw[db]);
 
     debug("calling drawotag", 0);
-    DrawOTag(&ot[db][OTLEN - 1]);
+    DrawOTag(ot[db][OTLEN - 1]);
 
     db = !db;
 
@@ -166,10 +166,16 @@ void platform_main_loop(minefield* mf) {
 }
 
 void draw_title_screen(minefield* mf) {
+    // Need this here on real hw
+    ClearOTagR(ot[db], OTLEN);
+    debug("draw_title_screen has been called", 0);
     FntPrint(-1, "MINESWEEPER\n");
     FntPrint(-1, "BROUGHT TO YOU BY ARQUEOLOGIA DIGITAL\n");
     FntPrint(-1, "PRESS START\n");
+    debug("flushing fnt buffer", 0);
     FntFlush(-1);
+    debug("fnt buffer has been flushed", 0);
     debug("calling display from title screen", 0);
     display();  
+    debug("display has been called", 0);
 }
