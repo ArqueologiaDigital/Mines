@@ -59,9 +59,6 @@ void display()
     db = !db;
 
     nextpri = pribuff[db];
-
-    // Doesnt work on real hw
-    //DrawOTag(&ot[db][OTLEN - 1]);
 }
 
 void set_tile_color(TILE *tile, uint8_t tile_type) {
