@@ -103,7 +103,12 @@ void set_tile(uint8_t x, uint8_t y, uint8_t tile_type) {
     setXY0(tile, x * TILESKIP, y * TILESKIP);
     setWH(tile, TILESIZE, TILESIZE);
     set_tile_color(tile, tile_type);
-    addPrim(ot[db][OTLEN - 1], tile);
+    if (tile_type == CURSOR)
+        // draw the cursor on the first layer
+        addPrim(ot[db][OTLEN - 3], tile);
+    else
+        // draw the minefield as the last layer, way down the z axis 
+        addPrim(ot[db][OTLEN - 1], tile);
 
     nextpri += sizeof(TILE);
 }
@@ -122,7 +127,7 @@ void highlight_current_cell(minefield* mf) {
     if (mf->state == GAME_OVER)
         set_tile(x2, y2, EXPLOSION);
     else
-        //set_tile(x2, y2, CURSOR);
+        set_tile(x2, y2, CURSOR);
 
     old_x = x;
     old_y = y;
