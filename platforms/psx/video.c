@@ -105,10 +105,10 @@ void set_tile(uint8_t x, uint8_t y, uint8_t tile_type) {
     set_tile_color(tile, tile_type);
     if (tile_type == CURSOR)
         // draw the cursor on the first layer
-        addPrim(ot[db][OTLEN - 3], tile);
+        addPrim(&ot[db][OTLEN - OTLEN + 1], tile);
     else
-        // draw the minefield as the last layer, way down the z axis 
-        addPrim(ot[db][OTLEN - 1], tile);
+        // draw the minefield as the last layer, way up the z axis 
+        addPrim(&ot[db][OTLEN - 1], tile);
 
     nextpri += sizeof(TILE);
 }
