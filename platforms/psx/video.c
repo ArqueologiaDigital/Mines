@@ -45,17 +45,23 @@ void init_gl() {
 
 void display()
 {
+    debug("calling drawsync", 0);
     DrawSync(0);
+    debug("calling vsync", 0);
     VSync(0);
 
     PutDispEnv(&disp[db]);
     PutDrawEnv(&draw[db]);
 
+    debug("calling drawotag", 0);
     DrawOTag(&ot[db][OTLEN - 1]);
 
     db = !db;
 
     nextpri = pribuff[db];
+
+    // Doesnt work on real hw
+    //DrawOTag(&ot[db][OTLEN - 1]);
 }
 
 void set_tile_color(TILE *tile, uint8_t tile_type) {
@@ -114,12 +120,12 @@ void highlight_current_cell(minefield* mf) {
     static uint8_t old_y = 0;
 
     // remove old cursor position
-    draw_single_cell(mf, old_x, old_y);
+    //draw_single_cell(mf, old_x, old_y);
 
     if (mf->state == GAME_OVER)
         set_tile(x2, y2, EXPLOSION);
     else
-        set_tile(x2, y2, CURSOR);
+        //set_tile(x2, y2, CURSOR);
 
     old_x = x;
     old_y = y;
@@ -128,23 +134,32 @@ void highlight_current_cell(minefield* mf) {
 void idle_update(minefield* mf) {}
 
 void platform_main_loop(minefield* mf) {
+    bool shouldCallDisplay = true;
     ClearOTagR(ot[db], OTLEN);
     while (mf->state != QUIT) {
         switch (mf->state)
         {
             case TITLE_SCREEN:
+                debug("on title screen", 0);
                 title_screen_update(mf);
+                shouldCallDisplay = false;
                 break;
             case PLAYING_GAME:
+                debug("playing game", 0);
                 gameplay_update(mf);
+                shouldCallDisplay = true;
                 break;
             case GAME_WON:
             case GAME_OVER:
+                debug("game over", 0);
                 game_over_update(mf);
                 break;
         }
 
-        //display();
+        if (shouldCallDisplay) {
+            debug("calling display from main loop", 0);
+            display();
+        }
         idle_update(mf); // useful for doing other things
                          // such as running animations
     }
@@ -155,5 +170,6 @@ void draw_title_screen(minefield* mf) {
     FntPrint(-1, "BROUGHT TO YOU BY ARQUEOLOGIA DIGITAL\n");
     FntPrint(-1, "PRESS START\n");
     FntFlush(-1);
+    debug("calling display from title screen", 0);
     display();  
 }
