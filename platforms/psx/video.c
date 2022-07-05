@@ -45,15 +45,12 @@ void init_gl() {
 
 void display()
 {
-    debug("calling drawsync", 0);
     DrawSync(0);
-    debug("calling vsync", 0);
     VSync(0);
 
     PutDispEnv(&disp[db]);
     PutDrawEnv(&draw[db]);
 
-    debug("calling drawotag", 0);
     DrawOTag(ot[db][OTLEN - 1]);
 
     db = !db;
@@ -143,24 +140,20 @@ void platform_main_loop(minefield* mf) {
         switch (mf->state)
         {
             case TITLE_SCREEN:
-                debug("on title screen", 0);
                 title_screen_update(mf);
                 shouldCallDisplay = false;
                 break;
             case PLAYING_GAME:
-                debug("playing game", 0);
                 gameplay_update(mf);
                 shouldCallDisplay = true;
                 break;
             case GAME_WON:
             case GAME_OVER:
-                debug("game over", 0);
                 game_over_update(mf);
                 break;
         }
 
         if (shouldCallDisplay) {
-            debug("calling display from main loop", 0);
             display();
         }
         idle_update(mf); // useful for doing other things
@@ -171,14 +164,9 @@ void platform_main_loop(minefield* mf) {
 void draw_title_screen(minefield* mf) {
     // Need this here on real hw
     ClearOTagR(ot[db], OTLEN);
-    debug("draw_title_screen has been called", 0);
     FntPrint(-1, "MINESWEEPER\n");
     FntPrint(-1, "BROUGHT TO YOU BY ARQUEOLOGIA DIGITAL\n");
     FntPrint(-1, "PRESS START\n");
-    debug("flushing fnt buffer", 0);
     FntFlush(-1);
-    debug("fnt buffer has been flushed", 0);
-    debug("calling display from title screen", 0);
     display();  
-    debug("display has been called", 0);
 }
