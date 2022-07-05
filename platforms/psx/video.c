@@ -45,8 +45,6 @@ void init_gl() {
 
 void display()
 {
-    debug("calling drawsync", 0);
-    DrawSync(0);
     debug("calling vsync", 0);
     VSync(0);
 
@@ -55,6 +53,8 @@ void display()
 
     debug("calling drawotag", 0);
     DrawOTag(ot[db][OTLEN - 1]);
+    debug("calling drawsync", 0);
+    DrawSync(0);
 
     db = !db;
 
@@ -135,7 +135,6 @@ void idle_update(minefield* mf) {}
 
 void platform_main_loop(minefield* mf) {
     bool shouldCallDisplay = true;
-    ClearOTagR(ot[db], OTLEN);
     while (mf->state != QUIT) {
         switch (mf->state)
         {
