@@ -10,7 +10,7 @@
 
 /* Assets */
 #include "mines.h"
-#include "cursor.h"
+#include "cursors.h"
 #include "tile_coords.c"
 
 typedef void (*Callback)(void);
@@ -86,9 +86,14 @@ void video_init()
     write_vram(0x8000, mines_SIZE, mines_data);
 
     /* Set cursor sprite */
-    set_sprite_pattern(cursor_pattern, PATTERN_ID);
-    put_sprite_colors(cursor_colors, SPRITE_ID);
+    set_sprite_pattern(cursor_pattern, CURSOR_PATTERN_ID);
+    put_sprite_colors(cursor_colors, CURSOR_SPRITE_ID);
     hide_cursor();
+
+    /* Set mouse sprite */
+    set_sprite_pattern(mouse_pattern, MOUSE_PATTERN_ID);
+    put_sprite_colors(mouse_colors, MOUSE_SPRITE_ID);
+    hide_mouse();
 
     /* Set 60Hz hook */
     __asm__("di");
@@ -110,14 +115,27 @@ void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
 
 void put_cursor(uint8_t x, uint8_t y)
 {
-    struct sprite_attr attr = { y - 1, x, 4 * PATTERN_ID, 0 };
-    put_sprite_attr(&attr, SPRITE_ID);
+    struct sprite_attr attr = { y - 1, x, 4 * CURSOR_PATTERN_ID, 0 };
+    put_sprite_attr(&attr, CURSOR_SPRITE_ID);
 }
 
 
 void hide_cursor()
 {
     put_cursor(0, 209);
+}
+
+
+void put_mouse(uint8_t x, uint8_t y)
+{
+    struct sprite_attr attr = { y - 1, x, 4 * MOUSE_PATTERN_ID, 0 };
+    put_sprite_attr(&attr, MOUSE_SPRITE_ID);
+}
+
+
+void hide_mouse()
+{
+    put_mouse(0, 209);
 }
 
 
@@ -186,9 +204,33 @@ void update_counter(minefield* mf)
 }
 
 
+static struct mouse mouse;
+static int x = 255;
+static int y = 212;
+
 void idle_update(minefield* mf)
 {
     mf;
+
+    read_mouse(&mouse, 1);
+
+    x -= mouse.dx;
+    if (x > 255) x = 255;
+    else if (x < 0) x = 0;
+
+    y -= mouse.dy;
+    if (y > 212) y = 212;
+    else if (y < 0) y = 0;
+
+    put_mouse(x, y);
+
+    if (!mouse.lbutton) {
+        debug_msg("left mouse button\n");
+    }
+
+    if (!mouse.rbutton) {
+        debug_msg("right mouse button\n");
+    }
 }
 
 

@@ -81,4 +81,18 @@ struct sprite_attr {
 /* low level sprite placement function */
 void put_sprite_attr(struct sprite_attr *src, uint8_t index) SDCCCALL0;
 
+/* structure for storing mouse data */
+struct mouse {
+    int8_t dx;
+    int8_t dy;
+    uint8_t lbutton; /* 1 = OFF, 2 = ON */
+    uint8_t rbutton; /* 1 = OFF, 2 = ON */
+};
+
+void read_mouse(struct mouse* mouse, uint8_t source);
+
+void put_mouse(uint8_t x, uint8_t y);
+
+void hide_mouse();
+
 #endif /* MSX2_H */

@@ -14,3 +14,5 @@ if { [info exists ::env(DEBUG)] } {
     ext debugdevice
     debug set_watchpoint write_io {0x2e} {} {pause $::wp_last_value}
 }
+
+plug joyporta mouse
