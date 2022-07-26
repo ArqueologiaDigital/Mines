@@ -51,7 +51,7 @@ $(BUILDDIR)/%.rel: ../../common/%.c $(BUILDDIR) ../../common/common.h
 	$(Z80_CC) $(Z80_CFLAGS) $(SCREEN_RESOLUTION) -c $< -o $@
 
 $(BUILDDIR)/%.rel: %.c $(HEADERS) $(BUILDDIR)
-	$(Z80_CC) $(Z80_CFLAGS) -c $< -o $@
+	$(Z80_CC) $(Z80_CFLAGS) $(SCREEN_RESOLUTION) -c $< -o $@
 
 $(BUILDDIR)/%.rel: %.asm $(HEADERS) $(BUILDDIR)
 	$(Z80_AS) -g -o $@ $<
