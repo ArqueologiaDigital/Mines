@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define CELL_INDEX(mf, x, y)  ((x) + (y) * mf->width)
+#define CELL_INDEX(mf, x, y)  ((x) + ((y) * mf->width))
 #define CELL(mf, x, y)        mf->cells[CELL_INDEX(mf, x, y)]
 #define CELL_X(mf, index)     ((index) % mf->width)
 #define CELL_Y(mf, index)     ((index) / mf->width)

@@ -2,8 +2,9 @@
 #include <stdbool.h>
 #include "msx2.h"
 #include "common.h"
-#include "video-tiles.h"
+#include "game.h"
 #include "minefield.h"
+#include "video-tiles.h"
 
 //#define USE_DEBUG_MODE
 #include "debug.h"

@@ -53,6 +53,15 @@ void draw_minefield_contents(minefield* mf);
 
 
 /**
+ * [Provided] Update minefield cell directly for mouse, lightpen, light gun or
+ * any other type of direct input device. `input` is either `MINE_INPUT_OPEN`,
+ * `MINE_INPUT_OPEN_BLOCK` or `MINE_INPUT_FLAG`, while `x` and `y` are the
+ * minefield cell coordinates.
+ */
+void set_minefield_cell(minefield* mf, uint8_t x, uint8_t y, uint8_t input);
+
+
+/**
  * [Optional] Draw the background image that surrounds the board.
  *
  * Implementation details
@@ -85,6 +94,7 @@ void draw_scenario(minefield* mf);
 void update_counter(minefield* mf);
 #endif /* ENABLE_COUNTER */
 
+
 #ifdef ENABLE_TIMER
 /**
  * [Optional] Display elapsed time on the screen.
@@ -98,7 +108,8 @@ void update_counter(minefield* mf);
  * The set of tile characters must include all the digits and the colon
  * to separate minutes and seconds.
  */
-void update_timer();
+void update_timer(minefield* mf);
+
 
 /**
  * [Optional] Reset elapsed time before new game starts.
@@ -114,6 +125,7 @@ void update_timer();
  */
 void reset_timer();
 #endif /* ENABLE_TIMER */
+
 
 #ifdef MAIN_LOOP_REIMPLEMENTED
 /**
@@ -153,5 +165,6 @@ void draw_game_over(minefield* mf);
  * `wait_ticks()` to wait for the next frame.
  */
 void idle_update(minefield* mf);
+
 
 #endif /* GAME_H */
