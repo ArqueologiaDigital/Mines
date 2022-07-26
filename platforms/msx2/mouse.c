@@ -9,16 +9,16 @@
 
 /* mouse data */
 static struct mouse mouse;
-static int x = 255;
-static int y = 212;
+static int x = 84;
+static int y = 33;
 static bool l_pressed = false;
 static bool r_pressed = false;
 static bool ignored = false;
 
 
-void update_mouse(minefield* mf)
+void update_mouse(minefield* mf, uint8_t source)
 {
-    read_mouse(&mouse, 1);
+    read_mouse(&mouse, source);
 
     x -= mouse.dx;
     if (x > 255) x = 255;

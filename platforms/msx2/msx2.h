@@ -81,6 +81,9 @@ struct sprite_attr {
 /* low level sprite placement function */
 void put_sprite_attr(struct sprite_attr *src, uint8_t index) SDCCCALL0;
 
+/* search for plugged mouse */
+uint8_t search_mouse();
+
 /* structure for storing mouse data */
 struct mouse {
     int8_t dx;
