@@ -15,4 +15,5 @@ if { [info exists ::env(DEBUG)] } {
     debug set_watchpoint write_io {0x2e} {} {pause $::wp_last_value}
 }
 
+bind "mouse button2 down" toggle grabinput
 plug joyporta mouse
