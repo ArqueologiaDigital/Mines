@@ -205,76 +205,16 @@ void update_counter(minefield* mf)
 }
 
 
-static struct mouse mouse;
-static int x = 255;
-static int y = 212;
-static bool l_pressed = false;
-static bool r_pressed = false;
-static bool ignored = false;
+extern inline void update_mouse(minefield* mf);
+
 
 void idle_update(minefield* mf)
 {
-    read_mouse(&mouse, 1);
+    static uint8_t fifth = 0;
 
-    x -= mouse.dx;
-    if (x > 255) x = 255;
-    else if (x < 0) x = 0;
-
-    y -= mouse.dy;
-    if (y > 212) y = 212;
-    else if (y < 0) y = 0;
-
-    put_mouse(x, y);
-
-    if (mf->state == PLAYING_GAME) {
-        uint8_t cell_x = x / 8 - MINEFIELD_X_OFFSET;
-        uint8_t cell_y = y / 8 - MINEFIELD_Y_OFFSET;
-        if (cell_x & 1 || cell_y & 1) return;
-        cell_x /= 2;
-        cell_y /= 2;
-        if (cell_x >= mf->width || cell_y >= mf->height) return;
-
-        /* ignore presses again after both button1 and button2 are released */
-        if (mouse.l_button + mouse.r_button == 5 && ignored) {
-            ignored = false;
-        }
-
-        if (ignored) {
-            return;
-        }
-
-        /* is left button released? */
-        if (mouse.l_button) {
-            /* was it pressed before? */
-            if (l_pressed && !r_pressed) {
-                set_minefield_cell(mf, cell_x, cell_y, MINE_INPUT_OPEN);
-                l_pressed = false;
-                return;
-            } else if (l_pressed) {
-                set_minefield_cell(mf, cell_x, cell_y, MINE_INPUT_OPEN_BLOCK);
-                l_pressed = false;
-                r_pressed = false;
-                ignored = true;
-                return;
-            }
-        } else {
-            l_pressed = true;
-        }
-    
-        /* is right button released? */
-        if (mouse.r_button) {
-            /* was it pressed before? */
-            if (r_pressed && !l_pressed) {
-                set_minefield_cell(mf, cell_x, cell_y, MINE_INPUT_FLAG);
-            } else if (r_pressed) {
-                set_minefield_cell(mf, cell_x, cell_y, MINE_INPUT_OPEN_BLOCK);
-                l_pressed = false;
-                ignored = true;
-            }
-            r_pressed = false;
-        } else {
-            r_pressed = true;
-        }
+    if (++fifth == 5) {
+        fifth = 0;
+        update_mouse(mf);
     }
 }
 

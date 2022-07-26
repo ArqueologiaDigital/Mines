@@ -1,3 +1,5 @@
+; void read_mouse(struct mouse* mouse, uint8_t source) __sdcccall(0)
+
 .globl read_mouse
 
 REGWTP = 0xA0           ; register write port

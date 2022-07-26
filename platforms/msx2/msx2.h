@@ -89,7 +89,7 @@ struct mouse {
     uint8_t r_button; /* 1 = OFF, 2 = ON */
 };
 
-void read_mouse(struct mouse* mouse, uint8_t source);
+void read_mouse(struct mouse* mouse, uint8_t source) SDCCCALL0;
 
 void put_mouse(uint8_t x, uint8_t y);
 
