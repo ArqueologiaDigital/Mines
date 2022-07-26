@@ -4,7 +4,7 @@
 
 
 #ifndef RESET_MINEFIELD
-void fill_minefield(minefield* mf)
+static void fill_minefield(minefield* mf)
 {
     // Clear the minefield:
     for (uint8_t x1 = 0; x1 < mf->width; x1++) {

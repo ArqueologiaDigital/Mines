@@ -4,13 +4,57 @@
 #include "minefield.h"
 
 
+void set_minefield_cell(minefield* mf, uint8_t x, uint8_t y, uint8_t input)
+{
+    uint8_t cell_index = CELL_INDEX(mf, x, y);
+    uint8_t current_cell = mf->cells[cell_index];
+    uint8_t has_bomb = current_cell & HASBOMB;
+    uint8_t num_bombs_around = current_cell & 0x0F;
+
+    switch (input) {
+        case MINE_INPUT_OPEN:
+            open_cell(mf, x, y);
+            if (mf->state == PLAYING_GAME) {
+                maybe_game_won(mf);
+            }
+            break;
+
+        case MINE_INPUT_OPEN_BLOCK:
+            if (!has_bomb && (count_surrounding_flags(mf, x, y) == num_bombs_around)) {
+                open_block(mf, x, y);
+                if (mf->state == PLAYING_GAME) {
+                    maybe_game_won(mf);
+                }
+            }
+            break;
+
+        case MINE_INPUT_FLAG:
+            if (!(current_cell & ISOPEN)) {
+                if (current_cell & HASFLAG) {
+                    mf->mines++;
+                    mf->cells[cell_index] &= ~HASFLAG;
+                    mf->cells[cell_index] |= HASQUESTIONMARK;
+                } else if (current_cell & HASQUESTIONMARK) {
+                    mf->cells[cell_index] &= ~HASQUESTIONMARK;
+                } else {
+                    mf->mines--;
+                    mf->cells[cell_index] |= HASFLAG;
+                    maybe_game_won(mf);
+                }
+            }
+            mf->changed = true;
+            break;
+
+        default:
+            debug("unknown command in set_minefield_cell: ", input);
+            break;
+    }
+}
+
+
 void update_gameplay_input(minefield* mf, uint8_t input)
 {
-    uint8_t x = mf->current_cell % mf->width;
-    uint8_t y = mf->current_cell / mf->width;
-    uint8_t has_bomb = (mf->cells[mf->current_cell] & HASBOMB);
-    uint8_t num_bombs_around = (mf->cells[mf->current_cell] & 0x0F);
-    uint8_t num_cells = (mf->width * mf->height);
+    uint8_t num_cells = mf->width * mf->height;
 
     switch (input) {
         case MINE_INPUT_LEFT:
@@ -37,44 +81,15 @@ void update_gameplay_input(minefield* mf, uint8_t input)
             }
             break;
 
-        case MINE_INPUT_OPEN:
-            open_cell(mf, x, y);
-            if (mf->state == PLAYING_GAME) {
-                maybe_game_won(mf);
-            }
-            break;
-
-        case MINE_INPUT_OPEN_BLOCK:
-            if (!has_bomb && (count_surrounding_flags(mf, x, y) == num_bombs_around)) {
-                open_block(mf, x, y);
-                if (mf->state == PLAYING_GAME) {
-                    maybe_game_won(mf);
-                }
-            }
-            break;
-
-        case MINE_INPUT_FLAG:
-            if (!(mf->cells[mf->current_cell] & ISOPEN)) {
-                if (mf->cells[mf->current_cell] & HASFLAG) {
-                    mf->mines++;
-                    mf->cells[mf->current_cell] &= ~HASFLAG;
-                    mf->cells[mf->current_cell] |= HASQUESTIONMARK;
-                } else if (mf->cells[mf->current_cell] & HASQUESTIONMARK) {
-                    mf->cells[mf->current_cell] &= ~HASQUESTIONMARK;
-                } else {
-                    mf->mines--;
-                    mf->cells[mf->current_cell] |= HASFLAG;
-                    maybe_game_won(mf);
-                }
-            }
-            mf->changed = true;
-            break;
-
         case MINE_INPUT_QUIT:
             mf->state = QUIT;
-
-        default:
             break;
+
+        default: {
+            uint8_t x = mf->current_cell % mf->width;
+            uint8_t y = mf->current_cell / mf->width;
+            set_minefield_cell(mf, x, y, input);
+        }
     }
 }
 
@@ -155,7 +170,7 @@ inline void gameplay_update(minefield* mf)
     draw_minefield_contents(mf);
 
 #ifdef ENABLE_TIMER
-    update_timer();
+    update_timer(mf);
 #endif /* ENABLE_TIMER */
 
 #ifdef ENABLE_COUNTER
