@@ -205,16 +205,39 @@ void update_counter(minefield* mf)
 }
 
 
-extern inline void update_mouse(minefield* mf);
+extern inline void update_mouse(minefield* mf, uint8_t source);
 
 
 void idle_update(minefield* mf)
 {
+    static uint8_t no_mouse = 0x1;
     static uint8_t fifth = 0;
+    static uint8_t source = 0xff;
 
-    if (++fifth == 5) {
-        fifth = 0;
-        update_mouse(mf);
+    switch (++fifth) {
+        case 3: {
+            /* count how many times mouse is not found */
+            uint8_t tmp = search_mouse();
+            if (tmp == 0xff) {
+                no_mouse = (no_mouse | 0b1) + 2;
+            } else {
+                /* found: reset counter */
+                source = tmp;
+                no_mouse = 0;
+            }
+            break;
+        }
+        case 5:
+            fifth = 0;
+            if (source != 0xff && no_mouse == 0) {
+                update_mouse(mf, source);
+            } else if (no_mouse > 3) {
+                source = 0xff;
+                hide_mouse();
+            }
+            break;
+        default:
+            break;
     }
 }
 
