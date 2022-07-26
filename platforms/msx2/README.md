@@ -10,6 +10,16 @@
 * `N` key opens multiple cells at once around the cursor;
 * `Q` key reboots;
 
+### Mouse
+
+* Left button opens the cell under the pointer;
+* Right button toggles flag and question mark under the pointer;
+* Left+Right buttons open multiple cells at once under the pointer;
+
+### OpenMSX
+
+* Middle-click will toggle mouse input grab (confines mouse events to OpenMSX window).
+
 ### Build & runtime/debug dependencies
 
 * SDCC compiler (successfully tested with 4.0.0, 4.1.0 and 4.2.0)
