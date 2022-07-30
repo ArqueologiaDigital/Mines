@@ -210,30 +210,50 @@ extern inline void update_mouse(minefield* mf, uint8_t source);
 
 void idle_update(minefield* mf)
 {
-    static uint8_t no_mouse = 0x1;
-    static uint8_t fifth = 0;
+    static uint8_t ignore_input = 0;
+    static uint8_t mouse1 = 0;
+    static uint8_t mouse2 = 0;
     static uint8_t source = 0xff;
+    static uint8_t fifth = 0;
 
     switch (++fifth) {
-        case 3: {
+        case 4: {
             /* count how many times mouse is not found */
-            uint8_t tmp = search_mouse();
-            if (tmp == 0xff) {
-                no_mouse = (no_mouse | 0b1) + 2;
-            } else {
-                /* found: reset counter */
-                source = tmp;
-                no_mouse = 0;
+            int8_t mouse = search_mouse();
+            switch (mouse) {
+            case -1:
+                ignore_input++;
+                break;
+            case 1:
+                ignore_input = 0;
+                if (source == 0xff && mouse1 > IGNORE_MOUSE_THRESHOLD) {
+                    debug_msg("mouse1 detected\n");
+                    mouse2 = 0;
+                    source = 1;
+                }
+                mouse1++;
+                break;
+            case 2:
+                ignore_input = 0;
+                if (source == 0xff && mouse2 > IGNORE_MOUSE_THRESHOLD) {
+                    debug_msg("mouse2 detected\n");
+                    mouse1 = 0;
+                    source = 2;
+                }
+                mouse2++;
+                break;
+            default:
+                ignore_input = 0;
+                break;
             }
-            break;
         }
         case 5:
             fifth = 0;
-            if (source != 0xff && no_mouse == 0) {
-                update_mouse(mf, source);
-            } else if (no_mouse > 3) {
-                source = 0xff;
+            if (ignore_input > IGNORE_MOUSE_THRESHOLD) {
                 hide_mouse();
+                source = 0xff;
+            } else if (source != 0xff) {
+                update_mouse(mf, source);
             }
             break;
         default:

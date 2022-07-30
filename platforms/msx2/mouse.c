@@ -15,7 +15,6 @@ static bool l_pressed = false;
 static bool r_pressed = false;
 static bool ignored = false;
 
-
 void update_mouse(minefield* mf, uint8_t source)
 {
     read_mouse(&mouse, source);
@@ -41,9 +40,7 @@ void update_mouse(minefield* mf, uint8_t source)
         /* ignore presses again until both button1 and button2 are released */
         if (mouse.l_button + mouse.r_button == 5 && ignored) {
             ignored = false;
-        }
-
-        if (ignored) {
+        } else if (ignored) {
             return;
         }
 
