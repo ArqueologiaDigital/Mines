@@ -110,7 +110,7 @@ void video_init()
 void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
 {
     /* copy 8x8 block from page 1 (hidden page) to page 0 (visible page) */
-    vdp(TILE_X[tile], TILE_Y[tile], dst_x * 8, dst_y * 8, 8, 8, DIR_DEFAULT, VDP_LMMM | PO_IMP);
+    vdp(TILE_X[tile], TILE_Y[tile], dst_x * 8, dst_y * 8, 8, 8, DIR_DEFAULT, VDP_HMMM);
 }
 
 
