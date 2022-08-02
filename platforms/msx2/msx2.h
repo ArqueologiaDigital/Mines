@@ -32,6 +32,7 @@
 
 /* VDP operation (combine it with pixel operation above) */
 #define VDP_LMMM            0b10010000
+#define VDP_HMMM            0b11010000
 
 /* vblank hook, 60 times per second */
 #define HTIMI               0xfd9f
