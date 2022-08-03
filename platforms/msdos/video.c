@@ -259,11 +259,7 @@ void highlight_current_cell(minefield *mf)
     old_y = y;
 }
 
-
 #ifdef USE_DEBUG_MODE
-/* Thanks to OSDev Wiki for the serial initialization sequence! */
-
-#define SERIAL_PORT_ADDR 0x3f8
 static inline uint8_t inb(uint16_t port)
 {
     uint8_t value;
@@ -271,6 +267,8 @@ static inline uint8_t inb(uint16_t port)
     return value;
 }
 
+/* Thanks to OSDev Wiki for the serial initialization sequence! */
+#define SERIAL_PORT_ADDR 0x3f8
 
 static void serial_debug_init(void)
 {
@@ -334,6 +332,7 @@ void debug_mode(uint8_t mode)
 #endif
 
 
+
 void platform_init()
 {
 #ifdef USE_DEBUG_MODE
@@ -344,6 +343,9 @@ void platform_init()
     srand(time(NULL));
 
     video_init();
+
+    void audio_init(void);
+    audio_init();
 }
 
 
@@ -354,6 +356,11 @@ void platform_shutdown()
 {
     free(mines_xpm[0]);
     free(mines_xpm);
+
     set_mode(VGA_TEXT_MODE);
+
+    void audio_shutdown(void);
+    audio_shutdown();
+
     exit(0);
 }
