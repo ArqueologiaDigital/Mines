@@ -1,5 +1,5 @@
 CC=gcc
-SOURCES=extras.c video.c input.c ../../common/main.c ../../common/minefield.c ../../common/video-tiles.c
+SOURCES=extras.c video.c input.c ../../common/main.c ../../common/minefield.c ../../common/tiles.c
 BUILDDIR=build
 CFLAGS=-Wall -pedantic -I../../common -I. -DNO_UNUSED_MACRO -DMINEFIELD_ALLOCATION -DMAIN_LOOP_REIMPLEMENTED
 LDFLAGS=-lGL -lGLU -lglut -lm
