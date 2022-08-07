@@ -1,6 +1,8 @@
 #include "common.h"
+#include "game.h"
 #include "minefield.h"
-#include "video-tiles.h"
+#include "tiles.h"
+#include "codes.h"
 #include <stdlib.h>
 #include <time.h>
 #include <stdbool.h>
@@ -260,7 +262,6 @@ void platform_init()
     srand(time(NULL));
 
     init_video();
-    draw_scenario();
 }
 
 
