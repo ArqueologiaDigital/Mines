@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include "msx2.h"
 #include "common.h"
-#include "video-tiles.h"
+#include "tiles.h"
 #include "game.h"
 #include "minefield.h"
 
@@ -14,6 +14,7 @@ static int y = 33;
 static bool l_pressed = false;
 static bool r_pressed = false;
 static bool ignored = false;
+
 
 void update_mouse(minefield* mf, uint8_t source)
 {
@@ -32,7 +33,6 @@ void update_mouse(minefield* mf, uint8_t source)
     if (mf->state == PLAYING_GAME) {
         uint8_t cell_x = x / 8 - MINEFIELD_X_OFFSET;
         uint8_t cell_y = y / 8 - MINEFIELD_Y_OFFSET;
-        if (cell_x & 1 || cell_y & 1) return;
         cell_x /= 2;
         cell_y /= 2;
         if (cell_x >= mf->width || cell_y >= mf->height) return;

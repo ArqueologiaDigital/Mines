@@ -4,56 +4,30 @@
 #include "common.h"
 #include "game.h"
 #include "minefield.h"
-#include "video-tiles.h"
+#include "tiles.h"
+#include "timer.h"
 
 //#define USE_DEBUG_MODE
 #include "debug.h"
 
 /* Assets */
-#include "mines.h"
+#include "build/mines.h"
 #include "cursors.h"
 #include "tile_coords.c"
 
 typedef void (*Callback)(void);
 
-/* Time controls */
-uint8_t ticks = 0; /* add one tick each time HTIMI is called */
-uint8_t seconds = 0; /* makeshift BCD counter */
-uint8_t minutes = 0; /* makeshift BCD counter */
 
-/* Mine control */
+// mine control
 bool negative = false;
 uint8_t units = 0; /* makeshift BCD counter */
 uint8_t decimals = 0; /* makeshift BCD counter */
 
 
-inline void count_bcd_time()
-{
-    /* Update timer */
-    if (++ticks > 59) {
-        ticks = 0; /* 60 ticks make a second at 60Hz */
-
-        if ((++seconds & 0b1111) > 9) {
-            seconds += 6; /* carry the BCD digit by adding 6 */
-
-            if (seconds > 0x59) {
-                seconds = 0;
-
-                if ((++minutes & 0b1111) > 9)
-                    minutes += 6; /* carry the BCD digit by adding 6 */
-
-                if (minutes > 99)
-                    minutes = 0;
-            }
-        }
-    }
-}
-
-
 void vblank_hook()
 {
     count_bcd_time();
-    /* TODO: play song */
+    // TODO: play a song
 }
 
 
@@ -114,6 +88,14 @@ void set_tile(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
 }
 
 
+/* set_block copies block of 16x16 tiles to x, y coordinates */
+void set_block(uint8_t dst_x, uint8_t dst_y, uint8_t tile)
+{
+    /* copy 16x16 block from page 1 (hidden page) to page 0 (visible page) */
+    vdp(TILE_X[tile], TILE_Y[tile], dst_x * 8, dst_y * 8, 16, 16, DIR_DEFAULT, VDP_HMMM);
+}
+
+
 void put_cursor(uint8_t x, uint8_t y)
 {
     struct sprite_attr attr = { y - 1, x, 4 * CURSOR_PATTERN_ID, 0 };
@@ -146,7 +128,7 @@ void highlight_current_cell(minefield* mf)
     uint8_t y = CELL_Y(mf, mf->current_cell) * 2 + MINEFIELD_Y_OFFSET + 1;
 
     if (mf->state == PLAYING_GAME) {
-        put_cursor(x * 8 - 3, y * 8 - 3);
+        put_cursor(x * 8 + CURSOR_X_OFFSET, y * 8 + CURSOR_Y_OFFSET);
     } else {
         hide_cursor();
     }
@@ -160,29 +142,29 @@ void platform_init()
 }
 
 
-void reset_timer()
+void draw_timer()
 {
-    debug_msg("reset_timer() called\n");
-    ticks = 0;
-    seconds = 0;
-    minutes = 0;
-}
+    set_tile(HOURGLASS_X_POS - 1, HOURGLASS_Y_POS - 1, FRAME_TOP_LEFT);
+    set_tile(HOURGLASS_X_POS + 0, HOURGLASS_Y_POS - 1, FRAME_TOP_CENTER);
+    set_tile(HOURGLASS_X_POS + 1, HOURGLASS_Y_POS - 1, FRAME_TOP_CENTER);
+    set_tile(HOURGLASS_X_POS + 2, HOURGLASS_Y_POS - 1, FRAME_TOP_CENTER);
+    set_tile(HOURGLASS_X_POS + 3, HOURGLASS_Y_POS - 1, FRAME_TOP_CENTER);
+    set_tile(HOURGLASS_X_POS + 4, HOURGLASS_Y_POS - 1, FRAME_TOP_CENTER);
+    set_tile(HOURGLASS_X_POS + 5, HOURGLASS_Y_POS - 1, FRAME_TOP_CENTER);
+    set_tile(HOURGLASS_X_POS + 6, HOURGLASS_Y_POS - 1, FRAME_TOP_RIGHT);
 
+    set_tile(HOURGLASS_X_POS - 1, HOURGLASS_Y_POS, FRAME_VERTICAL_LEFT);
+    set_tile(HOURGLASS_X_POS, HOURGLASS_Y_POS, HOURGLASS);
+    set_tile(HOURGLASS_X_POS + 6, HOURGLASS_Y_POS, FRAME_VERTICAL_RIGHT);
 
-void update_timer(minefield* mf)
-{
-    mf;
-
-    uint8_t unit = minutes & 0b1111;
-    uint8_t decimal = (minutes >> 4) & 0b1111;
-    set_tile(25, 6, ZERO_DIGIT + decimal);
-    set_tile(26, 6, ZERO_DIGIT + unit);
-    set_tile(27, 6, COLON);
-
-    unit = seconds & 0b1111;
-    decimal = (seconds >> 4) & 0b1111;
-    set_tile(28, 6, ZERO_DIGIT + decimal);
-    set_tile(29, 6, ZERO_DIGIT + unit);
+    set_tile(HOURGLASS_X_POS - 1, HOURGLASS_Y_POS + 1, FRAME_BOTTOM_LEFT);
+    set_tile(HOURGLASS_X_POS + 0, HOURGLASS_Y_POS + 1, FRAME_BOTTOM_CENTER);
+    set_tile(HOURGLASS_X_POS + 1, HOURGLASS_Y_POS + 1, FRAME_BOTTOM_CENTER);
+    set_tile(HOURGLASS_X_POS + 2, HOURGLASS_Y_POS + 1, FRAME_BOTTOM_CENTER);
+    set_tile(HOURGLASS_X_POS + 3, HOURGLASS_Y_POS + 1, FRAME_BOTTOM_CENTER);
+    set_tile(HOURGLASS_X_POS + 4, HOURGLASS_Y_POS + 1, FRAME_BOTTOM_CENTER);
+    set_tile(HOURGLASS_X_POS + 5, HOURGLASS_Y_POS + 1, FRAME_BOTTOM_CENTER);
+    set_tile(HOURGLASS_X_POS + 6, HOURGLASS_Y_POS + 1, FRAME_BOTTOM_RIGHT);
 }
 
 
@@ -196,12 +178,40 @@ inline void count_bcd_mines(const minefield* mf)
 }
 
 
+void draw_counter()
+{
+    set_tile(BOMB_ICON_X_POS - 1, BOMB_ICON_Y_POS - 1, FRAME_TOP_LEFT);
+    set_tile(BOMB_ICON_X_POS + 0, BOMB_ICON_Y_POS - 1, FRAME_TOP_CENTER);
+    set_tile(BOMB_ICON_X_POS + 1, BOMB_ICON_Y_POS - 1, FRAME_TOP_CENTER);
+    set_tile(BOMB_ICON_X_POS + 2, BOMB_ICON_Y_POS - 1, FRAME_TOP_CENTER);
+    set_tile(BOMB_ICON_X_POS + 3, BOMB_ICON_Y_POS - 1, FRAME_TOP_CENTER);
+    set_tile(BOMB_ICON_X_POS + 4, BOMB_ICON_Y_POS - 1, FRAME_TOP_CENTER);
+    set_tile(BOMB_ICON_X_POS + 5, BOMB_ICON_Y_POS - 1, FRAME_TOP_CENTER);
+    set_tile(BOMB_ICON_X_POS + 6, BOMB_ICON_Y_POS - 1, FRAME_TOP_RIGHT);
+
+    set_tile(BOMB_ICON_X_POS - 1, BOMB_ICON_Y_POS, FRAME_VERTICAL_LEFT);
+    set_tile(BOMB_ICON_X_POS, BOMB_ICON_Y_POS, BOMB_ICON);
+    set_tile(BOMB_ICON_X_POS + 1, BOMB_ICON_Y_POS, NO_SIGN);
+    set_tile(BOMB_ICON_X_POS + 2, BOMB_ICON_Y_POS, NO_SIGN);
+    set_tile(BOMB_ICON_X_POS + 6, BOMB_ICON_Y_POS, FRAME_VERTICAL_RIGHT);
+
+    set_tile(BOMB_ICON_X_POS - 1, BOMB_ICON_Y_POS + 1, FRAME_BOTTOM_LEFT);
+    set_tile(BOMB_ICON_X_POS + 0, BOMB_ICON_Y_POS + 1, FRAME_BOTTOM_CENTER);
+    set_tile(BOMB_ICON_X_POS + 1, BOMB_ICON_Y_POS + 1, FRAME_BOTTOM_CENTER);
+    set_tile(BOMB_ICON_X_POS + 2, BOMB_ICON_Y_POS + 1, FRAME_BOTTOM_CENTER);
+    set_tile(BOMB_ICON_X_POS + 3, BOMB_ICON_Y_POS + 1, FRAME_BOTTOM_CENTER);
+    set_tile(BOMB_ICON_X_POS + 4, BOMB_ICON_Y_POS + 1, FRAME_BOTTOM_CENTER);
+    set_tile(BOMB_ICON_X_POS + 5, BOMB_ICON_Y_POS + 1, FRAME_BOTTOM_CENTER);
+    set_tile(BOMB_ICON_X_POS + 6, BOMB_ICON_Y_POS + 1, FRAME_BOTTOM_RIGHT);
+}
+
+
 void update_counter(minefield* mf)
 {
     count_bcd_mines(mf);
-    set_tile(25, 3, negative ? MINUS_SIGN : NO_SIGN);
-    set_tile(26, 3, ZERO_DIGIT + decimals);
-    set_tile(27, 3, ZERO_DIGIT + units);
+    set_tile(BOMB_ICON_X_POS + 3, BOMB_ICON_Y_POS, negative ? MINUS_SIGN : NO_SIGN);
+    set_tile(BOMB_ICON_X_POS + 4, BOMB_ICON_Y_POS, ZERO_DIGIT + decimals);
+    set_tile(BOMB_ICON_X_POS + 5, BOMB_ICON_Y_POS, ZERO_DIGIT + units);
 }
 
 
