@@ -200,7 +200,16 @@ int main() {
 
     minefield* mf = init_minefield();
 
+    // draw screen elements
     draw_scenario(mf);
+
+#ifdef ENABLE_COUNTER
+    draw_counter();
+#endif // ENABLE_COUNTER
+
+#if ENABLE_TIMER
+    draw_timer();
+#endif // ENABLE_TIMER
 
     mf->state = TITLE_SCREEN;
 
