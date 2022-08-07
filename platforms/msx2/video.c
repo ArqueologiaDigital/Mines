@@ -13,7 +13,7 @@
 /* Assets */
 #include "build/mines.h"
 #include "cursors.h"
-#include "tile_coords.c"
+#include "tilemap.h"
 
 typedef void (*Callback)(void);
 

@@ -68,7 +68,7 @@ void set_minefield_cell(minefield* mf, uint8_t x, uint8_t y, uint8_t input);
  * ----------------------
  *
  * If coding a tile-based platform that uses **tiles.h** header, you can use
- * the definition in **tiles_8x8.c** or **tiles_16x16.c** instead of writing
+ * the definition in **8x8_tiles.h** or **16x16_tiles.h** instead of writing
  * your own.
  *
  * Note: some tile-based platforms use the `GROUND` tile to cover the whole

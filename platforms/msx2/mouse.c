@@ -33,10 +33,12 @@ void update_mouse(minefield* mf, uint8_t source)
     if (mf->state == PLAYING_GAME) {
         uint8_t cell_x = x / 8 - MINEFIELD_X_OFFSET;
         uint8_t cell_y = y / 8 - MINEFIELD_Y_OFFSET;
+#ifdef _8X8_TILES
+        if (cell_x & 1 || cell_y & 1) return;
+#endif // _8X8_TILES
         cell_x /= 2;
         cell_y /= 2;
         if (cell_x >= mf->width || cell_y >= mf->height) return;
-
         /* ignore presses again until both button1 and button2 are released */
         if (mouse.l_button + mouse.r_button == 5 && ignored) {
             ignored = false;
