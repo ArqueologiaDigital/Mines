@@ -1,4 +1,5 @@
-#include "video-tiles.h"
+#include "tiles.h"
+#include "codes.h"
 #include <string.h>
 #include <time.h>
 
