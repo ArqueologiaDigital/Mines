@@ -1,7 +1,8 @@
 #include "common.h"
 #include "minefield.h"
 #include "game.h"
-#include "video-tiles.h"
+#include "tiles.h"
+#include "codes.h"
 #include "colors.h"
 #include <ncurses.h>
 #include <stdlib.h>
