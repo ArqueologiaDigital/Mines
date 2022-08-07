@@ -1,9 +1,9 @@
-#ifndef VIDEO_TILES_H
-#define VIDEO_TILES_H
+#ifndef TILES_H
+#define TILES_H
 
 #include <stdint.h>
 #include "minefield.h"
-#include "video-tile-codes.h"
+
 
 /**
  * [Required] Set the tile position at the (`x`, `y`) coordinates with `tile`
@@ -15,6 +15,21 @@
  * See [tile_index](#tile_index) for tile index values.
  */
 void set_tile(uint8_t x, uint8_t y, uint8_t tile);
+
+
+#ifdef _16X16_TILES
+/**
+ * [Optional] Set the block at the (`x`..`x+1`, `y`..`y+1`) coordinates with
+ * a 16x16 `block` index. This is an alternative version of the board were
+ * each cell is a 16x16 collection of pixels (or a group of 2x2 tiles).
+ *
+ * Implementation details
+ * ----------------------
+ *
+ * _16X16_TILES must be defined to use 16x16 blocks of cells.
+ */
+void set_block(uint8_t x, uint8_t y, uint8_t block);
+#endif /* _16X16_TILES */
 
 
 /**
@@ -41,4 +56,4 @@ void draw_single_cell(minefield* mf, uint8_t x, uint8_t y);
  */
 void highlight_current_cell(minefield* mf);
 
-#endif /* VIDEO_TILES_H */
+#endif /* TILES_H */

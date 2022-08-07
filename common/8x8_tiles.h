@@ -1,6 +1,7 @@
-#include "video-tiles.h"
+#include "tiles.h"
 #include "common.h"
 #include "minefield.h"
+#include "codes.h"
 
 
 void draw_single_cell(minefield* mf, uint8_t x, uint8_t y)
@@ -157,14 +158,5 @@ void draw_scenario()
         set_tile(x, 0, TOP_BORDER__RIGHT);
         set_tile(x, SCREEN_HEIGHT - 1, BOTTOM_BORDER__RIGHT);
     }
-
-#if defined(AMPERSAND_X_POS) && defined(AMPERSAND_Y_POS)
-    set_tile(AMPERSAND_X_POS, AMPERSAND_Y_POS, AMPERSAND);
-#endif
-
-#if defined(BOMB_ICON_X_POS) && defined(BOMB_ICON_Y_POS)
-    set_tile(BOMB_ICON_X_POS, BOMB_ICON_Y_POS, BOMB_ICON);
-#endif
-
 #endif
 }

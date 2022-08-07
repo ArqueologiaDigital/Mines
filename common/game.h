@@ -67,8 +67,9 @@ void set_minefield_cell(minefield* mf, uint8_t x, uint8_t y, uint8_t input);
  * Implementation details
  * ----------------------
  *
- * If coding a tile-based platform that uses **video-tiles.h** header, you can
- * use the definition in **video-tiles.c** instead of creating your own.
+ * If coding a tile-based platform that uses **tiles.h** header, you can use
+ * the definition in **tiles_8x8.c** or **tiles_16x16.c** instead of writing
+ * your own.
  *
  * Note: some tile-based platforms use the `GROUND` tile to cover the whole
  * background area.
@@ -79,6 +80,12 @@ void draw_scenario(minefield* mf);
 
 
 #ifdef ENABLE_COUNTER
+/**
+ * [Optional] Draw static related screen elements related to the mine counter,
+ * i. e., a frame and mine icon.
+ */
+void draw_counter();
+
 /**
  * [Optional] Display mine counter on screen.
  *
@@ -96,6 +103,13 @@ void update_counter(minefield* mf);
 
 
 #ifdef ENABLE_TIMER
+/**
+ * [Optional] Draw static related screen elements related to the time counter,
+ * i. e., a frame and ampersand icon.
+ */
+void draw_timer();
+
+
 /**
  * [Optional] Display elapsed time on the screen.
  *
