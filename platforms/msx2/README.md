@@ -27,3 +27,11 @@
 * openMSX emulator with C-BIOS ROM
 
 **Note:** The hex2bin tool can be compiled from sources available at https://gitlab.com/reidrac/ubox-msx-lib/-/blob/main/tools/hex2bin-2.0 or you can also use binaries downloaded from https://sourceforge.net/projects/hex2bin/files/
+
+### Tileset selection
+
+The default tileset is the classic windows theme (16x16), but you can select the grassland tileset (8x8) by typing the following command:
+```
+$ _8X8_TILES=1 make clean all
+```
+![Screenshot](screenshot2.jpg)

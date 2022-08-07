@@ -1,8 +1,3 @@
-#include <stdint.h>
-#include "tiles.h"
-#include "codes.h"
-
-
 #define TILE_POS_X(x, y) ((x) * 8)
 static const uint8_t TILE_X[MAX_VIDEO_TILES] = {
     [ONE_BOMB] = TILE_POS_X(4, 0),
