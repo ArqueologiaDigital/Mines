@@ -1,5 +1,5 @@
 CC := ia16-elf-gcc
-SOURCES := extras.c video.c input.c ../../common/main.c ../../common/minefield.c ../../common/video-tiles.c
+SOURCES := extras.c video.c input.c ../../common/main.c ../../common/minefield.c ../../common/tiles.c
 BUILDDIR := build
 CFLAGS := -nodefaultlibs -nostdlib -mcmodel=tiny -mregparmcall -march=i186 -Os -flto -Wall -pedantic -I../../common -I. -DNO_UNUSED_MACRO
 LDFLAGS := -flto
