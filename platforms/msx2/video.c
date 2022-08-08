@@ -225,15 +225,12 @@ void update_counter(minefield* mf)
 }
 
 
-extern inline void update_mouse(minefield* mf, uint8_t source);
-
-
 void idle_update(minefield* mf)
 {
+    extern uint8_t source_mouse;
     static uint8_t ignore_input = 0;
     static uint8_t mouse1 = 0;
     static uint8_t mouse2 = 0;
-    static uint8_t source = 0xff;
     static uint8_t fifth = 0;
 
     switch (++fifth) {
@@ -246,19 +243,19 @@ void idle_update(minefield* mf)
                 break;
             case 1:
                 ignore_input = 0;
-                if (source == 0xff && mouse1 > IGNORE_MOUSE_THRESHOLD) {
+                if (source_mouse == 0xff && mouse1 > IGNORE_MOUSE_THRESHOLD) {
                     debug_msg("mouse1 detected\n");
+                    source_mouse = 1;
                     mouse2 = 0;
-                    source = 1;
                 }
                 mouse1++;
                 break;
             case 2:
                 ignore_input = 0;
-                if (source == 0xff && mouse2 > IGNORE_MOUSE_THRESHOLD) {
+                if (source_mouse == 0xff && mouse2 > IGNORE_MOUSE_THRESHOLD) {
                     debug_msg("mouse2 detected\n");
+                    source_mouse = 2;
                     mouse1 = 0;
-                    source = 2;
                 }
                 mouse2++;
                 break;
@@ -271,9 +268,9 @@ void idle_update(minefield* mf)
             fifth = 0;
             if (ignore_input > IGNORE_MOUSE_THRESHOLD) {
                 hide_mouse();
-                source = 0xff;
-            } else if (source != 0xff) {
-                update_mouse(mf, source);
+                source_mouse = 0xff;
+            } else if (source_mouse != 0xff) {
+                update_mouse(mf, source_mouse);
             }
             break;
         default:

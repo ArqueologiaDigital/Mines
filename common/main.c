@@ -100,12 +100,16 @@ inline void title_screen_update(minefield* mf)
     // TODO: platform dependent title screen, animations, music etc.
     draw_title_screen(mf);
 
-    uint8_t input = input_read(KEYBOARD);
-    if (input == MINE_INPUT_IGNORED) {
-        return;
+    uint8_t input = MINE_INPUT_IGNORED;
+    for (uint8_t source = 0; source < JOY_4; ++source) {
+        input = input_read(source);
+        if (input != MINE_INPUT_IGNORED)
+            break;
     }
-    debug("\nkey code = ", input);
+    if (input == MINE_INPUT_IGNORED)
+        return;
 
+    debug("\nkey code = ", input);
     switch (input) {
         case MINE_INPUT_OPEN:
         case MINE_INPUT_OPEN_BLOCK:
@@ -143,12 +147,16 @@ inline void game_over_update(minefield* mf)
     draw_minefield_contents(mf);
 #endif
 
-    uint8_t input = input_read(KEYBOARD);
-    if (input == MINE_INPUT_IGNORED) {
-        return;
+    uint8_t input = MINE_INPUT_IGNORED;
+    for (uint8_t source = 0; source < JOY_4; ++source) {
+        input = input_read(source);
+        if (input != MINE_INPUT_IGNORED)
+            break;
     }
-    debug("\nkey code = ", input);
+    if (input == MINE_INPUT_IGNORED)
+        return;
 
+    debug("\nkey code = ", input);
     switch (input) {
         case MINE_INPUT_OPEN:
         case MINE_INPUT_OPEN_BLOCK:
@@ -177,12 +185,16 @@ inline void gameplay_update(minefield* mf)
     update_counter(mf);
 #endif /* ENABLE_COUNTER */
 
-    uint8_t input = input_read(KEYBOARD);
-    if (input == MINE_INPUT_IGNORED) {
-        return;
+    uint8_t input = MINE_INPUT_IGNORED;
+    for (uint8_t source = 0; source < JOY_4; ++source) {
+        input = input_read(source);
+        if (input != MINE_INPUT_IGNORED)
+            break;
     }
-    debug("\nkey code = ", input);
+    if (input == MINE_INPUT_IGNORED)
+        return;
 
+    debug("\nkey code = ", input);
     update_gameplay_input(mf, input);
 }
  

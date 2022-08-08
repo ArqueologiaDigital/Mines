@@ -4,6 +4,9 @@
 #include "common.h"
 
 
+uint8_t source_mouse = 0xff;
+
+
 static uint8_t keyboard_read_row(uint8_t row) __z88dk_fastcall __naked
 {
     row; assert(row <= 10);
@@ -50,12 +53,51 @@ static uint8_t keyboard_read()
 }
 
 
+static joydata joy;
+
+
+static uint8_t joystick_read(uint8_t source)
+{
+    uint8_t input = read_raw_joyport(source);
+
+    if (!(input & (1 << 0))) {
+        return MINE_INPUT_UP;
+    }
+    if (!(input & (1 << 1))) {
+        return MINE_INPUT_DOWN;
+    }
+    if (!(input & (1 << 2))) {
+        return MINE_INPUT_LEFT;
+    }
+    if (!(input & (1 << 3))) {
+        return MINE_INPUT_RIGHT;
+    }
+    if (!(input & (1 << 4))) {
+        debug_msg("button1\n");
+        return MINE_INPUT_OPEN;
+    }
+    if (!(input & (1 << 5))) {
+        debug_msg("button2\n");
+        return MINE_INPUT_FLAG;
+    }
+    return MINE_INPUT_IGNORED;
+}
+
+
 uint8_t input_read(uint8_t source)
 {
+    static uint8_t wait_joy[3] = {0};
+
     if (source == KEYBOARD)
         return keyboard_read();
-
-    /* not implemented yet */
+    // distinguish mouse input from joystick input
+    else if (source < JOY_3 && source_mouse == 0xff) {
+        uint8_t* tick = &wait_joy[source];
+        if ((*tick)++ >= 30) {
+            *tick = 0;
+            return joystick_read(source);
+        }
+    }
     return MINE_INPUT_IGNORED;
 }
 

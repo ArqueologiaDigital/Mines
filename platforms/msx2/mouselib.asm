@@ -1,8 +1,9 @@
 ; int8_t search_mouse()
-; void read_mouse(struct mouse* mouse, uint8_t source) __sdcccall(0)
+; void read_joyport(struct mouse* mouse, uint8_t source) __sdcccall(0)
+; void read_raw_joyport(uint8_t source) __z88dk_fastcall
 
 .globl _search_mouse
-.globl _read_mouse
+.globl _read_joyport
 
 REGWTP = 0xA0           ; register write port
 VALWTP = 0xA1           ; value write port
@@ -41,12 +42,12 @@ port2:
 search_device:
         ld b, #SHORT_WAIT
 search_device0:
-        call get_mouse_data0            ; read bits 7-4 of the offset
+        call get_joy_data0              ; read bits 7-4 of the offset
         ld hl, #saved_tmp_data
         ld (hl), a                      ; save x offset 1/2
         or #0xc0                        ; clear bits b7/b6
         ld c, a                         ; c <- byte1
-        call get_mouse_data             ; read bits 3-0 of the offset
+        call get_joy_data               ; read bits 3-0 of the offset
         inc hl
         ld (hl), a                      ; save x offset 2/2
         or #0xc0
@@ -67,7 +68,7 @@ search_device0:
         ld l, a
         ret                             ; return device id fingerprint
 
-_read_mouse::
+_read_joyport::
         push ix
         ld ix, #2
         add ix, sp
@@ -78,10 +79,10 @@ _read_mouse::
 
         ld de, #PORT1                   ; DE = 01310h for mouse in port 1 (D = 00010011b, E = 00010000b)
         and #2
-        jr z, read_mouse
+        jr z, read_cached_joyport
         ld de, #PORT2                   ; DE = 06C20h for mouse in port 2 (D = 01101100b, E = 00100000b)
 
-read_mouse:
+read_cached_joyport:
         ld ix, #saved_tmp_data
         ld a, 0(ix)                     ; read previously stored x offset used in detection
         and #0xf
@@ -96,14 +97,14 @@ read_mouse:
 
         ld (hl), a                      ; save to mouse data struct (1/4)
         inc hl
-        call get_mouse_data             ; read bits 7-4 of the y offset
+        call get_joy_data               ; read bits 7-4 of the y offset
         and #0xf
         rlca
         rlca
         rlca
         rlca                            ; adjust y offset's higher bits
         ld c, a                         ; save as temp data
-        call get_mouse_data             ; read bits 3-0 of the y offset
+        call get_joy_data               ; read bits 3-0 of the y offset
                                         ; can read mouse button bit 4 = left button / bit 5 = right button
         ld b, a
         and #0xf
@@ -133,9 +134,25 @@ read_mouse:
         pop ix
         ret
 
-get_mouse_data:
+_read_raw_joyport::
+        ld a, l                         ; a <- l (z88dk_fastcall)
+        ld de, #PORT1                   ; DE = 01310h for mouse in port 1 (D = 00010011b, E = 00010000b)
+        and #2
+        ld b, #LONG_WAIT                ; first delay is longer
+        jr z, read_joyport
+        ld de, #PORT2                   ; DE = 06C20h for mouse in port 2 (D = 01101100b, E = 00100000b)
+read_joyport:
+        call get_joy_data0              ; read bits 7-4 of joystick
+        call get_joy_data               ; read bits 5-0 of the joystick
+        and #0x3f
+        ld l, a                         ; z88dk_fastcall return register
+        ld b, #LONGER_WAIT
+        call wait
+        ret
+
+get_joy_data:
         ld b, #SHORT_WAIT
-get_mouse_data0:
+get_joy_data0:
         di
         ld a, #IO_REG2
         out (#REGWTP), a                ; read PSG register 15 for mouse
@@ -174,6 +191,5 @@ wait_loop3:                             ; R800 extra wait 2/2
 .area DATA
 
 saved_tmp_data:
-        .db 0xff
-        .db 0xff
-
+        .db #0xff
+        .db #0xff

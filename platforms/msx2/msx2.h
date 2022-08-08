@@ -1,6 +1,7 @@
 #ifndef MSX2_H
 #define MSX2_H
 
+#include "game.h"
 #include <stdint.h>
 
 /* __sdcccall function attribute on SDCC 4.1.12 and later */
@@ -89,18 +90,24 @@ void put_sprite_attr(struct sprite_attr *src, uint8_t index) SDCCCALL0;
 /* search for plugged mouse device */
 int8_t search_mouse();
 
-/* structure for storing mouse data */
-struct mouse {
+/* structure for storing mouse or joystick data */
+typedef struct {
     int8_t dx;
     int8_t dy;
     uint8_t l_button; /* 1 = OFF, 2 = ON */
     uint8_t r_button; /* 1 = OFF, 2 = ON */
-};
+} joydata;
 
-void read_mouse(struct mouse* mouse, uint8_t source) SDCCCALL0;
+void read_joyport(joydata* data, uint8_t source) SDCCCALL0;
+
+uint8_t read_raw_joyport(uint8_t source) __z88dk_fastcall;
 
 void put_mouse(uint8_t x, uint8_t y);
 
 void hide_mouse();
+
+inline void update_mouse(minefield* mf, uint8_t source);
+
+inline void update_joystick(uint8_t source);
 
 #endif /* MSX2_H */
