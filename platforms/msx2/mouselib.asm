@@ -1,7 +1,8 @@
 ; int8_t search_mouse()
 ; void read_mouse(struct mouse* mouse, uint8_t source) __sdcccall(0)
 
-.globl read_mouse
+.globl _search_mouse
+.globl _read_mouse
 
 REGWTP = 0xA0           ; register write port
 VALWTP = 0xA1           ; value write port
@@ -16,25 +17,26 @@ IO_REG2 = 15
 
 _search_mouse::
         ld de, #PORT1                   ; DE = mouse on port 1
-        ld b, #LONG_WAIT                ; first delay is the longest
+        ld b, #LONG_WAIT                ; first delay is longer
         call search_device0
         cp #0xff
         jp z, port2                     ; device not found? Searching on port 2
         or a                            ; mouse signature?
-        ld a, #1
+        ld l, #1
         ret z                           ; signature found, return "1" for mouse port 1
-        ld a, e
+        ld l, e
         ret                             ; return x offset
 port2:
         ld de, #PORT2                   ; DE = mouse on port 2
         call search_device
         cp #0xff
+        ld l, a
         ret z                           ; return -1: device not found or it's a joystick
         or a                            ; mouse signature?
-        ld a, #2
+        ld l, #2
         ret z                           ; signature found, return "2" for mouse port 2
-        xor a
-        ret                             ; ignore input
+        ld l, #0                        ; ignore input
+        ret
 
 search_device:
         ld b, #SHORT_WAIT
@@ -62,6 +64,7 @@ search_device0:
         rlca
         or #0x3f
         and d                           ; a <- (byte1 << 2 | 0x3f) & (byte1 << 4 | 0x0f) & byte2
+        ld l, a
         ret                             ; return device id fingerprint
 
 _read_mouse::
