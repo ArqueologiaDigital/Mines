@@ -1,4 +1,4 @@
-all: mines.html common-ref.html game-ref.html msx2-ref.html msdos-ref.html ncurses-ref.html opengl-ref.html gunsmoke-ref.html
+all: mines.html common-ref.html game-ref.html msx2-ref.html msdos-ref.html ncurses-ref.html opengl-ref.html gunsmoke-ref.html psx-ref.html
 
 mines.md: ../README.md
 	./fixurl.py "platforms/([^/]+)/README.md" "\1-ref.html" $< > $@
@@ -48,6 +48,13 @@ gunsmoke-ref.md: ../platforms/gunsmoke/README.md footer.md
 	cat footer.md >> $@
 
 gunsmoke-ref.html: gunsmoke-ref.md footer.md header.html
+	pandoc -s -t html5 -c water.css -c monokai.css --toc --no-highlight -B header.html $< -o $@
+
+psx-ref.md: ../platforms/psx/README.md footer.md
+	./fixurl.py "../../docs/" "" $< > $@
+	cat footer.md >> $@
+
+psx-ref.html: psx-ref.md footer.md header.html
 	pandoc -s -t html5 -c water.css -c monokai.css --toc --no-highlight -B header.html $< -o $@
 
 clean:
