@@ -1,4 +1,4 @@
-all: mines.html common-ref.html game-ref.html msx2-ref.html msdos-ref.html ncurses-ref.html opengl-ref.html gunsmoke-ref.html psx-ref.html
+all: mines.html common-ref.html game-ref.html msx2-ref.html msdos-ref.html ncurses-ref.html opengl-ref.html gunsmoke-ref.html psx-ref.html vectrex-ref.html c64-ref.html
 
 mines.md: ../README.md
 	./fixurl.py "platforms/([^/]+)/README.md" "\1-ref.html" $< > $@
@@ -55,6 +55,20 @@ psx-ref.md: ../platforms/psx/README.md footer.md
 	cat footer.md >> $@
 
 psx-ref.html: psx-ref.md footer.md header.html
+	pandoc -s -t html5 -c water.css -c monokai.css --toc --no-highlight -B header.html $< -o $@
+
+vectrex-ref.md: ../platforms/vectrex/README.md footer.md
+	./fixurl.py "../../docs/" "" $< > $@
+	cat footer.md >> $@
+
+vectrex-ref.html: vectrex-ref.md footer.md header.html
+	pandoc -s -t html5 -c water.css -c monokai.css --toc --no-highlight -B header.html $< -o $@
+
+c64-ref.md: ../platforms/c64/README.md footer.md
+	./fixurl.py "../../docs/" "" $< > $@
+	cat footer.md >> $@
+
+c64-ref.html: c64-ref.md footer.md header.html
 	pandoc -s -t html5 -c water.css -c monokai.css --toc --no-highlight -B header.html $< -o $@
 
 clean:

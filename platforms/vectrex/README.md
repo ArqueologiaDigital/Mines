@@ -6,7 +6,7 @@
 - There may be a way of making cartridges larger than 8Kbytes. For now the Makefile simply crops the generated ROM file (mines.vec) to get rid of those higher addresses used by RAM. This ugly hack needs to be properly fixed.
 - The built ROM does boot on MAME's vectrex driver and the game name can be seen on the splash screen, meaning that at least the ROM headers seem fine.
 
-![screenshot](screenshot.png)
+![screenshot](../../docs/vectrex-screenshot.png)
 
 ### Build & runtime/debug dependencies
 
