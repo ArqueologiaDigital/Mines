@@ -1,6 +1,6 @@
 ## MSX2 port
 
-![Screenshot](screenshot.jpg)
+![Screenshot](../../docs/msx2-screenshot.jpg)
 
 ### Keys
 
@@ -34,4 +34,5 @@ The default tileset is the classic windows theme (16x16), but you can select the
 ```
 $ _8X8_TILES=1 make clean all
 ```
-![Screenshot](screenshot2.jpg)
+
+![Old screenshot](../../docs/msx2-screenshot2.jpg)
