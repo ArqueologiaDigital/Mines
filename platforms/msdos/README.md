@@ -4,8 +4,8 @@
 - Tested on DOSBOX 0.74 (you can use the `make run` for that)
 - Also tested on real hardware (on an old 386 IBM-PC)
 
-![DOSBOX screenshot](screenshot.png)
-![Running on real hardware (386 PC)](running_on_real_hardware.jpg)
+![DOSBOX screenshot](../../docs/msdos-screenshot.png)
+![Running on real hardware (386 PC)](../../docs/msdos-running_on_real_hardware.jpg)
 
 ### Build & runtime/debug dependencies
 
