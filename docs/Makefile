@@ -1,4 +1,4 @@
-all: mines.html common-ref.html game-ref.html msx2-ref.html msdos-ref.html ncurses-ref.html
+all: mines.html common-ref.html game-ref.html msx2-ref.html msdos-ref.html ncurses-ref.html opengl-ref.html
 
 mines.md: ../README.md
 	./fixurl.py "platforms/([^/]+)/README.md" "\1-ref.html" $< > $@
@@ -34,6 +34,13 @@ ncurses-ref.md: ../platforms/ncurses/README.md footer.md
 	cat footer.md >> $@
 
 ncurses-ref.html: ncurses-ref.md footer.md header.html
+	pandoc -s -t html5 -c water.css -c monokai.css --toc --no-highlight -B header.html $< -o $@
+
+opengl-ref.md: ../platforms/opengl/README.md footer.md
+	./fixurl.py "../../docs/" "" $< > $@
+	cat footer.md >> $@
+
+opengl-ref.html: opengl-ref.md footer.md header.html
 	pandoc -s -t html5 -c water.css -c monokai.css --toc --no-highlight -B header.html $< -o $@
 
 clean:

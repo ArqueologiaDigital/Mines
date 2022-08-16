@@ -3,7 +3,7 @@
 - WIP. Being developed on Debian GNU+Linux.
 - An initial attempt to make it 3D ;-)
 
-![screenshot](screenshot.png)
+![screenshot](../../docs/opengl-screenshot.png)
 
 ### Build & runtime/debug dependencies
 
