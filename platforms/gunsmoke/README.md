@@ -1,6 +1,6 @@
 ## GunSmoke JAMMA port
 
-![Screenshot](screenshot.png)
+![Screenshot](../../docs/gunsmoke-screenshot.png)
 
 ### Build & runtime/debug dependencies
 
