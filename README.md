@@ -26,3 +26,21 @@ For specific build & runtime/debug dependencies, please check the individual REA
 - Implement all functions and macros defined in `game.h` (follow the instructions for each in the file);
 
 You can compare you implementation with a preexisting one if you are stuck. [ncurses](platforms/ncurses) should be easy to follow.
+
+### How to generate HTML documentation
+
+The following Python 3 packages should be installed:
+
+- pandoc
+- pygments
+- pandocfilters
+
+Which you can do by typing
+```
+pip install -r requirements.txt
+```
+And then generate the HTML files by executing the command
+```
+make docs
+```
+And they will be found on the `docs` folder.
