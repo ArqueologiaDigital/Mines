@@ -22,6 +22,13 @@ msx2-ref.md: ../platforms/msx2/README.md footer.md
 msx2-ref.html: msx2-ref.md footer.md header.html
 	pandoc -s -t html5 -c water.css -c monokai.css --toc --no-highlight -B header.html $< -o $@
 
+msdos-ref.md: ../platforms/msdos/README.md footer.md
+	./fixurl.py "../../docs/" "" $< > $@
+	cat footer.md >> $@
+
+msdos-ref.html: msdos-ref.md footer.md header.html
+	pandoc -s -t html5 -c water.css -c monokai.css --toc --no-highlight -B header.html $< -o $@
+
 clean:
 	rm -f *-ref.html *-ref.md mines.md mines.html
 
