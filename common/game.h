@@ -10,8 +10,7 @@
   * [Optional] Set up memory and resources of the board. The default
   * constructor is called if the `MINEFIELD_ALLOCATION` macro is not defined.
   *
-  * Implementation details
-  * ----------------------
+  * 📌 **Implementation details**
   *
   * Depending on available system resources and compiler features, you may
   * prefer to statically reserve memory or allocate it dynamically.
@@ -31,10 +30,9 @@ void reset_minefield(minefield* mf);
  * [Optional] Free memory and resources of the board. The default destructor
  * is called if the `MINEFIELD_ALLOCATION` macro is not defined.
  *
- * Implementation details
- * ----------------------
+ * 📌 **Implementation details**
  *
- * The same resources allocated by `init_minefield()` should be released by
+ * * The same resources allocated by [init_minefield()](#init_minefield) should be released by
  * this function.
  */
 void free_minefield(minefield* mf);
@@ -64,8 +62,7 @@ void set_minefield_cell(minefield* mf, uint8_t x, uint8_t y, uint8_t input);
 /**
  * [Optional] Draw the background image that surrounds the board.
  *
- * Implementation details
- * ----------------------
+ * 📌 **Implementation details**
  *
  * If coding a tile-based platform that uses **tiles.h** header, you can use
  * the definition in **8x8_tiles.h** or **16x16_tiles.h** instead of writing
@@ -81,21 +78,20 @@ void draw_scenario(minefield* mf);
 
 #ifdef ENABLE_COUNTER
 /**
- * [Optional] Draw static related screen elements related to the mine counter,
- * i. e., a frame and mine icon.
+ * [Optional] Draw static screen elements related to the mine counter, i. e.,
+ * a frame and mine icon.
  */
 void draw_counter();
 
 /**
  * [Optional] Display mine counter on screen.
  *
- * Implementation details
- * ----------------------
+ * 📌 **Implementation details**
  *
- * If `ENABLE_COUNTER` is not defined, this function will not be called and
+ * * If `ENABLE_COUNTER` is not defined, this function will not be called and
  * the mine counter will not be displayed and updated during the game loop.
  *
- * The set of tile characters must include all the digits and the negative
+ * * The set of tile characters must include all the digits and the negative
  * sign, since the counter may become negative.
  */
 void update_counter(minefield* mf);
@@ -104,8 +100,8 @@ void update_counter(minefield* mf);
 
 #ifdef ENABLE_TIMER
 /**
- * [Optional] Draw static related screen elements related to the time counter,
- * i. e., a frame and ampersand icon.
+ * [Optional] Draw static screen elements related to the time counter, i. e.,
+ * a frame and ampersand icon.
  */
 void draw_timer();
 
@@ -113,13 +109,12 @@ void draw_timer();
 /**
  * [Optional] Display elapsed time on the screen.
  *
- * Implementation details
- * ----------------------
+ * 📌 **Implementation details**
  *
- * If `ENABLE_TIMER` is not defined, this function will not be called
+ * * If `ENABLE_TIMER` is not defined, this function will not be called
  * and the timer will not be displayed and updated during the game loop.
  *
- * The set of tile characters must include all the digits and the colon
+ * * The set of tile characters must include all the digits and the colon
  * to separate minutes and seconds.
  */
 void update_timer(minefield* mf);
@@ -128,13 +123,12 @@ void update_timer(minefield* mf);
 /**
  * [Optional] Reset elapsed time before new game starts.
  *
- * Implementation details
- * ----------------------
+ * 📌 **Implementation details**
  *
- * If `ENABLE_TIMER` is not defined, this function will not be called
+ * * If `ENABLE_TIMER` is not defined, this function will not be called
  * and the timer will not be displayed and updated during the game loop.
  *
- * The set of tile characters must include all the digits and the colon
+ * * The set of tile characters must include all the digits and the colon
  * to separate minutes and seconds.
  */
 void reset_timer();
@@ -172,11 +166,10 @@ void draw_game_over(minefield* mf);
 /**
  * [Required] Runs things in background, like music and animations.
  *
- * Implementation details
- * ----------------------
+ * 📌 **Implementation details**
  *
- * Refresh game state, like animation and music and when finished just call
- * `wait_ticks()` to wait for the next frame.
+ * * Refresh game state, like animation and music and when finished just call
+ * [wait_ticks()](common-ref.html#wait_ticks) to wait for the next frame.
  */
 void idle_update(minefield* mf);
 
