@@ -2,8 +2,8 @@
 
 Using [PSn00bSDK](https://github.com/Lameguy64/PSn00bSDK).
 
-![Emulator screenshot](screenshot.jpg)
-![Running on real hardware](running_on_real_hardware.jpg)
+![Emulator screenshot](../../docs/psx-screenshot.jpg)
+![Running on real hardware](../../docs/psx-running_on_real_hardware.jpg)
 
 ## Installing the SDK
 
