@@ -50,6 +50,8 @@ void enable_screen();
 
 void disable_screen();
 
+void wait_vdp();
+
 void vdp(uint16_t sx, uint16_t sy, uint16_t dx, uint16_t dy, uint16_t width, uint16_t height, uint16_t direction, uint8_t vdpop) SDCCCALL0;
 
 void set_palette(uint8_t count, uint8_t* color_table) SDCCCALL0;

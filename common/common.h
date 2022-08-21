@@ -42,6 +42,32 @@
 void platform_init();
 
 
+#ifdef ENABLE_PLATFORM_DRAW_HOOK
+/**
+ * [Optional] Platform-specific preparation for long-winded drawing operation.
+ * This function is called **before** the Mines board is rendered.
+ *
+ * 📌 **Implementation details**
+ *
+ * * You can leave the `ENABLE_PLATFORM_DRAW_HOOK` macro undefined to disable
+ * functions [platform_begin_draw()](#platform_begin_draw) and `platform_end_draw()`.
+ */
+void platform_begin_draw();
+
+
+/**
+ * [Optional] Platform-specific preparation for long-winded drawing operation
+ * This function is called **after** the Mines board is rendered.
+ *
+ * 📌 **Implementation details**
+ *
+ * * You can leave the `ENABLE_PLATFORM_DRAW_HOOK` macro undefined to disable
+ * functions [platform_begin_draw()](#platform_begin_draw) and `platform_end_draw()`.
+ */
+void platform_end_draw();
+#endif /* ENABLE_PLATFORM_DRAW_HOOK */
+
+
 /**
  * [Required] Platform-specific shutdown code
  *

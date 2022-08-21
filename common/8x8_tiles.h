@@ -55,6 +55,10 @@ void draw_minefield_contents(minefield* mf)
 
 void draw_minefield(minefield* mf)
 {
+#ifdef ENABLE_PLATFORM_DRAW_HOOK
+    platform_begin_draw();
+#endif /* ENABLE_PLATFORM_DRAW_HOOK */
+
     for (uint8_t x = 0; x <= mf->width; x++) {
         for (uint8_t y = 0; y <= mf->height; y++) {
             uint8_t xx = MINEFIELD_X_OFFSET + x * 2;
@@ -120,6 +124,10 @@ void draw_minefield(minefield* mf)
 
     mf->changed = true;
     draw_minefield_contents(mf);
+
+#ifdef ENABLE_PLATFORM_DRAW_HOOK
+    platform_end_draw();
+#endif /* ENABLE_PLATFORM_DRAW_HOOK */
 }
 
 
