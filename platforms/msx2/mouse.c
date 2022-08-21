@@ -7,8 +7,9 @@
 #include "minefield.h"
 
 
-/* mouse data */
-static struct mouse mouse;
+joydata mouse;
+
+/* contextual mouse data */
 static int x = 84;
 static int y = 33;
 static bool l_pressed = false;
@@ -18,7 +19,7 @@ static bool ignored = false;
 
 void update_mouse(minefield* mf, uint8_t source)
 {
-    read_mouse(&mouse, source);
+    read_joyport(&mouse, source);
 
     x -= mouse.dx;
     if (x > 255) x = 255;
