@@ -15,6 +15,7 @@
 #include "cursors.h"
 #include "tilemap.h"
 
+
 typedef void (*Callback)(void);
 
 
@@ -33,13 +34,11 @@ void vblank_hook()
 
 void video_init()
 {
-    disable_screen();
-
     set_colors(15, 1, 1);
 
     /* Setting SCREEN5, 16x16 sprites, display disabled, vblank enabled */
     write_vdp(0, 6);
-    write_vdp(1, 0x62);
+    write_vdp(1, 0x22);
 
     write_vdp(2, 0x1f); /* Setting Pattern name table to 0x0 */
 
@@ -75,8 +74,6 @@ void video_init()
     *((uint8_t*) HTIMI) = 0xc3;                 // jump opcode
     *((Callback*) (HTIMI + 1)) = vblank_hook;   // + address
     __asm__("ei");
-
-    enable_screen();
 }
 
 
@@ -132,6 +129,19 @@ void highlight_current_cell(minefield* mf)
     } else {
         hide_cursor();
     }
+}
+
+
+void platform_begin_draw()
+{
+    disable_screen();
+}
+
+
+void platform_end_draw()
+{
+    wait_vdp();
+    enable_screen();
 }
 
 
