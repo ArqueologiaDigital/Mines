@@ -1,8 +1,7 @@
-/* You can include this in a single .c file after "#define USE_DEBUG_MODE" or you can
- * define a compiler macro, like -DUSE_DEBUG_MODE=1 */
-#ifdef USE_DEBUG_MODE
 #ifndef DEBUG_H
 #define DEBUG_H
+
+#ifdef USE_DEBUG_MODE
 
 #include "msx2.h"
 #include "common.h"
@@ -76,6 +75,10 @@ void debug_break()
     __endasm;
 }
 
+#else
 
-#endif /* DEBUG_H */
-#endif /* USE_DEBUG_MODE */
+typedef int make_iso_compilers_happy;
+
+#endif // USE_DEBUG_MODE
+
+#endif // DEBUG_H

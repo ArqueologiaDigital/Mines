@@ -7,8 +7,8 @@
 #include "tiles.h"
 #include "timer.h"
 
-//#define USE_DEBUG_MODE
-#include "debug.h"
+/* #define USE_DEBUG_MODE
+#include "debug.h" */
 
 /* Assets */
 #include "build/mines.h"
@@ -21,8 +21,8 @@ typedef void (*Callback)(void);
 
 // mine control
 bool negative = false;
-uint8_t units = 0; /* makeshift BCD counter */
-uint8_t decimals = 0; /* makeshift BCD counter */
+uint8_t units = 0;              // makeshift BCD counter
+uint8_t decimals = 0;           // makeshift BCD counter
 
 
 void vblank_hook()
@@ -68,7 +68,11 @@ void video_init()
     set_sprite_pattern(mouse_pattern, MOUSE_PATTERN_ID);
     put_sprite_colors(mouse_colors, MOUSE_SPRITE_ID);
     hide_mouse();
+}
 
+
+void enable_vblank()
+{
     /* Set 60Hz hook */
     __asm__("di");
     *((uint8_t*) HTIMI) = 0xc3;                 // jump opcode
@@ -145,13 +149,6 @@ void platform_end_draw()
 }
 
 
-void platform_init()
-{
-    set_random_seed(read_clock());
-    video_init();
-}
-
-
 void draw_timer()
 {
     set_tile(HOURGLASS_X_POS - 1, HOURGLASS_Y_POS - 1, FRAME_TOP_LEFT);
@@ -224,66 +221,3 @@ void update_counter(minefield* mf)
     set_tile(BOMB_ICON_X_POS + 5, BOMB_ICON_Y_POS, ZERO_DIGIT + units);
 }
 
-
-extern inline void update_mouse(minefield* mf, uint8_t source);
-
-
-void idle_update(minefield* mf)
-{
-    static uint8_t ignore_input = 0;
-    static uint8_t mouse1 = 0;
-    static uint8_t mouse2 = 0;
-    static uint8_t source = 0xff;
-    static uint8_t fifth = 0;
-
-    switch (++fifth) {
-        case 4: {
-            /* count how many times mouse is not found */
-            int8_t mouse = search_mouse();
-            switch (mouse) {
-            case -1:
-                ignore_input++;
-                break;
-            case 1:
-                ignore_input = 0;
-                if (source == 0xff && mouse1 > IGNORE_MOUSE_THRESHOLD) {
-                    debug_msg("mouse1 detected\n");
-                    mouse2 = 0;
-                    source = 1;
-                }
-                mouse1++;
-                break;
-            case 2:
-                ignore_input = 0;
-                if (source == 0xff && mouse2 > IGNORE_MOUSE_THRESHOLD) {
-                    debug_msg("mouse2 detected\n");
-                    mouse1 = 0;
-                    source = 2;
-                }
-                mouse2++;
-                break;
-            default:
-                ignore_input = 0;
-                break;
-            }
-        }
-        case 5:
-            fifth = 0;
-            if (ignore_input > IGNORE_MOUSE_THRESHOLD) {
-                hide_mouse();
-                source = 0xff;
-            } else if (source != 0xff) {
-                update_mouse(mf, source);
-            }
-            break;
-        default:
-            break;
-    }
-}
-
-
-void platform_shutdown()
-{
-    // Cartridge games can't unload.
-    __asm__("jp 0");
-}
