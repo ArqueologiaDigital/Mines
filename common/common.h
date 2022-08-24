@@ -132,7 +132,8 @@ int random_number(int min, int max);
 #define DEBUG_HEX          0
 #define DEBUG_INT          1
 #define DEBUG_BIN          2
-#define DEBUG_INVALID      3
+#define DEBUG_CHAR         3
+#define DEBUG_INVALID      4
 
 /**
  * [Optional] Change emulator's debug mode. This allows programs to output text
@@ -144,6 +145,7 @@ int random_number(int min, int max);
  * | DEBUG_HEX             |   0   |
  * | DEBUG_INT             |   1   |
  * | DEBUG_BIN             |   2   |
+ * | DEBUG_CHAR            |   3   |
  *
  * See [debug()](#debug) for more details about the output.
  *
@@ -175,7 +177,7 @@ void debug_msg(char* msg);
  * * You can undefine `USE_DEBUG_MODE` macro to transform all the debug macros
  * into empty macros, so no additional code is generated on the release version.
  */
-void debug(char* msg, uint8_t value);
+void debug(char* msg, int value);
 
 
 /**
