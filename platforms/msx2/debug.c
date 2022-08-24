@@ -6,21 +6,14 @@
 #include "msx2.h"
 #include "common.h"
 
-/* debugdevice modes */
-#define DEBUGDEVICE_ASCII   0x63 // or 0x23 for line feed mode version
-#define DEBUGDEVICE_INT     0x62
-#define DEBUGDEVICE_BIN     0x61
-#define DEBUGDEVICE_HEX     0x60
 
-uint8_t _debug_mappings[] = { DEBUGDEVICE_HEX, DEBUGDEVICE_INT, DEBUGDEVICE_BIN };
-
-uint8_t _stored_debug_mode = DEBUGDEVICE_INT; /* default */
+uint16_t _stored_debug_mode = DEBUG_INT;
 
 
-/* configure debugdevice */
-void _set_debugdevice_mode(uint8_t mode) __z88dk_fastcall
+// send value to debug device (control)
+void _out2e(uint8_t value) __z88dk_fastcall
 {
-    mode;
+    value;
     __asm
         ld a, l
         out (#0x2e), a
@@ -28,8 +21,8 @@ void _set_debugdevice_mode(uint8_t mode) __z88dk_fastcall
 }
 
 
-/* send value to debug device */
-void _out2f(int8_t value) __z88dk_fastcall
+// send value to debug device (data)
+void _out2f(uint8_t value) __z88dk_fastcall
 {
     value;
     __asm
@@ -41,32 +34,42 @@ void _out2f(int8_t value) __z88dk_fastcall
 
 void debug_mode(uint8_t mode)
 {
-    if (mode < DEBUG_INVALID) {
-        _stored_debug_mode = _debug_mappings[mode];
-    }
+    _stored_debug_mode = mode;
 }
 
 
-void debug_msg(char* msg)
+inline void _debug_str(const char* msg)
 {
-    _set_debugdevice_mode(DEBUGDEVICE_ASCII);
-
+    _out2e(DEBUG_CHAR);
     for (int i = 0; msg[i] != 0; ++i) {
         _out2f(msg[i]);
     }
 }
 
 
-void debug(char* msg, uint8_t value)
+void debug_msg(char* msg)
 {
-    debug_msg(msg);
-    _set_debugdevice_mode(_stored_debug_mode);
-    _out2f(value);
-    debug_msg("\n");
+    _debug_str(msg);
+    _out2f('\n');
 }
 
 
-/* pause debug device (by tcl script) */
+void _debug_num(uint16_t value)
+{
+    _out2e(_stored_debug_mode);
+    _out2f(value & 0xff);               // LSB
+    _out2f((value >> 8) & 0xff);        // MSB
+}
+
+
+void debug(char* msg, int value)
+{
+    _debug_str(msg);
+    _debug_num(value);
+}
+
+
+// pause debug device (by tcl script)
 void debug_break()
 {
     __asm
