@@ -138,8 +138,11 @@ void reset_timer();
 #ifdef MAIN_LOOP_REIMPLEMENTED
 /**
  * [Optional] Reimplements the game loop on platforms that process their own
- * event loop. It will be called if the `MAIN_LOOP_REIMPLEMENTED` macro is
- * defined.
+ * event loop.
+ *
+ * 📌 **Implementation details**
+ *
+ * * It will be called if the `MAIN_LOOP_REIMPLEMENTED` macro is defined.
  */
 void platform_main_loop(minefield* mf);
 #endif /* MAIN_LOOP_REIMPLEMENTED */
@@ -147,8 +150,13 @@ void platform_main_loop(minefield* mf);
 
 #ifdef DRAW_TITLE_SCREEN
 /**
- * [Optional] Draws a title screen message when the game starts. It will be
- * called at the start of the game if the `DRAW_TITLE_SCREEN` macro is defined.
+ *
+ * [Optional] Draws a title screen message when the game starts.
+ *
+ * 📌 **Implementation details**
+ *
+ * * It will be called at the start of the game if the `DRAW_TITLE_SCREEN`
+ * macro is defined.
  */
 void draw_title_screen(minefield* mf);
 #endif /* DRAW_TITLE_SCREEN */
@@ -156,8 +164,12 @@ void draw_title_screen(minefield* mf);
 
 #ifdef DRAW_GAME_OVER
 /**
- * [Optional] Draws a game over message when the game ends. It will be called
- * when the game ends if the `DRAW_GAME_OVER` macro is defined.
+ * [Optional] Draws a game over message when the game ends.
+ * 
+ * 📌 **Implementation details**
+ *
+ * * It will be called when the game ends if the `DRAW_GAME_OVER` macro is
+ * defined.
  */
 void draw_game_over(minefield* mf);
 #endif /* DRAW_GAME_OVER */
