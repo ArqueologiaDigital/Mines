@@ -4,19 +4,7 @@
 #include "common.h"
 
 
-static uint8_t keyboard_read_row(uint8_t row) __z88dk_fastcall __naked
-{
-    row; assert(row <= 10);
-    __asm
-        in      a, (P_PPI_C)
-        and     #0xf0           /* keep PPI data constant... */
-        or      l               /* ...but change row */
-        out     (P_PPI_C), a
-        in      a, (P_PPI_B)    /* read row data */
-        ld      l, a
-        ret
-    __endasm;
-}
+uint8_t read_keyboard_row(uint8_t row) __z88dk_fastcall;
 
 
 static uint8_t keyboard_read()
@@ -27,7 +15,7 @@ static uint8_t keyboard_read()
     static uint8_t row8 = 0xff;
 
     /* search for 'M' key */
-    if ((scan = keyboard_read_row(4)) != row4) {
+    if ((scan = read_keyboard_row(4)) != row4) {
         row4 = scan;
         if (!(scan & (1 << 2))) return MINE_INPUT_FLAG;
         if (!(scan & (1 << 3))) return MINE_INPUT_OPEN_BLOCK;
@@ -36,7 +24,7 @@ static uint8_t keyboard_read()
     row4 = scan;
 
     /* search for space and arrow keys */
-    if ((scan = keyboard_read_row(8)) != row8) {
+    if ((scan = read_keyboard_row(8)) != row8) {
         row8 = scan;
         if (!(scan & 1)) return MINE_INPUT_OPEN;
         if (!(scan & (1 << 4))) return MINE_INPUT_LEFT;
