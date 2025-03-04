@@ -135,7 +135,7 @@ int main(int argc, char **argv)
     printf("#define %s_HEIGHT %u\n\n", argv[1], height);
     printf("static const uint8_t %s_palette[] = {\n", argv[1]);
 
-    for (int8_t i = 0; i <= colors; ++i) {
+    for (int8_t i = 0; i < used_colors; ++i) {
         if (palette[i].ci) {
             printf("\t%2i, %u,%u,%u, /* 0x%02X, 0x%02X, 0x%02X */\n",
                    palette[i].ci,
@@ -155,10 +155,10 @@ int main(int argc, char **argv)
 
             if (pos > 0 && pos % 24 == 0) printf("\n\t");
 
-            pixel1 = find_color(palette, colors, line, cpp);
+            pixel1 = find_color(palette, used_colors, line, cpp);
             line += cpp;
 
-            pixel2 = find_color(palette, colors, line, cpp);
+            pixel2 = find_color(palette, used_colors, line, cpp);
             line += cpp;
 
             printf("0x%02X,", (pixel1 << 4) | pixel2);
