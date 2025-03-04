@@ -63,7 +63,7 @@ jobs:
         echo "::set-output name=prerelease::$prerelease"
         echo "prerelease=$prerelease"
     - name: Upload redistributable package
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.platform }}
         path: |
