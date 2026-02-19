@@ -65,15 +65,15 @@ ICON_BIN := $(BUILD_DIR)/icon.bin
 # =============================================================================
 # MAME ROM Set Configuration
 # =============================================================================
-ORIGINAL_ROMS := /mnt/shared/kn5000_original_roms/kn5000
-ROMSET_BASE := /mnt/shared/custom_kn5000_roms/mines
+ORIGINAL_ROMS := ../../../kn5000_original_roms/kn5000
+ROMSET_BASE := ../../../custom_kn5000_roms/mines
 ROMSET_DIR := $(ROMSET_BASE)/kn5000
 
 # Files to copy from original ROM set
 ORIGINAL_ROM_FILES := \
 	kn5000_v10_program.rom \
 	kn5000_subcpu_boot.ic30 \
-	kn5000_subprogram_v142.rom \
+	kn5000_subprogram_v142_compressed.rom \
 	kn5000_table_data_rom_even.ic3 \
 	kn5000_table_data_rom_odd.ic1 \
 	kn5000_rhythm_data_rom.ic14 \
@@ -197,7 +197,7 @@ romset: $(ROM_FILE)
 .PHONY: test
 test: romset
 	@echo "Running MAME with Mines extension ROM..."
-	mame kn5000 -rompath $(ROMSET_BASE)
+	mame kn5000 -rompath $(ROMSET_BASE) -window -ui_active -oslog
 
 # =============================================================================
 # Clean
