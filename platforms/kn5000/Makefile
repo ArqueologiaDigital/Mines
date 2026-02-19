@@ -116,17 +116,9 @@ build-rom: $(ROM_FILE)
 # =============================================================================
 # Step 1: Compile C sources to LLVM IR (individually)
 # =============================================================================
-# NOTE: The LLVM TLCS900 backend is still in development. Some C files
-# compile successfully while others hit codegen bugs:
-#   - extras.c:    OK (basic math, memory ops)
-#   - input.c:     OK (serial I/O, bit manipulation)
-#   - tiles.c:     OK (tile drawing, struct access)
-#   - main.c:      OK (game state machine with switch/jump tables)
-#   - video.c:     FAILS (volatile pointer arithmetic, DAG assertion)
-#   - minefield.c: FAILS (division/modulo, APInt assertion)
-#
-# Files that compile successfully are assembled together. Functions from
-# failing files are provided as hand-written assembly stubs in main.asm.
+# All C files compile successfully with the LLVM TLCS900 backend.
+# The GAS→ASL converter (tools/llvm_asm_to_asl.py) handles syntax
+# differences between LLVM's output and ASL assembler.
 
 # Individual LLVM IR generation
 $(BUILD_DIR)/%.ll: %.c kn5000.h $(COMMON_DIR)/*.h include/*.h | $(BUILD_DIR)
@@ -135,8 +127,10 @@ $(BUILD_DIR)/%.ll: %.c kn5000.h $(COMMON_DIR)/*.h include/*.h | $(BUILD_DIR)
 $(BUILD_DIR)/common_%.ll: $(COMMON_DIR)/%.c $(COMMON_DIR)/*.h include/*.h | $(BUILD_DIR)
 	$(CLANG) $(CFLAGS) -S -emit-llvm -o $@ $<
 
-# Files that the LLVM TLCS900 backend can compile:
-COMPILABLE_LL := $(BUILD_DIR)/extras.ll $(BUILD_DIR)/input.ll $(BUILD_DIR)/common_tiles.ll $(BUILD_DIR)/common_main.ll
+# All C source files compiled to LLVM IR:
+COMPILABLE_LL := $(BUILD_DIR)/extras.ll $(BUILD_DIR)/input.ll \
+	$(BUILD_DIR)/video.ll $(BUILD_DIR)/common_tiles.ll \
+	$(BUILD_DIR)/common_main.ll $(BUILD_DIR)/common_minefield.ll
 
 # =============================================================================
 # Step 2: LLVM IR to TLCS900 assembly

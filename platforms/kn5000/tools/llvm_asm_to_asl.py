@@ -210,6 +210,38 @@ def fix_neg(line):
     return None
 
 
+def fix_large_displacement(line):
+    """Fix instructions with displacements > 32767 in (xrr+offset) addressing.
+
+    TLCS-900 (xrr+d) mode supports max 16-bit signed displacement (-32768..32767).
+    For larger offsets, split into: add xrr, offset; <op> (xrr); sub xrr, offset
+    Returns a list of lines or None if no fix needed.
+    """
+    stripped = line.lstrip()
+    indent = line[:len(line) - len(stripped)]
+
+    m = re.search(r'\((\w+)\+(\d+)\)', stripped)
+    if not m:
+        return None
+
+    reg, offset_str = m.group(1), m.group(2)
+    offset = int(offset_str)
+
+    if offset <= 32767:
+        return None
+
+    if not is_xrr(reg):
+        return None
+
+    # Replace (xrr+offset) with (xrr) and wrap with add/sub
+    new_instr = stripped.replace(f'({reg}+{offset_str})', f'({reg})')
+    return [
+        f'{indent}add\t{reg}, {offset}',
+        f'{indent}{new_instr}',
+        f'{indent}sub\t{reg}, {offset}'
+    ]
+
+
 def convert(input_path, output_path):
     with open(input_path, 'r') as f:
         lines = f.readlines()
@@ -285,9 +317,12 @@ def convert(input_path, output_path):
             continue
 
         # Convert .comm (uninitialized storage) to DS
-        m = re.match(r'^\s*\.comm\s+(\w+)\s*,\s*(\d+)', line)
+        # Names may contain dots (e.g., highlight_current_cell.old_x)
+        m = re.match(r'^\s*\.comm\s+([\w.]+)\s*,\s*(\d+)', line)
         if m:
             name, size = m.group(1), m.group(2)
+            # Convert dots to underscores for ASL compatibility
+            name = name.replace('.', '_')
             out.append(f'{name}:\tDS {size}')
             continue
 
@@ -308,6 +343,11 @@ def convert(input_path, output_path):
         line = re.sub(r'^\.L([^\s:]+):', lambda m: convert_local_label(m) + ':', line)
         # In references (jump targets, etc.)
         line = re.sub(r'\.L([^\s,;]+)', convert_local_label, line)
+
+        # Convert dots in C static variable names to underscores
+        # e.g., highlight_current_cell.old_x → highlight_current_cell_old_x
+        # Only applies to mid-identifier dots (word.word), not .L prefixes or directives
+        line = re.sub(r'(\w)\.(\w)', r'\1_\2', line)
 
         # Convert empty lines
         if line.strip() == '':
@@ -355,6 +395,12 @@ def convert(input_path, output_path):
 
         # Fix CPL with 32-bit register
         line = fix_cpl(line)
+
+        # Fix large displacements in (xrr+offset) addressing
+        disp_result = fix_large_displacement(line)
+        if disp_result is not None:
+            out.extend(disp_result)
+            continue
 
         out.append(line)
 
