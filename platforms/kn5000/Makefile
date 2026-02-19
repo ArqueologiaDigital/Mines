@@ -1,10 +1,12 @@
 # =============================================================================
 # Makefile - Mines for Technics KN5000 (HDAE5000 Extension ROM)
 # =============================================================================
-# Build pipeline:
-#   C sources → clang (LLVM IR) → llc (ELF .o) → llvm-objcopy (raw .bin)
-#   Python → tile/palette binary data
-#   ASL → main.asm (wraps everything into ROM) → p2bin → 512KB ROM
+# Build pipeline (pure LLVM toolchain):
+#   C sources -> clang (-emit-llvm) -> llvm-link (merge .ll) -> llc (-filetype=obj) -> all_c.o
+#   startup.s -> clang -c -> startup.o
+#   lld (startup.o + all_c.o + linker script) -> ELF
+#   llvm-objcopy -O binary -> raw ROM
+#   dd pad -> 512KB ROM
 #
 # Targets:
 #   make          - Build ROM and create MAME ROM set
@@ -19,24 +21,18 @@
 # =============================================================================
 # Tool paths
 # =============================================================================
-# LLVM TLCS900 compiler (built from ../llvm-project/)
+# LLVM TLCS900 toolchain (built from ../llvm-project/)
 LLVM_BIN := ../../../llvm-project/build/bin
 CLANG := $(LLVM_BIN)/clang
 LLC := $(LLVM_BIN)/llc
 OBJCOPY := $(LLVM_BIN)/llvm-objcopy
 LLVM_NM := $(LLVM_BIN)/llvm-nm
-
-# ASL Macro Assembler
-ASL_PATH := /home/fsanches/devel/tools/asl
-ASL := $(ASL_PATH)/asl
-P2BIN := $(ASL_PATH)/p2bin
+LLVM_LINK := $(LLVM_BIN)/llvm-link
+LLD := $(LLVM_BIN)/ld.lld
+LLD_ENV := LD_LIBRARY_PATH=$(LLVM_BIN)/../lib
 
 # Python for tile generation
 PYTHON := python3
-
-# Shared assembly includes from kn5000-roms-disasm
-DISASM_REPO := /home/fsanches/devel/kn5000-roms-disasm
-AW_SRC := /home/fsanches/devel/custom-kn5000-roms/anotherworld/src
 
 # =============================================================================
 # Build directories and files
@@ -56,13 +52,12 @@ CFLAGS := -target tlcs900 -ffreestanding -nostdlib -O2 \
 	-DMINEFIELD_X_OFFSET=10 -DMINEFIELD_Y_OFFSET=4 \
 	-DNO_UNUSED_MACRO
 
-# ASL assembler flags
-ASL_FLAGS := -w -q -L
-ASL_INCLUDES := -i $(DISASM_REPO) -i $(DISASM_REPO)/shared -i $(AW_SRC)/includes -i $(AW_SRC)
+# LLC flags
+LLC_FLAGS := -mtriple=tlcs900 -mcpu=tmp94c241 -O2
 
 # Output files
 ROM_FILE := $(BUILD_DIR)/mines_kn5000.bin
-C_CODE_ASM := $(BUILD_DIR)/c_code_asl.asm
+ELF_FILE := $(BUILD_DIR)/mines_kn5000.elf
 TILES_BIN := $(BUILD_DIR)/tiles.bin
 PALETTE_BIN := $(BUILD_DIR)/palette.bin
 ICON_BIN := $(BUILD_DIR)/icon.bin
@@ -116,11 +111,6 @@ build-rom: $(ROM_FILE)
 # =============================================================================
 # Step 1: Compile C sources to LLVM IR (individually)
 # =============================================================================
-# All C files compile successfully with the LLVM TLCS900 backend.
-# The GAS→ASL converter (tools/llvm_asm_to_asl.py) handles syntax
-# differences between LLVM's output and ASL assembler.
-
-# Individual LLVM IR generation
 $(BUILD_DIR)/%.ll: %.c kn5000.h $(COMMON_DIR)/*.h include/*.h | $(BUILD_DIR)
 	$(CLANG) $(CFLAGS) -S -emit-llvm -o $@ $<
 
@@ -133,28 +123,18 @@ COMPILABLE_LL := $(BUILD_DIR)/extras.ll $(BUILD_DIR)/input.ll \
 	$(BUILD_DIR)/common_main.ll $(BUILD_DIR)/common_minefield.ll
 
 # =============================================================================
-# Step 2: LLVM IR to TLCS900 assembly
+# Step 2: Link all LLVM IR into one module
 # =============================================================================
-# NOTE: The LLVM TLCS900 backend can produce assembly output (-filetype=asm)
-# but the ELF object emitter (-filetype=obj) has a code emission bug.
-# Workaround: produce assembly, then convert to ASL syntax and include
-# directly in main.asm via ASL's `include` directive.
-$(BUILD_DIR)/%.s: $(BUILD_DIR)/%.ll
-	$(LLC) -mtriple=tlcs900 -filetype=asm -O2 -o $@ $<
-
-# Concatenate all compilable assembly files
-$(BUILD_DIR)/c_code.s: $(patsubst %.ll,%.s,$(COMPILABLE_LL))
-	cat $^ > $@
-	@echo "Generated TLCS900 assembly: $$(wc -l < $@) lines from $$(echo $^ | wc -w) files"
+$(BUILD_DIR)/all_c.ll: $(COMPILABLE_LL)
+	$(LLVM_LINK) -S -o $@ $^
+	@echo "Linked LLVM IR: $$(echo $^ | wc -w) modules -> $@"
 
 # =============================================================================
-# Step 3: Convert LLVM assembly to ASL-compatible format
+# Step 3: Compile linked IR to TLCS900 ELF object
 # =============================================================================
-# The LLVM assembler output uses GNU as syntax which differs from ASL.
-# This script converts it to ASL-compatible TLCS900 assembly.
-$(C_CODE_ASM): $(BUILD_DIR)/c_code.s tools/llvm_asm_to_asl.py
-	$(PYTHON) tools/llvm_asm_to_asl.py $< $@
-	@echo "C code converted to ASL format"
+$(BUILD_DIR)/all_c.o: $(BUILD_DIR)/all_c.ll
+	$(LLC) $(LLC_FLAGS) -filetype=obj -o $@ $<
+	@echo "Compiled to object: $@"
 
 # =============================================================================
 # Step 4: Generate tile and palette data
@@ -166,16 +146,24 @@ $(TILES_BIN) $(PALETTE_BIN) $(ICON_BIN): tools/generate_tiles.py | $(BUILD_DIR)
 	$(PYTHON) tools/generate_tiles.py $(BUILD_DIR)
 
 # =============================================================================
-# Step 5: Assemble ROM wrapper with ASL
+# Step 5: Assemble startup code
 # =============================================================================
-$(BUILD_DIR)/main.p: main.asm $(C_CODE_ASM) $(TILES_BIN) $(PALETTE_BIN) $(ICON_BIN)
-	$(ASL) $(ASL_FLAGS) $(ASL_INCLUDES) -i $(BUILD_DIR) -olist $(BUILD_DIR)/main.listing main.asm -o $@
+$(BUILD_DIR)/startup.o: startup.s $(TILES_BIN) $(PALETTE_BIN) $(ICON_BIN) | $(BUILD_DIR)
+	$(CLANG) -target tlcs900 -mcpu=tmp94c241 -c -o $@ $<
 
 # =============================================================================
-# Step 6: Convert to binary ROM with p2bin
+# Step 6: Link startup + C code with linker script
 # =============================================================================
-$(ROM_FILE): $(BUILD_DIR)/main.p
-	$(P2BIN) $< $@ -r 0x280000-0x2FFFFF -l 0xFF
+$(ELF_FILE): $(BUILD_DIR)/startup.o $(BUILD_DIR)/all_c.o kn5000.ld
+	$(LLD_ENV) $(LLD) -T kn5000.ld -o $@ $(BUILD_DIR)/startup.o $(BUILD_DIR)/all_c.o
+	@echo "Linked ELF: $@"
+	@$(LLVM_NM) $@ | grep -E '(main|TILES_DATA|GAME_ACTIVE|__udivsi3)' || true
+
+# =============================================================================
+# Step 7: Convert to binary ROM + pad to 512KB
+# =============================================================================
+$(ROM_FILE): $(ELF_FILE)
+	$(OBJCOPY) -O binary $< $@
 	@SIZE=$$(stat -c%s "$@" 2>/dev/null || stat -f%z "$@" 2>/dev/null); \
 	if [ "$$SIZE" -lt 524288 ]; then \
 		echo "Padding ROM to 512KB..."; \
@@ -230,33 +218,14 @@ distclean: clean
 .PHONY: check
 check:
 	@echo "Checking build tools..."
-	@echo "--- LLVM TLCS900 Compiler ---"
-	@if [ -x "$(CLANG)" ]; then \
-		echo "  clang: $(CLANG)"; \
-	else \
-		echo "  ERROR: clang not found at $(CLANG)"; \
-	fi
-	@if [ -x "$(LLC)" ]; then \
-		echo "  llc: $(LLC)"; \
-	else \
-		echo "  ERROR: llc not found at $(LLC)"; \
-	fi
-	@if [ -x "$(OBJCOPY)" ]; then \
-		echo "  llvm-objcopy: $(OBJCOPY)"; \
-	else \
-		echo "  ERROR: llvm-objcopy not found at $(OBJCOPY)"; \
-	fi
-	@echo "--- ASL Assembler ---"
-	@if [ -x "$(ASL)" ]; then \
-		echo "  asl: $(ASL)"; \
-	else \
-		echo "  ERROR: asl not found at $(ASL)"; \
-	fi
-	@if [ -x "$(P2BIN)" ]; then \
-		echo "  p2bin: $(P2BIN)"; \
-	else \
-		echo "  ERROR: p2bin not found at $(P2BIN)"; \
-	fi
+	@echo "--- LLVM TLCS900 Toolchain ---"
+	@for tool in clang llc llvm-objcopy llvm-link ld.lld llvm-nm; do \
+		if [ -x "$(LLVM_BIN)/$$tool" ]; then \
+			echo "  $$tool: $(LLVM_BIN)/$$tool"; \
+		else \
+			echo "  ERROR: $$tool not found at $(LLVM_BIN)/$$tool"; \
+		fi; \
+	done
 	@echo "--- Python ---"
 	@$(PYTHON) --version
 	@echo "--- Original ROMs ---"
@@ -284,6 +253,6 @@ help:
 	@echo "  make check    - Verify build tools"
 	@echo ""
 	@echo "Build pipeline:"
-	@echo "  C sources → clang → llc → llvm-objcopy → raw binary"
-	@echo "  Python → tiles.bin + palette.bin + icon.bin"
-	@echo "  ASL → main.asm (wraps everything) → p2bin → 512KB ROM"
+	@echo "  C sources -> clang (-emit-llvm) -> llvm-link -> llc (-filetype=obj) -> all_c.o"
+	@echo "  startup.s -> clang -c -> startup.o"
+	@echo "  lld (startup.o + all_c.o + kn5000.ld) -> ELF -> llvm-objcopy -> 512KB ROM"
