@@ -43,25 +43,34 @@
 .text
 
 ; --- XAPR Header (8 bytes at offset 0x00) ---
+; Bytes 0-3: "XAPR" magic (checked by main firmware)
+; Bytes 4-7: version/flags metadata (not a pointer)
 	.ascii	"XAPR"
-	.long	HANDLER_REGISTRATION
+	.byte	0x34, 0xA1, 0x2F, 0x00
 
-; --- Entry Point 1: Boot_Init (offset 0x08) ---
+; --- Entry Point 1: Boot_Init (offset 0x08, 8-byte slot) ---
 	jp	Boot_Init
+	ret
+	.byte	0x00, 0x00, 0x00
 
-; --- Entry Point 2: Frame_Handler (offset 0x0C) ---
+; --- Entry Point 2: Frame_Handler (offset 0x10, 8-byte slot) ---
 	jp	Frame_Handler
+	ret
+	.byte	0x00, 0x00, 0x00
 
-; --- Entry Point 3: Unused (offset 0x10) ---
-	jp	Dummy_Return
+; --- Entry Point 3: Unused (offset 0x18, 8-byte slot) ---
+	ret
+	.byte	0x00, 0x00, 0x00
 
-; --- Padding to offset 0x20 ---
-	.fill	12, 1, 0xFF
+; --- Entry Point 4: Unused (offset 0x1C, 4-byte slot) ---
+	ret
+	.byte	0x00, 0x00, 0x00
 
 ; =============================================================================
-; HANDLER_REGISTRATION (offset 0x20)
+; HANDLER_REGISTRATION
 ;
 ; Registers our callbacks with the main firmware's dispatch system.
+; Called from Boot_Init after workspace pointer is stored.
 ; Adapted from the real HDAE5000 handler registration protocol.
 ; =============================================================================
 HANDLER_REGISTRATION:
