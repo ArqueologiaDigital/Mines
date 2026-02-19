@@ -81,7 +81,12 @@ def fix_shift_operands(line):
             result.append(f'{indent}{op}\t{count}, {arg1}{comment}')
             return result
     except ValueError:
-        pass  # Non-numeric count (e.g., A register), just swap
+        # Non-numeric count - could be a register
+        # TLCS-900 only accepts A register or immediate as shift count
+        # If the count is a 32-bit register, use its low byte
+        if is_xrr(arg2):
+            low_byte = XRR_TO_R.get(arg2, arg2)
+            return f'{indent}{op}\t{low_byte}, {arg1}{comment}'
 
     return f'{indent}{op}\t{arg2}, {arg1}{comment}'
 
@@ -257,6 +262,8 @@ def convert(input_path, output_path):
                 value, comment = value.split(';', 1)
                 comment = ' ; ' + comment.strip()
             value = value.strip()
+            # Convert .Lxxx label references within the value
+            value = re.sub(r'\.L(\w+)', r'.\1', value)
             out.append(f'{indent}DD {value}{comment}')
             continue
 
@@ -267,6 +274,16 @@ def convert(input_path, output_path):
             out.append(f'{indent}DB {value}')
             continue
 
+        # Convert .zero N to DB 0 (N times)
+        m = re.match(r'^(\s*)\.zero\s+(\d+)', line)
+        if m:
+            indent, count = m.group(1), int(m.group(2))
+            if count == 1:
+                out.append(f'{indent}DB 0')
+            else:
+                out.append(f'{indent}DB {count} DUP (0)')
+            continue
+
         # Convert .comm (uninitialized storage) to DS
         m = re.match(r'^\s*\.comm\s+(\w+)\s*,\s*(\d+)', line)
         if m:
@@ -274,11 +291,23 @@ def convert(input_path, output_path):
             out.append(f'{name}:\tDS {size}')
             continue
 
-        # Convert .Lxxx local labels to .xxx (ASL format)
+        # Convert .Lxxx local labels to ASL format
+        # Labels with dots in the name (e.g., .Lswitch.table.main) become
+        # global labels with underscores (switch_table_main) to avoid
+        # ASL local label scoping issues.
+        def convert_local_label(m):
+            name = m.group(1)
+            if '.' in name:
+                # Multi-dot name: convert to global label with underscores
+                return name.replace('.', '_')
+            else:
+                # Simple name: keep as ASL local label
+                return '.' + name
+
         # In labels (at start of line)
-        line = re.sub(r'^\.L(\w+):', r'.\1:', line)
+        line = re.sub(r'^\.L([^\s:]+):', lambda m: convert_local_label(m) + ':', line)
         # In references (jump targets, etc.)
-        line = re.sub(r'\.L(\w+)', r'.\1', line)
+        line = re.sub(r'\.L([^\s,;]+)', convert_local_label, line)
 
         # Convert empty lines
         if line.strip() == '':

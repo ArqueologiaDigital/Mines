@@ -770,304 +770,11 @@ platform_shutdown:
 idle_update:
 	ret
 
-; --- main.c stubs ---
-; The main() function contains the game state machine with switch statements.
-; Since the LLVM backend can't generate jump tables yet, we implement it here.
-
-; main() - Game entry point
-; Uses if/else chain instead of switch to avoid jump tables
-main:
-	; platform_init()
-	call	platform_init
-
-	; minefield* mf = init_minefield()
-	call	init_minefield
-	; XDE = mf pointer (return value)
-
-	; draw_scenario(mf)
-	call	draw_scenario
-
-	; mf->state = TITLE_SCREEN (1)
-	ld	XIZ, XDE		; XIZ = mf
-	ld	(XIZ), 1		; mf->state = TITLE_SCREEN
-
-	; Skip title screen, go straight to playing
-	; (DRAW_TITLE_SCREEN not defined)
-	ld	(XIZ), 2		; mf->state = PLAYING_GAME
-	ld	XDE, XIZ
-	call	reset_minefield
-	ld	XDE, XIZ
-	call	draw_minefield
-
-.main_loop:
-	; Check state
-	ld	A, (XIZ)		; mf->state
-
-	; if (state == QUIT) break
-	cp	A, 7			; QUIT = 7
-	jr	Z, .main_done
-
-	; if (state == PLAYING_GAME) gameplay_update
-	cp	A, 2			; PLAYING_GAME = 2
-	jr	NZ, .not_playing
-	ld	XDE, XIZ
-	call	gameplay_update_asm
-	jr	.main_continue
-.not_playing:
-	; if (state == GAME_OVER || state == GAME_WON) game_over_update
-	cp	A, 3			; GAME_OVER = 3
-	jr	Z, .game_over
-	cp	A, 4			; GAME_WON = 4
-	jr	Z, .game_over
-	; if (state == TITLE_SCREEN) title_screen_update
-	cp	A, 1			; TITLE_SCREEN = 1
-	jr	NZ, .main_continue
-	; title_screen: just start playing
-	ld	(XIZ), 2		; state = PLAYING_GAME
-	ld	XDE, XIZ
-	call	reset_minefield
-	ld	XDE, XIZ
-	call	draw_minefield
-	jr	.main_continue
-.game_over:
-	ld	XDE, XIZ
-	call	game_over_update_asm
-.main_continue:
-	ld	XDE, XIZ
-	call	idle_update
-	jr	.main_loop
-
-.main_done:
-	; free_minefield(mf)
-	ld	XDE, XIZ
-	call	free_minefield
-
-	; platform_shutdown()
-	call	platform_shutdown
-	ret
-
-; gameplay_update_asm(mf in XDE)
-gameplay_update_asm:
-	push	XIZ
-	ld	XIZ, XDE
-
-	; draw_minefield_contents(mf)
-	call	draw_minefield_contents
-
-	; input = input_read(KEYBOARD=0)
-	push	XDE
-	ld	XDE, 0
-	call	input_read
-	; XDE = input result
-	ld	XBC, XDE
-	pop	XDE
-	; XBC = input, XDE = mf
-
-	; if (input == MINE_INPUT_IGNORED) return
-	cp	XBC, 0
-	jr	Z, .gu_done
-
-	; update_gameplay_input_asm(mf, input)
-	; XDE = mf, XBC = input
-	call	update_gameplay_input_asm
-
-.gu_done:
-	pop	XIZ
-	ret
-
-; update_gameplay_input_asm(mf in XDE, input in XBC)
-update_gameplay_input_asm:
-	push	XIZ
-	ld	XIZ, XDE
-	ld	A, C			; A = input
-
-	; LEFT (bit 0)
-	cp	A, 1
-	jr	NZ, .ugi_not_left
-	ld	B, (XIZ + 3)		; current_cell
-	ld	C, (XIZ + 1)		; width
-	; if (current_cell % width > 0) current_cell--
-	push	WA
-	ld	A, B
-.mod_left:
-	cp	A, C
-	jr	C, .mod_left_done
-	sub	A, C
-	jr	.mod_left
-.mod_left_done:
-	cp	A, 0
-	pop	WA
-	jp	Z, .ugi_done
-	dec	1, (XIZ + 3)
-	jp	.ugi_done
-.ugi_not_left:
-
-	; RIGHT (bit 1)
-	cp	A, 2
-	jr	NZ, .ugi_not_right
-	ld	B, (XIZ + 3)		; current_cell
-	ld	C, (XIZ + 1)		; width
-	push	WA
-	ld	A, B
-.mod_right:
-	cp	A, C
-	jr	C, .mod_right_done
-	sub	A, C
-	jr	.mod_right
-.mod_right_done:
-	; A = current_cell % width
-	ld	D, C
-	dec	1, D			; D = width - 1
-	cp	A, D
-	pop	WA
-	jp	NC, .ugi_done		; if (x >= width-1) skip
-	inc	1, (XIZ + 3)
-	jp	.ugi_done
-.ugi_not_right:
-
-	; UP (bit 2)
-	cp	A, 4
-	jr	NZ, .ugi_not_up
-	ld	B, (XIZ + 3)		; current_cell
-	ld	C, (XIZ + 1)		; width
-	cp	B, C
-	jp	C, .ugi_done		; if (current_cell < width) skip
-	ld	A, (XIZ + 3)
-	sub	A, C
-	ld	(XIZ + 3), A
-	jp	.ugi_done
-.ugi_not_up:
-
-	; DOWN (bit 3)
-	cp	A, 8
-	jr	NZ, .ugi_not_down
-	ld	B, (XIZ + 3)		; current_cell
-	ld	C, (XIZ + 1)		; width
-	ld	D, (XIZ + 2)		; height
-	push	WA
-	ld	A, D
-	sub	A, 1
-	mul	WA, C			; A = (height-1) * width ... simplified
-	; Actually just: num_cells - width = width*height - width
-	ld	A, C
-	ld	E, D
-	; threshold = width * (height - 1)
-	; We need: if (current_cell < threshold) current_cell += width
-	; Simplified: current_cell + width < width * height
-	ld	A, B
-	add	A, C			; A = current_cell + width
-	; Compare with width * height
-	; width * height = computed via loop
-	push	DE
-	ld	D, 0
-	ld	E, (XIZ + 2)		; height
-.mul_down:
-	cp	E, 0
-	jr	Z, .mul_down_done
-	add	D, C			; D += width
-	dec	1, E
-	jr	.mul_down
-.mul_down_done:
-	; D = width * height
-	cp	A, D
-	pop	DE
-	pop	WA
-	jp	NC, .ugi_done		; if (current_cell + width >= total) skip
-	ld	A, (XIZ + 3)
-	add	A, C
-	ld	(XIZ + 3), A
-	jp	.ugi_done
-.ugi_not_down:
-
-	; QUIT (bit 7)
-	cp	A, 128			; MINE_INPUT_QUIT
-	jr	NZ, .ugi_not_quit
-	ld	(XIZ), 7		; state = QUIT
-	jp	.ugi_done
-.ugi_not_quit:
-
-	; OPEN (bit 4)
-	cp	A, 16			; MINE_INPUT_OPEN
-	jr	NZ, .ugi_not_open
-	; Compute x, y from current_cell
-	push	WA
-	ld	A, (XIZ + 3)		; current_cell
-	ld	C, (XIZ + 1)		; width
-	ld	B, 0			; y counter
-.open_div:
-	cp	A, C
-	jr	C, .open_div_done
-	sub	A, C
-	inc	1, B
-	jr	.open_div
-.open_div_done:
-	; A = x, B = y
-	; open_cell(mf, x, y)
-	ld	XDE, XIZ		; mf
-	and	XBC, 0
-	ld	C, A			; XBC = x
-	and	XIX, 0
-	ld	XIX, XWA		; XIX needs y in low byte
-	and	XIX, 0FFh
-	push	XIZ
-	; Calling convention: XDE=mf, XBC=x, XIX=y
-	; But we need to set up properly
-	; Actually for open_cell: XDE=arg0(mf), XBC=arg1(x), XIX=arg2(y)
-	ld	E, (XIZ + 3)		; get x again
-	; This is getting complex - just call set_minefield_cell approach
-	pop	XIZ
-	pop	WA
-	; For now, simplified: just open the current cell
-	; call open_cell  -- requires proper args
-	jp	.ugi_done
-.ugi_not_open:
-
-	; FLAG (bit 5)
-	cp	A, 32			; MINE_INPUT_FLAG
-	jp	NZ, .ugi_done
-	; Toggle flag on current cell - simplified
-	jp	.ugi_done
-
-.ugi_done:
-	pop	XIZ
-	ret
-
-; game_over_update_asm(mf in XDE)
-game_over_update_asm:
-	push	XIZ
-	ld	XIZ, XDE
-
-	; draw_minefield_contents(mf)
-	call	draw_minefield_contents
-
-	; input = input_read(KEYBOARD=0)
-	push	XDE
-	ld	XDE, 0
-	call	input_read
-	ld	XBC, XDE
-	pop	XDE
-
-	; if (input == MINE_INPUT_IGNORED) return
-	cp	XBC, 0
-	jr	Z, .gou_done
-
-	; if OPEN/FLAG/OPEN_BLOCK → back to title
-	ld	A, C
-	cp	A, 16			; OPEN
-	jr	Z, .gou_restart
-	cp	A, 32			; FLAG
-	jr	Z, .gou_restart
-	cp	A, 64			; OPEN_BLOCK
-	jr	Z, .gou_restart
-	cp	A, 128			; QUIT
-	jr	NZ, .gou_done
-	ld	(XIZ), 7		; state = QUIT
-	jr	.gou_done
-.gou_restart:
-	ld	(XIZ), 1		; state = TITLE_SCREEN
-.gou_done:
-	pop	XIZ
-	ret
+; --- main.c ---
+; Now compiled from C (LLVM backend supports jump tables).
+; The following functions are provided by compiled C code:
+;   main, gameplay_update, update_gameplay_input,
+;   game_over_update, title_screen_update, set_minefield_cell
 
 ; --- minefield.c stubs ---
 ; These require division/modulo which the backend can't handle.
@@ -1264,6 +971,26 @@ maybe_game_won:
 ; Compiler runtime helpers
 ; =============================================================================
 
+; __udivsi3: unsigned 32-bit division
+; Args: XDE = dividend, XBC = divisor
+; Returns: XDE = quotient (dividend / divisor)
+__udivsi3:
+	push	XWA
+	push	XHL
+	ld	XWA, XDE		; XWA = dividend
+	ld	XHL, 0			; XHL = quotient
+.udiv_loop:
+	cp	XWA, XBC
+	jr	C, .udiv_done		; dividend < divisor → done
+	sub	XWA, XBC
+	inc	4, XHL
+	jr	.udiv_loop
+.udiv_done:
+	ld	XDE, XHL		; XDE = quotient
+	pop	XHL
+	pop	XWA
+	ret
+
 ; __umodsi3: unsigned 32-bit modulo
 ; Args: XDE = dividend, XBC = divisor
 ; Returns: XDE = remainder (dividend % divisor)
@@ -1280,7 +1007,7 @@ __umodsi3:
 	pop	XWA
 	ret
 
-; C_Main is the 'main' symbol defined above
+; C_Main is the 'main' symbol from compiled C code (common/main.c)
 C_Main		EQU main
 
 ; =============================================================================
