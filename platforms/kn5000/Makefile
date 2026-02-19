@@ -197,7 +197,7 @@ romset: $(ROM_FILE)
 .PHONY: test
 test: romset
 	@echo "Running MAME with Mines extension ROM..."
-	mame kn5000 -rompath $(ROMSET_BASE) -window -ui_active -oslog
+	mame kn5000 -rompath $(ROMSET_BASE) -extension hdae5000 -window -ui_active -oslog 2>&1 | tee ../../../log.txt
 
 # =============================================================================
 # Clean
