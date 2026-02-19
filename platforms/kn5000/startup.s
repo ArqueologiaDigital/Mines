@@ -4,9 +4,14 @@
 ; GAS-syntax startup assembly (replaces main.asm / ASL format).
 ; Assembled with: clang -target tlcs900 -c startup.s
 ;
-; NOTE: Register+displacement loads are not yet supported by the LLVM
-; TLCS-900 assembler. These use an add+load workaround. Stores with
-; displacement work fine.
+; NOTE: The LLVM TLCS-900 assembler has encoding bugs with direct memory
+; addressing (ld reg, (addr) / ld (addr), imm). Loads use the wrong prefix
+; byte (F2 instead of E2), and immediate-to-memory stores emit a non-existent
+; sub-opcode (0x08). All direct memory accesses use a register-indirect
+; workaround: ld xreg, addr; ld xreg, (xreg) for loads and
+; ld xreg, addr; ld (xreg), src for stores.
+; Register+displacement loads also use an add+load workaround (hardware
+; limitation). Stores with displacement work fine.
 ;
 ; Target: TMP94C241F (TLCS-900/H2) @ 16 MHz
 ; Display: 320x240 LCD, 8bpp indexed color
@@ -77,8 +82,9 @@ HANDLER_REGISTRATION:
 	push	xix
 	push	xiz
 
-	; Get workspace pointer
-	ld	xiz, (WORKSPACE_PTR)
+	; Get workspace pointer (direct mem load broken, use reg-indirect)
+	ld	xiz, WORKSPACE_PTR
+	ld	xiz, (xiz)
 
 	; Get handler table A: xiz = *(workspace + 0x0E0A)
 	; (reg+disp load not supported, use add+load workaround)
@@ -93,7 +99,9 @@ HANDLER_REGISTRATION:
 
 	; Call registration function with ID parameter
 	ld	xwa, 0x00600002
-	call	(xix)
+	; call (xix) - LLVM encodes CALL sub-opcode as 0x1F (undefined),
+	; correct is 0xE8 (CALL T = unconditional) in mnemonic_b0 table
+	.byte	0xB4, 0xE8
 
 	; XHL now points to our registered slot
 	; Store handler flags
@@ -105,7 +113,8 @@ HANDLER_REGISTRATION:
 	ld	(xhl + 0x2A), xwa
 
 	; Register with handler table B for frame callbacks
-	ld	xiz, (WORKSPACE_PTR)
+	ld	xiz, WORKSPACE_PTR
+	ld	xiz, (xiz)
 
 	; Get handler table B: xiz = *(workspace + 0x0E88)
 	add	xiz, 0x0E88
@@ -114,7 +123,7 @@ HANDLER_REGISTRATION:
 	; Get handler_B function: xhl = *(handler_table_B + 0x0108)
 	add	xiz, 0x0108
 	ld	xhl, (xiz)
-	call	(xhl)
+	.byte	0xB3, 0xE8	; call (xhl) - correct CALL T encoding
 
 	pop	xiz
 	pop	xix
@@ -169,15 +178,20 @@ Boot_Init:
 	push	xbc
 
 	; Store workspace pointer (XWA from firmware)
-	ld	(WORKSPACE_PTR), xwa
+	; (direct mem store broken for immediates, use reg-indirect for all)
+	ld	xde, WORKSPACE_PTR
+	ld	(xde), xwa
 
-	; Initialize game state
-	ld	(GAME_ACTIVE), 0
-	ld	(GAME_INITIALIZED), 1
+	; Initialize game state: GAME_ACTIVE=0, GAME_INITIALIZED=1
+	; Store both as one 32-bit value: LE 0x00000100 = [0x00, 0x01, 0x00, 0x00]
+	ld	xde, GAME_ACTIVE
+	ld	xwa, 0x00000100
+	ld	(xde), xwa
 
 	; Zero system ticks counter (32-bit)
+	ld	xde, SYSTEM_TICKS
 	ld	xwa, 0
-	ld	(SYSTEM_TICKS), xwa
+	ld	(xde), xwa
 
 	; Register handlers with the main firmware
 	call	HANDLER_REGISTRATION
@@ -195,13 +209,14 @@ Register_Frame_Handler:
 	push	xiz
 	push	xix
 
-	ld	xiz, (WORKSPACE_PTR)
+	ld	xiz, WORKSPACE_PTR
+	ld	xiz, (xiz)
 	; (reg+disp load not supported, use add+load workaround)
 	add	xiz, 0x0E88
 	ld	xiz, (xiz)
 	add	xiz, 0x0108
 	ld	xix, (xiz)
-	call	(xix)
+	.byte	0xB4, 0xE8	; call (xix) - correct CALL T encoding
 
 	pop	xix
 	pop	xiz
@@ -212,12 +227,14 @@ Register_Frame_Handler:
 ; =============================================================================
 Frame_Handler:
 	; Check: is game initialized? (byte at GAME_INITIALIZED)
-	ld	xwa, (GAME_INITIALIZED)
+	ld	xhl, GAME_INITIALIZED
+	ld	xwa, (xhl)
 	cp	a, 0
 	jr	z, .Lframe_exit
 
 	; Check: is game active? (byte at GAME_ACTIVE)
-	ld	xwa, (GAME_ACTIVE)
+	ld	xhl, GAME_ACTIVE
+	ld	xwa, (xhl)
 	cp	a, 0
 	jr	z, .Lframe_exit
 
@@ -239,8 +256,10 @@ Activate_Game:
 	push	xbc
 	push	xde
 
-	; Set game active
-	ld	(GAME_ACTIVE), 1
+	; Set game active (GAME_ACTIVE=1, GAME_INITIALIZED=1)
+	ld	xhl, GAME_ACTIVE
+	ld	xwa, 0x00000101
+	ld	(xhl), xwa
 
 	; Set up game stack
 	ld	xwa, STACK_TOP
@@ -253,8 +272,10 @@ Activate_Game:
 	; Call C main()
 	call	main
 
-	; Game has returned - mark inactive
-	ld	(GAME_ACTIVE), 0
+	; Game has returned - mark inactive (GAME_ACTIVE=0, GAME_INITIALIZED=1)
+	ld	xhl, GAME_ACTIVE
+	ld	xwa, 0x00000100
+	ld	(xhl), xwa
 
 	; NOTE: Stack context from firmware is lost after stack switch.
 	; This function is currently unreachable (game activation mechanism
