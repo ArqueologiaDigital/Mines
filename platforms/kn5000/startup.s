@@ -38,9 +38,9 @@
 .globl __umodsi3
 
 ; =============================================================================
-; Code Section (.text, placed at 0x280000 by linker script)
+; Code Section (.startup, placed at 0x280000 by linker script)
 ; =============================================================================
-.text
+.section .startup, "ax", @progbits
 
 ; --- XAPR Header (8 bytes at offset 0x00) ---
 ; Bytes 0-3: "XAPR" magic (checked by main firmware)

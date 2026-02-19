@@ -20,7 +20,7 @@ MEMORY {
 SECTIONS {
   /* Assembly startup code: XAPR header, handlers, palette routines, etc. */
   .startup 0x280000 : {
-    startup.o(.text)
+    startup.o(.startup)
   } > ROM
 
   /* Compiled C code */
