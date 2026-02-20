@@ -1,17 +1,8 @@
 ; =============================================================================
 ; startup.s - Mines for KN5000 (HDAE5000 Extension ROM)
 ; =============================================================================
-; GAS-syntax startup assembly (replaces main.asm / ASL format).
+; GAS-syntax startup assembly.
 ; Assembled with: clang -target tlcs900 -c startup.s
-;
-; NOTE: The LLVM TLCS-900 assembler has encoding bugs with direct memory
-; addressing (ld reg, (addr) / ld (addr), imm). Loads use the wrong prefix
-; byte (F2 instead of E2), and immediate-to-memory stores emit a non-existent
-; sub-opcode (0x08). All direct memory accesses use a register-indirect
-; workaround: ld xreg, addr; ld xreg, (xreg) for loads and
-; ld xreg, addr; ld (xreg), src for stores.
-; Register+displacement loads also use an add+load workaround (hardware
-; limitation). Stores with displacement work fine.
 ;
 ; Target: TMP94C241F (TLCS-900/H2) @ 16 MHz
 ; Display: 320x240 LCD, 8bpp indexed color
@@ -30,6 +21,7 @@
 .equ GAME_INITIALIZED, 0x200001
 .equ SYSTEM_TICKS,     0x200004
 .equ WORKSPACE_PTR,    0x200008
+.equ HANDLER_SLOT,     0x20000C
 .equ STACK_TOP,        0x203000
 
 ; =============================================================================
@@ -82,12 +74,10 @@ HANDLER_REGISTRATION:
 	push	xix
 	push	xiz
 
-	; Get workspace pointer (direct mem load broken, use reg-indirect)
-	ld	xiz, WORKSPACE_PTR
-	ld	xiz, (xiz)
+	; Get workspace pointer
+	ld	xiz, (WORKSPACE_PTR)
 
 	; Get handler table A: xiz = *(workspace + 0x0E0A)
-	; (reg+disp load not supported, use add+load workaround)
 	add	xiz, 0x0E0A
 	ld	xiz, (xiz)
 
@@ -99,31 +89,32 @@ HANDLER_REGISTRATION:
 
 	; Call registration function with ID parameter
 	ld	xwa, 0x00600002
-	; call (xix) - LLVM encodes CALL sub-opcode as 0x1F (undefined),
-	; correct is 0xE8 (CALL T = unconditional) in mnemonic_b0 table
-	.byte	0xB4, 0xE8
+	call	(xix)
 
-	; XHL now points to our registered slot
-	; Store handler flags
-	ld	xwa, 0x016A0005
-	ld	(xhl), xwa
-
-	; Store Alloc_Memory_Icon address at slot + 0x2A
-	ld	xwa, Alloc_Memory_Icon
+	; XHL = handler slot (menu item structure, pre-initialized by firmware).
+	; Do NOT overwrite slot+0x00 header — firmware's defaults are required.
+	;
+	; slot+0x2A = text string pointer (for DISK MENU display name)
+	; slot+0x32 = icon ID (indexes into table_data ROM at 0x938000)
+	ld	xwa, MENU_NAME
 	ld	(xhl + 0x2A), xwa
 
-	; Register with handler table B for frame callbacks
-	ld	xiz, WORKSPACE_PTR
-	ld	xiz, (xiz)
+	; Set icon ID (176 = our custom mine icon, patched into table_data ROM)
+	ld	xwa, 176
+	ld	(xhl + 0x32), xwa
 
-	; Get handler table B: xiz = *(workspace + 0x0E88)
-	add	xiz, 0x0E88
-	ld	xiz, (xiz)
+	; Save handler slot pointer for later use
+	ld	(HANDLER_SLOT), xhl
 
-	; Get handler_B function: xhl = *(handler_table_B + 0x0108)
-	add	xiz, 0x0108
-	ld	xhl, (xiz)
-	.byte	0xB3, 0xE8	; call (xhl) - correct CALL T encoding
+	; Now register a sub-handler for extension app activation.
+	; The firmware queries 0x01600040 (ExtensionApp_Type1) when
+	; user selects a DISK MENU entry. We need to register a handler
+	; that responds to this query so the firmware knows we're an app,
+	; not the default floppy test.
+	;
+	; Register via workspace[0x0E0A][0x00E4]:
+	;   WA = handler ID, XBC = parameter block pointer
+	; (TODO: implement extension app type handler)
 
 	pop	xiz
 	pop	xix
@@ -171,35 +162,34 @@ Dummy_Return:
 ; Boot_Init - Called once at startup when main firmware detects HDAE5000
 ;
 ; Entry: XWA = workspace pointer from main firmware
+; Must return to firmware (firmware continues boot sequence after this).
+; Only stores workspace pointer and registers handlers — does NOT start the game.
 ; =============================================================================
 Boot_Init:
-	push	xiz
-	push	xix
-	push	xbc
+	push	xwa
+	push	xde
 
-	; Store workspace pointer (XWA from firmware)
-	; (direct mem store broken for immediates, use reg-indirect for all)
-	ld	xde, WORKSPACE_PTR
+	; DEBUG: Write marker to AudioMix to confirm Boot_Init was called
+	ld	xde, 0x150000
+	ld	xwa, 0x00B100FE		; addr=0xFE, data=0xB1 (Boot_Init marker)
 	ld	(xde), xwa
 
-	; Initialize game state: GAME_ACTIVE=0, GAME_INITIALIZED=1
-	; Store both as one 32-bit value: LE 0x00000100 = [0x00, 0x01, 0x00, 0x00]
-	ld	xde, GAME_ACTIVE
-	ld	xwa, 0x00000100
-	ld	(xde), xwa
+	; Store workspace pointer (passed in XWA by firmware)
+	; XWA was saved above before we overwrote it, restore it
+	pop	xde
+	pop	xwa
 
-	; Zero system ticks counter (32-bit)
-	ld	xde, SYSTEM_TICKS
-	ld	xwa, 0
-	ld	(xde), xwa
+	; Store workspace pointer for later use
+	ld	(WORKSPACE_PTR), xwa
 
-	; Register handlers with the main firmware
+	; Register DISK MENU entry and handler table B callback
 	call	HANDLER_REGISTRATION
-	call	Register_Frame_Handler
 
-	pop	xbc
-	pop	xix
-	pop	xiz
+	; Do NOT set GAME_ACTIVE here. Boot_Init runs during firmware boot;
+	; starting the game now would block the boot sequence.
+	; The game starts when the user selects our DISK MENU entry,
+	; which triggers Activate_Game via the registered handler.
+
 	ret
 
 ; =============================================================================
@@ -209,39 +199,67 @@ Register_Frame_Handler:
 	push	xiz
 	push	xix
 
-	ld	xiz, WORKSPACE_PTR
-	ld	xiz, (xiz)
-	; (reg+disp load not supported, use add+load workaround)
+	ld	xiz, (WORKSPACE_PTR)
 	add	xiz, 0x0E88
 	ld	xiz, (xiz)
 	add	xiz, 0x0108
 	ld	xix, (xiz)
-	.byte	0xB4, 0xE8	; call (xix) - correct CALL T encoding
+	call	(xix)
 
 	pop	xix
 	pop	xiz
 	ret
 
 ; =============================================================================
-; Frame_Handler - Called every frame by main firmware
+; Frame_Handler - Called every frame by main firmware (from LABEL_F1E9D0)
+;
+; On first call (GAME_ACTIVE=1), calls main() which blocks in its game loop.
+; When main() returns (player quit), marks GAME_ACTIVE=0 so subsequent
+; frames are no-ops.
+;
+; All registers must be preserved — the firmware's main loop expects them
+; intact after this call returns.
 ; =============================================================================
 Frame_Handler:
-	; Check: is game initialized? (byte at GAME_INITIALIZED)
-	ld	xhl, GAME_INITIALIZED
-	ld	xwa, (xhl)
-	cp	a, 0
-	jr	z, .Lframe_exit
+	; Save all registers (firmware needs them preserved)
+	push	xwa
+	push	xbc
+	push	xde
+	push	xhl
+	push	xix
+	push	xiy
+	push	xiz
 
-	; Check: is game active? (byte at GAME_ACTIVE)
+	; === DEBUG: Write marker to AudioMix to confirm Frame_Handler was called ===
+	ld	xde, 0x150000
+	ld	xwa, 0x00F100FE		; addr=0xFE, data=0xF1 (Frame_Handler marker)
+	ld	(xde), xwa
+	; === END DEBUG ===
+
+	; Check GAME_ACTIVE
 	ld	xhl, GAME_ACTIVE
 	ld	xwa, (xhl)
 	cp	a, 0
-	jr	z, .Lframe_exit
+	jr	z, .Lframe_done
 
-	; Game is active: call C game loop
-	call	C_Game_Frame
+	; Game is active: call C main() (blocks until player quits)
+	call	main
 
-.Lframe_exit:
+	; main() returned — mark game inactive
+	; GAME_ACTIVE=0, GAME_INITIALIZED=1
+	ld	xhl, GAME_ACTIVE
+	ld	xwa, 0x00000100
+	ld	(xhl), xwa
+
+.Lframe_done:
+	; Restore all registers
+	pop	xiz
+	pop	xiy
+	pop	xix
+	pop	xhl
+	pop	xde
+	pop	xbc
+	pop	xwa
 	ret
 
 ; =============================================================================
@@ -403,3 +421,7 @@ PALETTE_DATA:
 ; Icon data (27x27 pixels, displayed in DISK MENU)
 ICON_DATA:
 	.incbin	"build/icon.bin"
+
+; DISK MENU display name (null-terminated string, shown in menu)
+MENU_NAME:
+	.asciz	"Mines Game"

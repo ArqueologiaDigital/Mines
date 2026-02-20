@@ -20,12 +20,12 @@ MEMORY {
 SECTIONS {
   /* Assembly startup code: XAPR header, handlers, palette routines, etc. */
   .startup 0x280000 : {
-    startup.o(.startup)
+    *(.startup)
   } > ROM
 
   /* Compiled C code */
   .text 0x281000 : {
-    all_c.o(.text)
+    *(.text*)
   } > ROM
 
   /* Read-only data: tiles, palette, icon from startup.o + C const data */
@@ -37,7 +37,7 @@ SECTIONS {
    * ALIGN(4) ensures Copy_C_Data can use 4-byte copies. */
   .data 0x200310 : {
     __data_start = .;
-    all_c.o(.data)
+    *(.data*)
     . = ALIGN(4);
     __data_end = .;
   } > RAM AT > ROM
@@ -49,7 +49,8 @@ SECTIONS {
    * ALIGN(4) ensures Clear_C_BSS can use 4-byte stores. */
   .bss 0x201000 : {
     __bss_start = .;
-    all_c.o(.bss)
+    *(.bss*)
+    *(COMMON)
     . = ALIGN(4);
     __bss_end = .;
   } > RAM

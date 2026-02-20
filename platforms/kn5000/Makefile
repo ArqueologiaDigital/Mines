@@ -187,6 +187,7 @@ romset: $(ROM_FILE)
 	done
 	cp $(ROM_FILE) $(ROMSET_DIR)/$(EXTENSION_ROM_NAME)
 	@echo "  Installed: $(EXTENSION_ROM_NAME) (Mines game)"
+	$(PYTHON) tools/patch_icon.py $(ROMSET_DIR)
 	@echo ""
 	@echo "ROM set contents:"
 	@ls -la $(ROMSET_DIR)/
