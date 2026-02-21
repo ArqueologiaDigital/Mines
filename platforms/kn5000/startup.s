@@ -188,12 +188,18 @@ HANDLER_REGISTRATION:
 ; =============================================================================
 ; Mines_Handler - Implementation function for our data record
 ;
-; Called by firmware dispatch when events target our handler 0x016A.
-; Entry: XWA = object_id, XBC = request, XDE = parameter
-; Intercepts activation events to set GAME_ACTIVE flag:
+; Called by firmware dispatch (via ClassProc) when events target handler 0x016A.
+; Entry: XWA = object_id, XBC = event code, XDE = parameter
+;
+; Only intercepts activation events to set GAME_ACTIVE flag:
 ;   0x01C00008 - Sent by firmware DISK MENU when user selects our entry
 ;   0x01E0009C - Sent by direct event injection (ApPostEvent)
-; All other requests are delegated to the default handler.
+;
+; All other events are silently ignored. We do NOT delegate to the default
+; lifecycle handler (table_A[0x00DC]) because it processes events as standard
+; DISK MENU operations, showing unrelated firmware UI like "FD SAVE/LOAD TEST".
+; Since handler 0x016A is extension-ROM exclusive (main firmware leaves it
+; vacant), ignoring non-activation events is safe.
 ; =============================================================================
 Mines_Handler:
 	push	xix
@@ -208,29 +214,17 @@ Mines_Handler:
 	; Check for DISK MENU selection event (0x01C00008)
 	ld	xix, 0x01C00008
 	cp	xbc, xix
-	jr	nz, .Lmh_not_selection
-
-	; Selection event — verify it targets OUR specific DISK MENU entry.
-	; Our slot is linked as 0x016A0000 (handler 0x016A, sub-index 0).
-	; Without this check, pressing ANY button in the DISK MENU would
-	; activate the game because handler 0x016A receives all HDAE5000 events.
-	ld	xix, 0x016A0000
-	cp	xwa, xix
 	jr	z, .Lmh_activate
-	; Not for us — delegate to default handler
-	jr	.Lmh_delegate
 
-.Lmh_not_selection:
 	; Check for direct event injection (0x01E0009C)
 	ld	xix, 0x01E0009C
 	cp	xbc, xix
 	jr	z, .Lmh_activate
 
-	; Not an activation event — delegate to default handler
-	jr	.Lmh_delegate
+	; All other events: ignore silently.
+	jr	.Lmh_done
 
 .Lmh_activate:
-	; Activation: set GAME_ACTIVE=1, GAME_INITIALIZED=0
 	push	xwa
 	push	xhl
 	ld	xhl, GAME_ACTIVE
@@ -243,20 +237,6 @@ Mines_Handler:
 	ld	(xhl), xwa
 	pop	xhl
 	pop	xwa
-
-	; Don't delegate to default handler on activation —
-	; it would show "FD SAVE/LOAD TEST" and interfere with our game
-	jr	.Lmh_done
-
-.Lmh_delegate:
-	; Delegate to default handler: workspace[0x0E0A][0x00DC]
-	; XWA, XBC, XDE are preserved (original call arguments)
-	ld	xiz, (WORKSPACE_PTR)
-	add	xiz, 0x0E0A
-	ld	xiz, (xiz)
-	add	xiz, 0x00DC
-	ld	xix, (xiz)
-	call	(xix)
 
 .Lmh_done:
 	pop	xiz
