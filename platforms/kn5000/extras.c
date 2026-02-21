@@ -21,7 +21,7 @@ int rand(void)
     return rand_seed;
 }
 
-void srand(unsigned int v) { rand_seed = v; }
+void srand(unsigned int v) { rand_seed = v ? v : 1; }
 
 /* ========================================================================
  * Memory functions

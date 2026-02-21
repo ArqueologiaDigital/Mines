@@ -195,13 +195,27 @@ inline void gameplay_update(minefield* mf)
  * and throw all the code away. */
 __attribute__((used))
 #endif
+/* Temporary debug marker for KN5000 — writes to AudioMix port 0xFE */
+/* Debug progress marker: write to both AudioMix port and RAM location.
+ * RAM location 0x200050 can be read by Lua test scripts.
+ * Uses 32-bit stores to avoid LLVM TLCS-900 bug #8. */
+#define DBG(x) do { \
+    *(volatile uint32_t *)0x150000 = ((uint32_t)(x) << 16) | 0x00FE; \
+    *(volatile uint32_t *)0x200050 = (uint32_t)(x); \
+} while(0)
+
 int main() {
+    DBG(0xD0);  /* D0 = main entry */
     platform_init();
 
+    DBG(0xD1);  /* D1 = after platform_init */
     minefield* mf = init_minefield();
 
+    DBG(0xD2);  /* D2 = after init_minefield */
     // draw screen elements
     draw_scenario(mf);
+
+    DBG(0xD3);  /* D3 = after draw_scenario */
 
 #ifdef ENABLE_COUNTER
     draw_counter();
@@ -213,16 +227,21 @@ int main() {
 
     mf->state = TITLE_SCREEN;
 
+    DBG(0xD4);  /* D4 = entering game loop */
+
 #ifdef MAIN_LOOP_REIMPLEMENTED
     platform_main_loop(mf);
 #else
     while (mf->state != QUIT) {
+        DBG(0xD5);  /* D5 = game loop iteration */
         switch (mf->state)
         {
             case TITLE_SCREEN:
+                DBG(0xD6);  /* D6 = title_screen_update */
                 title_screen_update(mf);
                 break;
             case PLAYING_GAME:
+                DBG(0xD7);  /* D7 = gameplay_update */
                 gameplay_update(mf);
                 break;
             case GAME_WON:
@@ -236,6 +255,7 @@ int main() {
     }
 #endif /* MAIN_LOOP_REIMPLEMENTED */
 
+    DBG(0xDF);  /* DF = main exiting (should not happen!) */
     free_minefield(mf);
     platform_shutdown();
 

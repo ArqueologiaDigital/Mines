@@ -35,9 +35,10 @@ Requires custom LLVM with TLCS-900 backend at `../llvm-project/build/bin/`.
 
 ### Current Status
 - DISK MENU entry with mine icon and "Mines Game" text: **WORKING**
-- Game activation from DISK MENU selection: **NOT IMPLEMENTED**
-- Display ownership (drawing to LCD): **NOT IMPLEMENTED**
-- Control panel input in game: **NEEDS FIRMWARE API**
+- Game activation from DISK MENU selection: **WORKING** (RegisterObjectTable + Mines_Handler)
+- Display/rendering to LCD: **WORKING** (minesweeper board renders correctly)
+- Palette loading: **WORKING** (game colors visible)
+- Control panel input in game: **NEEDS FIRMWARE API** (disabled at input.c:64)
 
 ### Display Ownership (Critical Blocker)
 The firmware draws its UI in the main event loop BEFORE calling Frame_Handler. To render game graphics:
@@ -51,8 +52,8 @@ The MN89304 VGA controller uses a 4-bit RAMDAC (not standard 6-bit VGA). Key reg
 - DAC data: 0x1703C9 (write R,G,B sequentially)
 - CRTC index/data: 0x1703D4/0x1703D5
 
-### DISK MENU Activation (Next Step)
-When user selects our DISK MENU entry, firmware queries handler `0x01600040`. We need to register a sub-handler via `workspace[0x0E0A][0x00E4]` to respond. The original HDAE5000 uses handler ID `0x016A` with data at `0x29C0AA`.
+### DISK MENU Activation (Implemented)
+When user selects our DISK MENU entry, firmware posts event `0x01E0009C` via `ApPostEvent`. The dispatch system (FA9660) routes this to our registered handler `0x016A`, which calls `Mines_Handler`. This sets `GAME_ACTIVE=1`, and the next `Frame_Handler` call initializes the C runtime and starts the game. On quit, display ownership is returned to firmware.
 
 ### Workspace Pointer System
 Boot_Init receives workspace pointer `0x027ED2` in XWA. Key offsets:
@@ -63,8 +64,12 @@ Boot_Init receives workspace pointer `0x027ED2` in XWA. Key offsets:
 - Table A `[+0x0124]` -> Display callback
 - Table A `[+0x0244/0x0248/0x024C]` -> UI callbacks
 
+### LLVM Backend Bugs (Active Workarounds)
+- Bug #10: Register x/y swap on inlining — `__attribute__((noinline))` on tile_vram_ptr
+- Bug #11: for-loop with uint16_t counter exits after 1 iteration — use do-while + uint32_t
+
 ### LLVM Assembler Limitations
-All encoding bugs are fixed. Remaining unsupported features:
+Remaining unsupported features (not bugs):
 - `ei` / `di` instructions: use raw `.byte` opcodes
 - Large displacement loads (>127 bytes): use `add + ld (xreg)` workaround
 - `ld a, (addr)` direct byte load: use register-indirect
@@ -76,7 +81,7 @@ All encoding bugs are fixed. Remaining unsupported features:
 - ROM disassembly: `~/devel/kn5000-roms-disasm/`
 
 ## Next Steps (in order)
-1. Understand DISK MENU activation mechanism (handler 0x016A protocol)
-2. Implement display ownership (0x0D53 bit 3 + palette + VRAM)
+1. Re-enable control panel input (remove early return at input.c:64)
+2. Test DISK MENU activation via actual button press (not Lua)
 3. Implement firmware-mediated input (workspace UI callbacks)
-4. Wire up game activation flow (DISK MENU -> Activate_Game -> main())
+4. Handle game exit (return display to firmware)

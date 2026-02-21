@@ -59,6 +59,10 @@ uint8_t input_read(uint8_t source)
 {
     (void)source;
 
+    /* DEBUG: Disable input to test display rendering.
+     * The game will draw the board and sit idle. */
+    return MINE_INPUT_IGNORED;
+
     /* Query all needed control panel segments */
     uint8_t cpr_seg4 = cpanel_query_segment(CPANEL_RIGHT, CPR_SEG4);
     uint8_t cpl_seg4 = cpanel_query_segment(CPANEL_LEFT,  CPL_SEG4);

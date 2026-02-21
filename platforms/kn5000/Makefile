@@ -198,7 +198,18 @@ romset: $(ROM_FILE)
 .PHONY: test
 test: romset
 	@echo "Running MAME with Mines extension ROM..."
+	LD_LIBRARY_PATH=/tmp/qt5libs/usr/lib/x86_64-linux-gnu:$$LD_LIBRARY_PATH /mnt/shared/mame/mame kn5000 -rompath $(ROMSET_BASE) -extension hdae5000 -window -ui_active -oslog 2>&1 | tee ../../../log.txt
+
+
+
+# -----------------------------------------------------------------------------
+# Note to Claude: Do not edit this target:
+fsanches_test: romset
+	@echo "Running MAME with Mines extension ROM..."
 	mame kn5000 -rompath $(ROMSET_BASE) -extension hdae5000 -window -ui_active -oslog 2>&1 | tee ../../../log.txt
+# -----------------------------------------------------------------------------
+
+
 
 # =============================================================================
 # Clean

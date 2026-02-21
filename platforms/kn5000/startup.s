@@ -22,6 +22,10 @@
 .equ SYSTEM_TICKS,     0x200004
 .equ WORKSPACE_PTR,    0x200008
 .equ HANDLER_SLOT,     0x20000C
+.equ PARAM_BLOCK,      0x200040
+.equ SAVED_SP,         0x200044
+.equ DBG_PROGRESS,     0x200050
+.equ DBG_FRAME_COUNT,  0x200054
 .equ STACK_TOP,        0x203000
 
 ; =============================================================================
@@ -66,55 +70,162 @@
 ; =============================================================================
 ; HANDLER_REGISTRATION
 ;
-; Registers our callbacks with the main firmware's dispatch system.
-; Called from Boot_Init after workspace pointer is stored.
-; Adapted from the real HDAE5000 handler registration protocol.
+; Registers handler 0x016A via RegisterObjectTable, then creates a DISK MENU
+; entry and links it to our handler. Follows the original HDAE5000 pattern:
+;   1. Register handler via workspace[0x0E0A][0x00E4]
+;   2. Create DISK MENU slot via workspace[0x0E0A][0x02C4]
+;   3. Set slot+0x00 to link the entry to our handler
 ; =============================================================================
 HANDLER_REGISTRATION:
 	push	xix
 	push	xiz
 
-	; Get workspace pointer
-	ld	xiz, (WORKSPACE_PTR)
+	; Debug marker E0 = entering HANDLER_REGISTRATION
+	push	xwa
+	push	xhl
+	ld	xhl, 0x150000
+	ld	xwa, 0x00E000FE
+	ld	(xhl), xwa
+	pop	xhl
+	pop	xwa
 
-	; Get handler table A: xiz = *(workspace + 0x0E0A)
+	; === Step 1: Register handler 0x016A via RegisterObjectTable ===
+
+	; Get table A pointer
+	ld	xiz, (WORKSPACE_PTR)
 	add	xiz, 0x0E0A
 	ld	xiz, (xiz)
 
-	; Get registration function: xix = *(handler_table_A + 0x02C4)
+	; Build 14-byte param block in RAM at PARAM_BLOCK (0x200040)
+	; +0x00: port address (4 bytes) = 0x01600004
+	ld	xhl, PARAM_BLOCK
+	ld	xwa, 0x01600004
+	ld	(xhl), xwa
+
+	; +0x04: handler function (4 bytes) = table_A[0x0168]
+	add	xhl, 4
+	push	xiz
+	add	xiz, 0x0168
+	ld	xwa, (xiz)
+	pop	xiz
+	ld	(xhl), xwa
+
+	; +0x08: record count (2 bytes) = 1 (one sub-object)
+	add	xhl, 4
+	ld	xwa, 1
+	ld	(xhl), xwa
+
+	; +0x0A: data pointer (4 bytes) = MINES_RECORD_TABLE
+	add	xhl, 2
+	ld	xwa, MINES_RECORD_TABLE
+	ld	(xhl), xwa
+
+	; Get RegisterObjectTable function: table_A[0x00E4]
+	push	xiz
+	add	xiz, 0x00E4
+	ld	xix, (xiz)
+	pop	xiz
+
+	; Call RegisterObjectTable: WA = handler_id, XBC = param_block_ptr
+	ld	xwa, 0x016A
+	ld	xbc, PARAM_BLOCK
+	call	(xix)
+
+	; Debug marker E1 = after RegisterObjectTable
+	push	xwa
+	push	xhl
+	ld	xhl, 0x150000
+	ld	xwa, 0x00E100FE
+	ld	(xhl), xwa
+	pop	xhl
+	pop	xwa
+
+	; === Step 2: Register DISK MENU entry ===
+
+	; Reload table A (registers may be clobbered by RegisterObjectTable)
+	ld	xiz, (WORKSPACE_PTR)
+	add	xiz, 0x0E0A
+	ld	xiz, (xiz)
+
+	; Get DISK MENU registration: table_A[0x02C4]
 	push	xiz
 	add	xiz, 0x02C4
 	ld	xix, (xiz)
 	pop	xiz
 
-	; Call registration function with ID parameter
 	ld	xwa, 0x00600002
 	call	(xix)
 
-	; XHL = handler slot (menu item structure, pre-initialized by firmware).
-	; Do NOT overwrite slot+0x00 header — firmware's defaults are required.
-	;
-	; slot+0x2A = text string pointer (for DISK MENU display name)
-	; slot+0x32 = icon ID (indexes into table_data ROM at 0x938000)
+	; XHL = handler slot (menu item structure)
+	; Debug marker E2 = after DISK MENU slot registration (preserve XHL!)
+	push	xwa
+	push	xde
+	ld	xde, 0x150000
+	ld	xwa, 0x00E200FE
+	ld	(xde), xwa
+	pop	xde
+	pop	xwa
+
+	; Set display name
 	ld	xwa, MENU_NAME
 	ld	(xhl + 0x2A), xwa
 
-	; Set icon ID (176 = our custom mine icon, patched into table_data ROM)
+	; Set icon ID (176 = our custom mine icon)
 	ld	xwa, 176
 	ld	(xhl + 0x32), xwa
 
-	; Save handler slot pointer for later use
+	; Link slot to our handler: handler 0x016A, sub-index 0
+	ld	xwa, 0x016A0000
+	ld	(xhl), xwa
+
+	; Save handler slot pointer
 	ld	(HANDLER_SLOT), xhl
 
-	; Now register a sub-handler for extension app activation.
-	; The firmware queries 0x01600040 (ExtensionApp_Type1) when
-	; user selects a DISK MENU entry. We need to register a handler
-	; that responds to this query so the firmware knows we're an app,
-	; not the default floppy test.
-	;
-	; Register via workspace[0x0E0A][0x00E4]:
-	;   WA = handler ID, XBC = parameter block pointer
-	; (TODO: implement extension app type handler)
+	pop	xiz
+	pop	xix
+	ret
+
+; =============================================================================
+; Mines_Handler - Implementation function for our data record
+;
+; Called by firmware dispatch when events target our handler 0x016A.
+; Entry: XWA = object_id, XBC = request, XDE = parameter
+; Intercepts activation event 0x01E0009C to set GAME_ACTIVE flag.
+; All other requests are delegated to the default handler.
+; =============================================================================
+Mines_Handler:
+	push	xix
+	push	xiz
+
+	; Check for activation event (0x01E0009C)
+	ld	xix, 0x01E0009C
+	cp	xbc, xix
+	jr	nz, .Lmh_delegate
+
+	; Activation: set GAME_ACTIVE=1, GAME_INITIALIZED=0
+	; 32-bit store: 0x200000 = 01 00 00 00
+	push	xwa
+	push	xhl
+	ld	xhl, GAME_ACTIVE
+	ld	xwa, 0x00000001
+	ld	(xhl), xwa
+
+	; Debug marker A1 = Game Activation
+	ld	xhl, 0x150000
+	ld	xwa, 0x00A100FE
+	ld	(xhl), xwa
+	pop	xhl
+	pop	xwa
+
+.Lmh_delegate:
+	; Delegate to default handler: workspace[0x0E0A][0x00DC]
+	; XWA, XBC, XDE are preserved (original call arguments)
+	ld	xiz, (WORKSPACE_PTR)
+	add	xiz, 0x0E0A
+	ld	xiz, (xiz)
+	add	xiz, 0x00DC
+	ld	xix, (xiz)
+	call	(xix)
 
 	pop	xiz
 	pop	xix
@@ -129,13 +240,16 @@ HANDLER_REGISTRATION:
 Alloc_Memory_Icon:
 	push	xix
 
-	; Check request code in low byte of C register
-	ld	a, c
-	cp	a, 0xA1
+	; Check request code in low byte of XBC register.
+	; WORKAROUND: Use 32-bit AND+CP instead of 8-bit `cp a, ...` to avoid
+	; LLVM assembler bug #8 (8-bit register encoding mismatch).
+	ld	xwa, xbc
+	and	xwa, 0xFF
+	cp	xwa, 0xA1
 	jr	z, .Lreturn_data_ptr
-	cp	a, 0xA2
+	cp	xwa, 0xA2
 	jr	z, .Lreturn_width
-	cp	a, 0xA3
+	cp	xwa, 0xA3
 	jr	z, .Lreturn_height
 	jr	.Licon_done
 
@@ -230,25 +344,56 @@ Frame_Handler:
 	push	xiy
 	push	xiz
 
-	; === DEBUG: Write marker to AudioMix to confirm Frame_Handler was called ===
+	; Debug marker F1 to AudioMix (for logic analyzer / MAME oslog)
 	ld	xde, 0x150000
-	ld	xwa, 0x00F100FE		; addr=0xFE, data=0xF1 (Frame_Handler marker)
+	ld	xwa, 0x00F100FE
 	ld	(xde), xwa
-	; === END DEBUG ===
 
-	; Check GAME_ACTIVE
+	; Check GAME_ACTIVE (byte at 0x200000)
+	; WORKAROUND: Use 32-bit AND+CP instead of `cp a, 0` to avoid
+	; LLVM assembler bug #8 (8-bit register encoding mismatch).
+	; `cp a, 0` encodes register W instead of A, checking the wrong byte.
 	ld	xhl, GAME_ACTIVE
 	ld	xwa, (xhl)
-	cp	a, 0
+	and	xwa, 0xFF
+	cp	xwa, 0
 	jr	z, .Lframe_done
 
-	; Game is active: call C main() (blocks until player quits)
+	; Game is active — check if C runtime needs initialization
+	ld	xhl, GAME_INITIALIZED
+	ld	xwa, (xhl)
+	and	xwa, 0xFF
+	cp	xwa, 0
+	jr	nz, .Lskip_init
+
+	; First activation: initialize C runtime
+	call	Copy_C_Data
+	call	Clear_C_BSS
+
+	; Set GAME_INITIALIZED=1 (keep GAME_ACTIVE=1)
+	ld	xhl, GAME_ACTIVE
+	ld	xwa, 0x00000101
+	ld	(xhl), xwa
+
+.Lskip_init:
+	; Save firmware stack pointer, switch to game stack
+	ld	(SAVED_SP), xsp
+	ld	xsp, STACK_TOP
+
+	; Debug marker: about to call main
+	ld	xde, 0x150000
+	ld	xwa, 0x00D000FE
+	ld	(xde), xwa
+
+	; Call C main() (blocks in game loop until player quits)
 	call	main
 
-	; main() returned — mark game inactive
-	; GAME_ACTIVE=0, GAME_INITIALIZED=1
+	; Restore firmware stack pointer
+	ld	xsp, (SAVED_SP)
+
+	; main() returned — mark game inactive, clear initialized flag
 	ld	xhl, GAME_ACTIVE
-	ld	xwa, 0x00000100
+	ld	xwa, 0x00000000
 	ld	(xhl), xwa
 
 .Lframe_done:
@@ -260,45 +405,6 @@ Frame_Handler:
 	pop	xde
 	pop	xbc
 	pop	xwa
-	ret
-
-; =============================================================================
-; Activate_Game - Called when DISK MENU selects our entry
-;
-; Sets up the C runtime and starts the game. Palette loading is handled
-; by platform_init() in the C code.
-; =============================================================================
-Activate_Game:
-	; Save firmware registers
-	push	xwa
-	push	xbc
-	push	xde
-
-	; Set game active (GAME_ACTIVE=1, GAME_INITIALIZED=1)
-	ld	xhl, GAME_ACTIVE
-	ld	xwa, 0x00000101
-	ld	(xhl), xwa
-
-	; Set up game stack
-	ld	xwa, STACK_TOP
-	ld	xsp, xwa
-
-	; Initialize C runtime
-	call	Copy_C_Data
-	call	Clear_C_BSS
-
-	; Call C main()
-	call	main
-
-	; Game has returned - mark inactive (GAME_ACTIVE=0, GAME_INITIALIZED=1)
-	ld	xhl, GAME_ACTIVE
-	ld	xwa, 0x00000100
-	ld	(xhl), xwa
-
-	; NOTE: Stack context from firmware is lost after stack switch.
-	; This function is currently unreachable (game activation mechanism
-	; is not yet wired up). When implemented, the firmware stack pointer
-	; must be saved and restored around the stack switch.
 	ret
 
 ; =============================================================================
@@ -425,3 +531,15 @@ ICON_DATA:
 ; DISK MENU display name (null-terminated string, shown in menu)
 MENU_NAME:
 	.asciz	"Mines Game"
+
+; Data record table for handler 0x016A (1 record, 24 bytes)
+; Referenced by RegisterObjectTable param block; must stay in ROM.
+; Record 0 = our DISK MENU entry (linked to slot via 0x016A0000).
+MINES_RECORD_TABLE:
+	.long	Mines_Handler		; +0x00: implementation function
+	.long	0x0160001D		; +0x04: next handler ID (chain to Root module)
+	.byte	0x00, 0x00		; +0x08: config size (16-bit)
+	.byte	0x00, 0x00		; +0x0A: config flags (16-bit)
+	.long	MENU_NAME		; +0x0C: ROM data pointer 1 (component name)
+	.long	0			; +0x10: ROM data pointer 2
+	.long	0			; +0x14: RAM workspace pointer
