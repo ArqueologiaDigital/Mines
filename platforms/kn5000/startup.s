@@ -190,20 +190,36 @@ HANDLER_REGISTRATION:
 ;
 ; Called by firmware dispatch when events target our handler 0x016A.
 ; Entry: XWA = object_id, XBC = request, XDE = parameter
-; Intercepts activation event 0x01E0009C to set GAME_ACTIVE flag.
+; Intercepts activation events to set GAME_ACTIVE flag:
+;   0x01C00008 - Sent by firmware DISK MENU when user selects our entry
+;   0x01E0009C - Sent by direct event injection (ApPostEvent)
 ; All other requests are delegated to the default handler.
 ; =============================================================================
 Mines_Handler:
 	push	xix
 	push	xiz
 
-	; Check for activation event (0x01E0009C)
+	; Debug: log event code to DBG_PROGRESS for Lua monitoring
+	push	xhl
+	ld	xhl, DBG_PROGRESS
+	ld	(xhl), xbc
+	pop	xhl
+
+	; Check for DISK MENU selection event (0x01C00008)
+	ld	xix, 0x01C00008
+	cp	xbc, xix
+	jr	z, .Lmh_activate
+
+	; Check for direct event injection (0x01E0009C)
 	ld	xix, 0x01E0009C
 	cp	xbc, xix
-	jr	nz, .Lmh_delegate
+	jr	z, .Lmh_activate
 
+	; Not an activation event — delegate to default handler
+	jr	.Lmh_delegate
+
+.Lmh_activate:
 	; Activation: set GAME_ACTIVE=1, GAME_INITIALIZED=0
-	; 32-bit store: 0x200000 = 01 00 00 00
 	push	xwa
 	push	xhl
 	ld	xhl, GAME_ACTIVE
@@ -217,6 +233,10 @@ Mines_Handler:
 	pop	xhl
 	pop	xwa
 
+	; Don't delegate to default handler on activation —
+	; it would show "FD SAVE/LOAD TEST" and interfere with our game
+	jr	.Lmh_done
+
 .Lmh_delegate:
 	; Delegate to default handler: workspace[0x0E0A][0x00DC]
 	; XWA, XBC, XDE are preserved (original call arguments)
@@ -227,6 +247,7 @@ Mines_Handler:
 	ld	xix, (xiz)
 	call	(xix)
 
+.Lmh_done:
 	pop	xiz
 	pop	xix
 	ret

@@ -52,8 +52,8 @@ The MN89304 VGA controller uses a 4-bit RAMDAC (not standard 6-bit VGA). Key reg
 - DAC data: 0x1703C9 (write R,G,B sequentially)
 - CRTC index/data: 0x1703D4/0x1703D5
 
-### DISK MENU Activation (Implemented)
-When user selects our DISK MENU entry, firmware posts event `0x01E0009C` via `ApPostEvent`. The dispatch system (FA9660) routes this to our registered handler `0x016A`, which calls `Mines_Handler`. This sets `GAME_ACTIVE=1`, and the next `Frame_Handler` call initializes the C runtime and starts the game. On quit, display ownership is returned to firmware.
+### DISK MENU Activation (Working)
+When user selects our DISK MENU entry via button press (RIGHT 5), firmware dispatches event `0x01C00008` to our registered handler `0x016A`, which calls `Mines_Handler`. This sets `GAME_ACTIVE=1`, and the next `Frame_Handler` call initializes the C runtime and starts the game. On quit, display ownership is returned to firmware. Direct event injection via `ApPostEvent` uses event code `0x01E0009C` instead — both are intercepted by Mines_Handler.
 
 ### Workspace Pointer System
 Boot_Init receives workspace pointer `0x027ED2` in XWA. Key offsets:
@@ -82,6 +82,5 @@ Remaining unsupported features (not bugs):
 
 ## Next Steps (in order)
 1. Re-enable control panel input (remove early return at input.c:64)
-2. Test DISK MENU activation via actual button press (not Lua)
-3. Implement firmware-mediated input (workspace UI callbacks)
-4. Handle game exit (return display to firmware)
+2. Implement firmware-mediated input (workspace UI callbacks)
+3. Handle game exit (return display to firmware)
