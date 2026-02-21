@@ -76,9 +76,22 @@ Remaining unsupported features (not bugs):
 
 ## Research Documentation
 - Extension board interface: `~/devel/kn5000-docs/hdae5000-homebrew.md`
+- Event codes reference: `~/devel/kn5000-docs/event-codes.md`
 - Display subsystem: `~/devel/kn5000-docs/display-subsystem.md`
 - Original HDAE5000 firmware: `~/devel/kn5000-docs/hdae5000.md`
 - ROM disassembly: `~/devel/kn5000-roms-disasm/`
+
+## Documentation Freshness Policy (STRICT)
+
+Whenever our understanding of the KN5000 firmware improves (new event codes discovered, dispatch behavior clarified, handler protocols decoded), the following MUST all be updated before the work is considered complete:
+
+1. **Event Codes Reference** (`~/devel/kn5000-docs/event-codes.md`) -- Add new codes, update descriptions
+2. **HDAE5000 Homebrew page** (`~/devel/kn5000-docs/hdae5000-homebrew.md`) -- Update handler examples, activation flow, status
+3. **ROM disassembly** (`~/devel/kn5000-roms-disasm/`) -- Update `EVT_*` EQU constants in assembly, replace raw hex with symbolic names
+4. **Website deployment** -- Commit and push `kn5000-docs` to deploy updated pages
+5. **This file** (`CLAUDE.md`) -- Keep current status and architecture notes accurate
+
+This policy ensures documentation, disassembly, and website stay synchronized with the latest discoveries.
 
 ## Next Steps (in order)
 1. Re-enable control panel input (remove early return at input.c:64)
