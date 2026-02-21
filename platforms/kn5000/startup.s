@@ -28,6 +28,7 @@
 .equ DBG_FRAME_COUNT,  0x200054
 .equ DBG_HANDLER_XWA,  0x200058
 .equ DBG_HANDLER_XDE,  0x20005C
+.equ HANDLER_WORKSPACE, 0x200100	; 64 bytes workspace for handler lifecycle
 .equ STACK_TOP,        0x203000
 
 ; =============================================================================
@@ -72,11 +73,19 @@
 ; =============================================================================
 ; HANDLER_REGISTRATION
 ;
-; Registers handler 0x016A via RegisterObjectTable, then creates a DISK MENU
-; entry and links it to our handler. Follows the original HDAE5000 pattern:
-;   1. Register handler via workspace[0x0E0A][0x00E4]
-;   2. Create DISK MENU slot via workspace[0x0E0A][0x02C4]
-;   3. Set slot+0x00 to link the entry to our handler
+; Registers handler 0x016A with 13 sub-object records (matching the original
+; HDAE5000 structure), then customizes the firmware's auto-created DISK MENU
+; entry with our name and icon.
+;
+; The firmware detects the XAPR header and creates a default "HARD DISK MAIN
+; MENU" entry linked to 0x016A0005 (sub-index 5 = HDTitleMenu position).
+; Our data table places Mines_Handler at record[5] so the firmware's entry
+; dispatches to our code. Other records are stubs (Dummy_Return).
+;
+; Steps:
+;   1. Register handler 0x016A via RegisterObjectTable (13 records)
+;   2. Get firmware's DISK MENU slot via workspace[0x0E0A][0x02C4]
+;   3. Customize slot: set name="Mines Game", icon=176, link=0x016A0005
 ; =============================================================================
 HANDLER_REGISTRATION:
 	push	xix
@@ -112,9 +121,13 @@ HANDLER_REGISTRATION:
 	pop	xiz
 	ld	(xhl), xwa
 
-	; +0x08: record count (2 bytes) = 1 (one sub-object)
+	; +0x08: record count (2 bytes) = 13 sub-objects
+	; Must match the original HDAE5000 structure. The firmware's
+	; DISK MENU entry links to sub-index 5 (0x016A0005), so the
+	; data table must have at least 6 records. We provide all 13
+	; for compatibility with any firmware code that expects them.
 	add	xhl, 4
-	ld	xwa, 1
+	ld	xwa, 13
 	ld	(xhl), xwa
 
 	; +0x0A: data pointer (4 bytes) = MINES_RECORD_TABLE
@@ -176,8 +189,11 @@ HANDLER_REGISTRATION:
 	ld	xwa, 176
 	ld	(xhl + 0x32), xwa
 
-	; Link slot to our handler: handler 0x016A, sub-index 0
-	ld	xwa, 0x016A0000
+	; Link slot to our handler: handler 0x016A, sub-index 5
+	; Sub-index 5 = HDTitleMenu position in the data record table.
+	; The firmware creates a default DISK MENU entry for the extension
+	; board and links it to 0x016A0005. We must match this sub-index.
+	ld	xwa, 0x016A0005
 	ld	(xhl), xwa
 
 	; Save handler slot pointer
@@ -327,13 +343,8 @@ Boot_Init:
 	; Store workspace pointer for later use
 	ld	(WORKSPACE_PTR), xwa
 
-	; Register DISK MENU entry and handler table B callback
+	; Register handler 0x016A and customize the firmware's DISK MENU entry
 	call	HANDLER_REGISTRATION
-
-	; Do NOT set GAME_ACTIVE here. Boot_Init runs during firmware boot;
-	; starting the game now would block the boot sequence.
-	; The game starts when the user selects our DISK MENU entry,
-	; which triggers Activate_Game via the registered handler.
 
 	ret
 
@@ -563,14 +574,67 @@ ICON_DATA:
 MENU_NAME:
 	.asciz	"Mines Game"
 
-; Data record table for handler 0x016A (1 record, 24 bytes)
-; Referenced by RegisterObjectTable param block; must stay in ROM.
-; Record 0 = our DISK MENU entry (linked to slot via 0x016A0000).
+; Data record table for handler 0x016A (13 records, 24 bytes each = 312 bytes)
+; Must match the original HDAE5000 structure: the firmware's DISK MENU entry
+; links to sub-index 5 (HDTitleMenu). Records 0-4 and 6-12 are stubs that
+; delegate to the default handler. Record 5 is our Mines_Handler.
+;
+; Each record: +0x00 func(4), +0x04 next(4), +0x08 size(2), +0x0A flags(2),
+;              +0x0C data1(4), +0x10 data2(4), +0x14 workspace(4) = 24 bytes
 MINES_RECORD_TABLE:
-	.long	Mines_Handler		; +0x00: implementation function
-	.long	0x0160001D		; +0x04: next handler ID (chain to Root module)
-	.byte	0x00, 0x00		; +0x08: config size (16-bit)
-	.byte	0x00, 0x00		; +0x0A: config flags (16-bit)
-	.long	MENU_NAME		; +0x0C: ROM data pointer 1 (component name)
-	.long	0			; +0x10: ROM data pointer 2
-	.long	0			; +0x14: RAM workspace pointer
+; Record 0 (SelectList) - stub
+	.long	Dummy_Return, 0xFFFFFFFF
+	.byte	0x00, 0x00, 0x00, 0x00
+	.long	0, 0, 0
+; Record 1 (DbMemoCl) - stub
+	.long	Dummy_Return, 0xFFFFFFFF
+	.byte	0x00, 0x00, 0x00, 0x00
+	.long	0, 0, 0
+; Record 2 (TtlScreenR) - stub
+	.long	Dummy_Return, 0xFFFFFFFF
+	.byte	0x00, 0x00, 0x00, 0x00
+	.long	0, 0, 0
+; Record 3 (AcHddNamingWindow) - stub
+	.long	Dummy_Return, 0xFFFFFFFF
+	.byte	0x00, 0x00, 0x00, 0x00
+	.long	0, 0, 0
+; Record 4 (IvHddNaming) - stub
+	.long	Dummy_Return, 0xFFFFFFFF
+	.byte	0x00, 0x00, 0x00, 0x00
+	.long	0, 0, 0
+; Record 5 (HDTitleMenu) - OUR HANDLER (firmware DISK MENU entry targets this)
+	.long	Mines_Handler
+	.long	0x0160001D		; next: chain to Root module (same as original)
+	.byte	0x36, 0x00		; config size = 54 (same as original)
+	.byte	0x00, 0x00		; config flags = 0
+	.long	MENU_NAME		; ROM data pointer 1
+	.long	0			; ROM data pointer 2
+	.long	HANDLER_WORKSPACE	; RAM workspace for default handler lifecycle
+; Record 6 (TtlScreenR2) - stub
+	.long	Dummy_Return, 0xFFFFFFFF
+	.byte	0x00, 0x00, 0x00, 0x00
+	.long	0, 0, 0
+; Record 7 (TtlScreenR3) - stub
+	.long	Dummy_Return, 0xFFFFFFFF
+	.byte	0x00, 0x00, 0x00, 0x00
+	.long	0, 0, 0
+; Record 8 (AcWindowPage1) - stub
+	.long	Dummy_Return, 0xFFFFFFFF
+	.byte	0x00, 0x00, 0x00, 0x00
+	.long	0, 0, 0
+; Record 9 (IvScreenR2) - stub
+	.long	Dummy_Return, 0xFFFFFFFF
+	.byte	0x00, 0x00, 0x00, 0x00
+	.long	0, 0, 0
+; Record 10 (AcLanguageText1) - stub
+	.long	Dummy_Return, 0xFFFFFFFF
+	.byte	0x00, 0x00, 0x00, 0x00
+	.long	0, 0, 0
+; Record 11 (LyricBox) - stub
+	.long	Dummy_Return, 0xFFFFFFFF
+	.byte	0x00, 0x00, 0x00, 0x00
+	.long	0, 0, 0
+; Record 12 (FDFileSelect) - stub
+	.long	Dummy_Return, 0xFFFFFFFF
+	.byte	0x00, 0x00, 0x00, 0x00
+	.long	0, 0, 0
