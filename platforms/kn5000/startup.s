@@ -208,8 +208,19 @@ Mines_Handler:
 	; Check for DISK MENU selection event (0x01C00008)
 	ld	xix, 0x01C00008
 	cp	xbc, xix
-	jr	z, .Lmh_activate
+	jr	nz, .Lmh_not_selection
 
+	; Selection event — verify it targets OUR specific DISK MENU entry.
+	; Our slot is linked as 0x016A0000 (handler 0x016A, sub-index 0).
+	; Without this check, pressing ANY button in the DISK MENU would
+	; activate the game because handler 0x016A receives all HDAE5000 events.
+	ld	xix, 0x016A0000
+	cp	xwa, xix
+	jr	z, .Lmh_activate
+	; Not for us — delegate to default handler
+	jr	.Lmh_delegate
+
+.Lmh_not_selection:
 	; Check for direct event injection (0x01E0009C)
 	ld	xix, 0x01E0009C
 	cp	xbc, xix
