@@ -26,6 +26,8 @@
 .equ SAVED_SP,         0x200044
 .equ DBG_PROGRESS,     0x200050
 .equ DBG_FRAME_COUNT,  0x200054
+.equ DBG_HANDLER_XWA,  0x200058
+.equ DBG_HANDLER_XDE,  0x20005C
 .equ STACK_TOP,        0x203000
 
 ; =============================================================================
@@ -188,27 +190,31 @@ HANDLER_REGISTRATION:
 ; =============================================================================
 ; Mines_Handler - Implementation function for our data record
 ;
-; Called by firmware dispatch (via ClassProc) when events target handler 0x016A.
+; Called by SendEvent when events target our sub-object (0x016A0000).
 ; Entry: XWA = object_id, XBC = event code, XDE = parameter
 ;
-; Only intercepts activation events to set GAME_ACTIVE flag:
-;   0x01C00008 - Sent by firmware DISK MENU when user selects our entry
-;   0x01E0009C - Sent by direct event injection (ApPostEvent)
+; Intercepts activation events to set GAME_ACTIVE flag and SKIPS delegation:
+;   0x01C00008 - Button-press activation (DISK MENU user selection)
+;   0x01E0009C - Programmatic activation (PostEvent injection)
 ;
-; All other events are silently ignored. We do NOT delegate to the default
-; lifecycle handler (table_A[0x00DC]) because it processes events as standard
-; DISK MENU operations, showing unrelated firmware UI like "FD SAVE/LOAD TEST".
-; Since handler 0x016A is extension-ROM exclusive (main firmware leaves it
-; vacant), ignoring non-activation events is safe.
+; All other events are delegated to the default lifecycle handler
+; (table_A[0x00DC]) which manages DISK MENU rendering, item enumeration,
+; focus, and other lifecycle operations. Skipping delegation for these
+; events breaks the DISK MENU (only 1 item visible, buttons misbehave).
+;
+; Activation events MUST skip delegation — the default handler would show
+; "FD SAVE/LOAD TEST" dialog, interfering with the game.
 ; =============================================================================
 Mines_Handler:
 	push	xix
 	push	xiz
 
-	; Debug: log event code to DBG_PROGRESS for Lua monitoring
+	; Debug: log event code and object_id for diagnosis
 	push	xhl
 	ld	xhl, DBG_PROGRESS
-	ld	(xhl), xbc
+	ld	(xhl), xbc		; 0x200050 = event code (XBC)
+	ld	xhl, DBG_HANDLER_XWA
+	ld	(xhl), xwa		; 0x200058 = object_id (XWA)
 	pop	xhl
 
 	; Check for DISK MENU selection event (0x01C00008)
@@ -216,13 +222,14 @@ Mines_Handler:
 	cp	xbc, xix
 	jr	z, .Lmh_activate
 
-	; Check for direct event injection (0x01E0009C)
+	; Check for programmatic activation (0x01E0009C)
 	ld	xix, 0x01E0009C
 	cp	xbc, xix
 	jr	z, .Lmh_activate
 
-	; All other events: ignore silently.
-	jr	.Lmh_done
+	; All other events: delegate to default lifecycle handler.
+	; Required for DISK MENU rendering and item management.
+	jr	.Lmh_delegate
 
 .Lmh_activate:
 	push	xwa
@@ -237,6 +244,18 @@ Mines_Handler:
 	ld	(xhl), xwa
 	pop	xhl
 	pop	xwa
+	; Skip delegation — default handler would show "FD SAVE/LOAD TEST"
+	jr	.Lmh_done
+
+.Lmh_delegate:
+	; Delegate to default handler: workspace[0x0E0A][0x00DC]
+	; XWA, XBC, XDE are preserved (original call arguments)
+	ld	xiz, (WORKSPACE_PTR)
+	add	xiz, 0x0E0A
+	ld	xiz, (xiz)
+	add	xiz, 0x00DC
+	ld	xix, (xiz)
+	call	(xix)
 
 .Lmh_done:
 	pop	xiz
