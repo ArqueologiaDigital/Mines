@@ -75,19 +75,19 @@ Remaining unsupported features (not bugs):
 - `ld a, (addr)` direct byte load: use register-indirect
 
 ## Research Documentation
-- Extension board interface: `~/devel/kn5000-docs/hdae5000-homebrew.md`
-- Event codes reference: `~/devel/kn5000-docs/event-codes.md`
-- Display subsystem: `~/devel/kn5000-docs/display-subsystem.md`
-- Original HDAE5000 firmware: `~/devel/kn5000-docs/hdae5000.md`
-- ROM disassembly: `~/devel/kn5000-roms-disasm/`
+- Extension board interface: `/mnt/shared/kn5000-docs/hdae5000-homebrew.md`
+- Event codes reference: `/mnt/shared/kn5000-docs/event-codes.md`
+- Display subsystem: `/mnt/shared/kn5000-docs/display-subsystem.md`
+- Original HDAE5000 firmware: `/mnt/shared/kn5000-docs/hdae5000.md`
+- ROM disassembly: `/mnt/shared/kn5000-roms-disasm/`
 
 ## Documentation Freshness Policy (STRICT)
 
 Whenever our understanding of the KN5000 firmware improves (new event codes discovered, dispatch behavior clarified, handler protocols decoded), the following MUST all be updated before the work is considered complete:
 
-1. **Event Codes Reference** (`~/devel/kn5000-docs/event-codes.md`) -- Add new codes, update descriptions
-2. **HDAE5000 Homebrew page** (`~/devel/kn5000-docs/hdae5000-homebrew.md`) -- Update handler examples, activation flow, status
-3. **ROM disassembly** (`~/devel/kn5000-roms-disasm/`) -- Update `EVT_*` EQU constants in assembly, replace raw hex with symbolic names
+1. **Event Codes Reference** (`/mnt/shared/kn5000-docs/event-codes.md`) -- Add new codes, update descriptions
+2. **HDAE5000 Homebrew page** (`/mnt/shared/kn5000-docs/hdae5000-homebrew.md`) -- Update handler examples, activation flow, status
+3. **ROM disassembly** (`/mnt/shared/kn5000-roms-disasm/`) -- Update `EVT_*` EQU constants in assembly, replace raw hex with symbolic names
 4. **Website deployment** -- Commit and push `kn5000-docs` to deploy updated pages
 5. **This file** (`CLAUDE.md`) -- Keep current status and architecture notes accurate
 
@@ -95,9 +95,9 @@ This policy ensures documentation, disassembly, and website stay synchronized wi
 
 ## Issue Tracker
 
-Project issues are tracked centrally using [Beads](https://github.com/beads-ai/beads) in `~/devel/kn5000-roms-disasm/.beads/issues.jsonl`. Use `~/devel/tools/bd` commands (never edit JSONL directly). Relevant issues use tags/prefixes like `HDAE5000`, `Homebrew`, `LLVM`.
+Project issues are tracked centrally using [Beads](https://github.com/beads-ai/beads) in `/mnt/shared/kn5000_project/.beads/issues.jsonl`. Use `/mnt/shared/tools/bd` commands (never edit JSONL directly). Relevant issues use tags/prefixes like `HDAE5000`, `Homebrew`, `LLVM`.
 
-**After meaningful work, agents MUST:** (1) update relevant issues with progress comments, (2) open new issues for next steps, (3) sync to website (`cd ~/devel/kn5000-roms-disasm && make issues`), (4) pick the next task from the tracker.
+**After meaningful work, agents MUST:** (1) update relevant issues with progress comments, (2) open new issues for next steps, (3) sync to website (`cd /mnt/shared/kn5000-roms-disasm && make issues`), (4) pick the next task from the tracker.
 
 ## Next Steps (in order)
 1. Re-enable control panel input (remove early return at input.c:64)
