@@ -93,6 +93,12 @@ Whenever our understanding of the KN5000 firmware improves (new event codes disc
 
 This policy ensures documentation, disassembly, and website stay synchronized with the latest discoveries.
 
+## Issue Tracker
+
+Project issues are tracked centrally using [Beads](https://github.com/beads-ai/beads) in `~/devel/kn5000-roms-disasm/.beads/issues.jsonl`. Use `~/devel/tools/bd` commands (never edit JSONL directly). Relevant issues use tags/prefixes like `HDAE5000`, `Homebrew`, `LLVM`.
+
+**After meaningful work, agents MUST:** (1) update relevant issues with progress comments, (2) open new issues for next steps, (3) sync to website (`cd ~/devel/kn5000-roms-disasm && make issues`), (4) pick the next task from the tracker.
+
 ## Next Steps (in order)
 1. Re-enable control panel input (remove early return at input.c:64)
 2. Implement firmware-mediated input (workspace UI callbacks)
