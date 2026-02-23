@@ -146,16 +146,11 @@ HANDLER_REGISTRATION:
 	ld	xbc, PARAM_BLOCK
 	call	(xix)
 
-	; Debug marker E1 = after RegisterObjectTable
-	push	xwa
-	push	xhl
-	ld	xhl, 0x150000
-	ld	xwa, 0x00E100FE
-	ld	(xhl), xwa
-	pop	xhl
-	pop	xwa
-
-	; === Step 2: Register DISK MENU entry ===
+	; === Step 2: Customize DISK MENU entry ===
+	; The firmware auto-creates a "HARD DISK MAIN MENU" entry when it
+	; detects the XAPR header, but that entry links to the original
+	; HDAE5000 handler (floppy dialog). We must create our own entry
+	; via table_A[0x02C4] and link it to 0x016A0005 (our record[5]).
 
 	; Reload table A (registers may be clobbered by RegisterObjectTable)
 	ld	xiz, (WORKSPACE_PTR)
@@ -172,27 +167,15 @@ HANDLER_REGISTRATION:
 	call	(xix)
 
 	; XHL = handler slot (menu item structure)
-	; Debug marker E2 = after DISK MENU slot registration (preserve XHL!)
-	push	xwa
-	push	xde
-	ld	xde, 0x150000
-	ld	xwa, 0x00E200FE
-	ld	(xde), xwa
-	pop	xde
-	pop	xwa
-
-	; Set display name
+	; Set display name at slot+0x2A
 	ld	xwa, MENU_NAME
 	ld	(xhl + 0x2A), xwa
 
-	; Set icon ID (176 = our custom mine icon)
+	; Set icon ID at slot+0x32 (176 = our custom mine icon)
 	ld	xwa, 176
 	ld	(xhl + 0x32), xwa
 
-	; Link slot to our handler: handler 0x016A, sub-index 5
-	; Sub-index 5 = HDTitleMenu position in the data record table.
-	; The firmware creates a default DISK MENU entry for the extension
-	; board and links it to 0x016A0005. We must match this sub-index.
+	; Link slot to our handler: 0x016A sub-index 5 (record[5] = Mines_Handler)
 	ld	xwa, 0x016A0005
 	ld	(xhl), xwa
 
@@ -232,6 +215,15 @@ Mines_Handler:
 	ld	xhl, DBG_HANDLER_XWA
 	ld	(xhl), xwa		; 0x200058 = object_id (XWA)
 	pop	xhl
+
+	; DIAGNOSTIC: Write marker 0xDD to AudioMix[0xFD] = "Mines_Handler called"
+	push	xwa
+	push	xhl
+	ld	xhl, 0x150000
+	ld	xwa, 0x00DD00FD
+	ld	(xhl), xwa
+	pop	xhl
+	pop	xwa
 
 	; Check for DISK MENU selection event (0x01C00008)
 	ld	xix, 0x01C00008
