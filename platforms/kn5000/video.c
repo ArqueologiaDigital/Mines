@@ -199,6 +199,11 @@ void highlight_current_cell(minefield *mf)
  * Platform interface
  * ======================================================================== */
 
+/* Clear VRAM to black (palette index 0).
+ * Implemented in assembly to avoid LLVM bug #12: 16/32-bit INC/DEC
+ * don't set flags on TLCS-900/H, but LLVM generates DEC+JR NZ loops. */
+extern void clear_vram(void);
+
 void platform_init(void)
 {
     debug_marker(0xC0);  /* C0 = platform_init entry */
@@ -208,27 +213,13 @@ void platform_init(void)
 
     debug_marker(0xC1);  /* C1 = after srand */
 
-    /* Load game palette via VGA DAC */
     load_palette();
 
     debug_marker(0xC2);  /* C2 = after load_palette */
 
-    /* Clear framebuffer to color 0.
-     * VRAM is 76800 bytes = 19200 * 4. Uses 32-bit stores to avoid
-     * LLVM TLCS-900 bug #8 (8-bit register encoding mismatch).
-     * WORKAROUND: Use do-while with uint32_t counter because the
-     * TLCS-900 backend generates broken for-loop code with uint16_t
-     * counters (loop exits after 1 iteration). */
-    {
-        volatile uint32_t *p = (volatile uint32_t *)VRAM_BASE;
-        uint32_t count = 19200;
-        do {
-            *p++ = 0;
-            count--;
-        } while (count != 0);
-    }
+    clear_vram();
 
-    debug_marker(0xC3);  /* C3 = after VRAM clear */
+    debug_marker(0xC3);  /* C3 = after clear_vram */
 }
 
 /* Yield to firmware — implemented in startup.s.

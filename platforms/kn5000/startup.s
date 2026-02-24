@@ -40,6 +40,7 @@
 .globl TILES_DATA
 .globl PALETTE_DATA
 .globl yield_to_firmware
+.globl clear_vram
 .globl __udivsi3
 .globl __umodsi3
 
@@ -340,6 +341,16 @@ Boot_Init:
 	; Register handler 0x016A and customize the firmware's DISK MENU entry
 	call	HANDLER_REGISTRATION
 
+	; AUTO-ACTIVATE for headless testing (skip DISK MENU interaction)
+	; Remove this for interactive builds!
+	push	xwa
+	push	xhl
+	ld	xhl, GAME_ACTIVE
+	ld	xwa, 1
+	ld	(xhl), xwa
+	pop	xhl
+	pop	xwa
+
 	ret
 
 ; =============================================================================
@@ -366,9 +377,14 @@ Frame_Handler:
 	push	xiy
 	push	xiz
 
-	; Debug marker FF = Frame_Handler entry (every call)
+	; Debug marker FF = Frame_Handler entry (AudioMix + RAM)
 	ld	xhl, 0x150000
 	ld	xwa, 0x00FF00FE
+	ld	(xhl), xwa
+	; Also increment frame counter in RAM for Lua monitoring
+	ld	xhl, DBG_FRAME_COUNT
+	ld	xwa, (xhl)
+	inc	1, xwa
 	ld	(xhl), xwa
 
 	; Check GAME_ACTIVE (byte at 0x200000)
@@ -390,7 +406,7 @@ Frame_Handler:
 	ld	xwa, (xhl)
 	and	xwa, 0xFF
 	cp	xwa, 0
-	jr	nz, .Lresume_game
+	jrl	nz, .Lresume_game
 
 	; === First activation: init C runtime and start game ===
 	; Save firmware stack pointer
@@ -437,6 +453,18 @@ Frame_Handler:
 	jr	.Lframe_done
 
 .Lresume_game:
+	; Debug marker R1 = entering resume path
+	push	xwa
+	push	xhl
+	ld	xhl, 0x150000
+	ld	xwa, 0x00C100FE
+	ld	(xhl), xwa
+	ld	xhl, DBG_PROGRESS
+	ld	xwa, 0xC1
+	ld	(xhl), xwa
+	pop	xhl
+	pop	xwa
+
 	; Subsequent frames: resume game from yield_to_firmware()
 	; Save firmware stack pointer
 	ld	xwa, xsp
@@ -479,6 +507,18 @@ Frame_Handler:
 ; next frame, when Frame_Handler resumes the game.
 ; =============================================================================
 yield_to_firmware:
+	; Debug marker E1 = yield_to_firmware entry (AudioMix + RAM)
+	push	xwa
+	push	xhl
+	ld	xhl, 0x150000
+	ld	xwa, 0x00E100FE
+	ld	(xhl), xwa
+	ld	xhl, DBG_PROGRESS
+	ld	xwa, 0xE1
+	ld	(xhl), xwa
+	pop	xhl
+	pop	xwa
+
 	; Save all game registers on game stack
 	push	xwa
 	push	xbc
@@ -495,6 +535,18 @@ yield_to_firmware:
 	; Load firmware SP and switch
 	ld	xwa, (SAVED_SP)
 	ld	xsp, xwa
+
+	; Debug marker E2 = about to pop firmware regs and return (AudioMix + RAM)
+	push	xwa
+	push	xhl
+	ld	xhl, 0x150000
+	ld	xwa, 0x00E200FE
+	ld	(xhl), xwa
+	ld	xhl, DBG_PROGRESS
+	ld	xwa, 0xE2
+	ld	(xhl), xwa
+	pop	xhl
+	pop	xwa
 
 	; Return to firmware (same as .Lframe_done)
 	pop	xiz
@@ -607,6 +659,33 @@ __umodsi3:
 	jr	.Lumod_loop
 .Lumod_done:
 	ld	xde, xwa
+	pop	xwa
+	ret
+
+; =============================================================================
+; clear_vram - Clear VRAM to black (all zeros)
+;
+; Written in assembly to avoid LLVM bug #12: 16/32-bit INC/DEC don't set
+; flags on TLCS-900/H, but LLVM generates DEC+JR NZ loops.
+; Uses SUB for counter (always sets flags) instead of DEC.
+; Clears 76800 bytes = 19200 32-bit words.
+; =============================================================================
+clear_vram:
+	push	xwa
+	push	xbc
+	push	xhl
+
+	ld	xhl, VIDEO_RAM_BASE
+	ld	xwa, 0
+	ld	xbc, VRAM_SIZE / 4	; 19200 iterations
+.Lclear_loop:
+	ld	(xhl), xwa
+	add	xhl, 4
+	sub	xbc, 1
+	jrl	nz, .Lclear_loop
+
+	pop	xhl
+	pop	xbc
 	pop	xwa
 	ret
 
