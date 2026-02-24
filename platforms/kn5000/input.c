@@ -45,18 +45,19 @@ uint8_t input_read(uint8_t source)
 {
     (void)source;
 
-    /* Read button state using 32-bit aligned loads (bug #8 workaround).
-     * 32-bit register encoding is correct (XWA=0, XBC=1, etc.). */
-    uint32_t cpr_word = *(volatile uint32_t *)0x8E4C;  /* CPR segs 2-5 */
-    uint32_t cpl_word = *(volatile uint32_t *)0x8E5C;  /* CPL segs 2-5 */
-    uint32_t cpl_word2 = *(volatile uint32_t *)0x8E60; /* CPL segs 6-9 */
+    /* Read button state using 16-bit aligned loads.
+     * 16-bit register encoding is also correct in LLVM TLCS-900.
+     * Little-endian: low byte is the even address. */
+    uint16_t cpr_word16 = *(volatile uint16_t *)0x8E4E; /* [SEG5 | SEG4] */
+    uint16_t cpl_word16 = *(volatile uint16_t *)0x8E5E; /* [SEG5 | SEG4] */
+    uint16_t cpl_word16_2 = *(volatile uint16_t *)0x8E60; /* [SEG7 | SEG6] */
 
-    /* Extract segments using shifts (all 32-bit operations) */
-    uint32_t cpr_seg4 = (cpr_word >> 16) & 0xFF;   /* byte 2 of word at 0x8E4C */
-    uint32_t cpl_seg4 = (cpl_word >> 16) & 0xFF;   /* byte 2 of word at 0x8E5C */
-    uint32_t cpl_seg7 = (cpl_word2 >> 8) & 0xFF;   /* byte 1 of word at 0x8E60 */
+    /* Extract segments (low byte of 16-bit word) */
+    uint32_t cpr_seg4 = cpr_word16 & 0xFF;
+    uint32_t cpl_seg4 = cpl_word16 & 0xFF;
+    uint32_t cpl_seg7 = (cpl_word16_2 >> 8) & 0xFF;
 
-    /* Build raw button state (all 32-bit operations) */
+    /* Build raw button state */
     uint32_t buttons = 0;
 
     if (cpr_seg4 & CPR_SEG4_UP)     buttons |= MINE_INPUT_UP;

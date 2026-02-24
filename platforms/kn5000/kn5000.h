@@ -87,6 +87,14 @@
 #define CPR_SEG4_DOWN       0x20  /* bit 5: Conductor RIGHT 2 */
 #define CPR_SEG4_RIGHT      0x40  /* bit 6: Conductor RIGHT 1 */
 
+/* Control panel low-level serial byte buffer pointers */
+#define CPANEL_RX_READ_PTR  ((volatile uint16_t *)0x8D9D)
+#define CPANEL_RX_WRITE_PTR ((volatile uint16_t *)0x8D9F)
+
+/* Control panel high-level application event queue pointers (in Main DRAM) */
+#define CPANEL_EVENT_READ_PTR  ((volatile uint16_t *)0x02F838)
+#define CPANEL_EVENT_WRITE_PTR ((volatile uint16_t *)0x02F83A)
+
 /* Left panel segment 4: VARIATION / MSA buttons */
 #define CPL_SEG4_FLAG       0x01  /* bit 0: VARIATION 1 / MSA 1 */
 #define CPL_SEG4_OPEN       0x08  /* bit 3: VARIATION 4 */

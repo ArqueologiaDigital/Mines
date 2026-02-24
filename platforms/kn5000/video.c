@@ -9,14 +9,6 @@
 #include "codes.h"
 #include "kn5000.h"
 
-/* Debug marker output via AudioMix port.
- * Writes marker byte to addr 0xFE for tracing in MAME log. */
-static void debug_marker(uint8_t marker)
-{
-    volatile uint32_t *port = (volatile uint32_t *)0x150000;
-    *port = ((uint32_t)marker << 16) | 0x00FE;
-}
-
 /* Forward declarations for functions provided by extras.c */
 extern int rand(void);
 extern void srand(unsigned int v);
@@ -206,20 +198,12 @@ extern void clear_vram(void);
 
 void platform_init(void)
 {
-    debug_marker(0xC0);  /* C0 = platform_init entry */
-
     /* Seed PRNG from system ticks */
     srand((unsigned int)SYSTEM_TICKS);
 
-    debug_marker(0xC1);  /* C1 = after srand */
-
     load_palette();
 
-    debug_marker(0xC2);  /* C2 = after load_palette */
-
     clear_vram();
-
-    debug_marker(0xC3);  /* C3 = after clear_vram */
 }
 
 /* Yield to firmware — implemented in startup.s.
@@ -234,12 +218,16 @@ extern void draw_minefield(minefield *mf);
 
 void idle_update(minefield *mf)
 {
-    /* Combat firmware display ownership: firmware rendering runs BEFORE
-     * our Frame_Handler in the main loop, overwriting both VRAM and the
-     * VGA palette each frame. We counter by reloading our palette,
-     * clearing VRAM, and redrawing the full minefield right before yield. */
+    /* Clear firmware's control panel event queues to prevent it from
+     * performing original actions while the game is running. */
+    *CPANEL_RX_READ_PTR = *CPANEL_RX_WRITE_PTR;
+    *CPANEL_EVENT_READ_PTR = *CPANEL_EVENT_WRITE_PTR;
+
+    /* Ensure our palette is loaded and board is redrawn. This counters
+     * any firmware UI elements that might bypass the DISP_DISABLE_FLAG
+     * or any palette changes made by the firmware. 
+     * We don't call clear_vram() here to avoid flickering. */
     load_palette();
-    clear_vram();
     draw_minefield(mf);
 
     /* Yield back to firmware until next frame. This lets the firmware's
@@ -250,7 +238,5 @@ void idle_update(minefield *mf)
 
 void platform_shutdown(void)
 {
-    /* Restore will be handled by assembly wrapper (palette restore, etc.)
-     * Setting GAME_ACTIVE = 0 signals the frame handler to stop calling us */
-    GAME_ACTIVE = 0;
+    /* Cleanup handled by startup.s assembly wrapper on main() return */
 }
