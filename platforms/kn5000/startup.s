@@ -378,7 +378,7 @@ Frame_Handler:
 	ld	xwa, (xhl)
 	and	xwa, 0xFF
 	cp	xwa, 0
-	jr	z, .Lframe_done
+	jrl	z, .Lframe_done
 
 	; Debug marker FE = GAME_ACTIVE was nonzero
 	ld	xhl, 0x150000
