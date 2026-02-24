@@ -25,7 +25,7 @@ extern void srand(unsigned int v);
  * VGA Palette
  * ======================================================================== */
 
-static void load_palette(void)
+void load_palette(void)
 {
     const uint8_t *pal = PALETTE_DATA;
     /* WORKAROUND for bugs #8 and #9:
@@ -229,9 +229,19 @@ void platform_init(void)
  * resumes execution here. */
 extern void yield_to_firmware(void);
 
+/* Full minefield redraw — defined in common/8x8_tiles.h, draws borders + cells */
+extern void draw_minefield(minefield *mf);
+
 void idle_update(minefield *mf)
 {
-    (void)mf;
+    /* Combat firmware display ownership: firmware rendering runs BEFORE
+     * our Frame_Handler in the main loop, overwriting both VRAM and the
+     * VGA palette each frame. We counter by reloading our palette,
+     * clearing VRAM, and redrawing the full minefield right before yield. */
+    load_palette();
+    clear_vram();
+    draw_minefield(mf);
+
     /* Yield back to firmware until next frame. This lets the firmware's
      * main loop run between game frames, processing SC1 control panel
      * data and updating button state arrays at 0x8E4A/0x8E5A. */
