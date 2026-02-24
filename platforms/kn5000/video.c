@@ -231,10 +231,20 @@ void platform_init(void)
     debug_marker(0xC3);  /* C3 = after VRAM clear */
 }
 
+/* Yield to firmware — implemented in startup.s.
+ * Saves game state (registers + stack), returns control to firmware's
+ * main loop. Firmware processes SC1 serial data (updating button state
+ * at 0x8E4A), then calls Frame_Handler on the next frame, which
+ * resumes execution here. */
+extern void yield_to_firmware(void);
+
 void idle_update(minefield *mf)
 {
     (void)mf;
-    /* No-op: frame timing is managed by the assembly frame handler */
+    /* Yield back to firmware until next frame. This lets the firmware's
+     * main loop run between game frames, processing SC1 control panel
+     * data and updating button state arrays at 0x8E4A/0x8E5A. */
+    yield_to_firmware();
 }
 
 void platform_shutdown(void)

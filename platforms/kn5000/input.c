@@ -1,10 +1,13 @@
 /* input.c: Control panel input driver for KN5000
  *
- * Reads button state from the KN5000 control panel via SC1 synchronous serial.
- * The SC1 hardware is initialized by the assembly wrapper (boot_hw_init).
+ * Reads button state from firmware RAM. The main firmware's SC1 interrupt-
+ * driven state machine continuously polls the control panel and stores
+ * button bitmaps in RAM arrays. We simply read those arrays — no direct
+ * SC1 serial access needed, no interference with firmware operation.
  *
- * Protocol: send command byte + segment byte + 2 dummy bytes (0xFF)
- * to clock in header (discarded) and button bitmap.
+ * Button state arrays (1 byte per segment, bit = button pressed):
+ *   Right panel: 0x8E4A + segment  (segments 0-10)
+ *   Left panel:  0x8E5A + segment  (segments 0-10)
  */
 
 #include "common.h"
@@ -15,73 +18,57 @@
 extern int rand(void);
 
 /* ========================================================================
- * SC1 Serial I/O
+ * Firmware RAM button state arrays
+ *
+ * WORKAROUND for LLVM TLCS-900 bug #8: 8-bit register encoding mismatches
+ * corrupt byte loads, so values end up in wrong registers. All reads use
+ * 32-bit aligned loads with shift/mask to extract individual bytes.
+ *
+ * Memory layout (little-endian):
+ *   Right panel: 0x8E4A + segment (segs 0-10)
+ *   Left panel:  0x8E5A + segment (segs 0-10)
+ *
+ * Aligned 32-bit reads:
+ *   0x8E4C → [CPR_SEG2, CPR_SEG3, CPR_SEG4, CPR_SEG5]  (bits 0-7, 8-15, 16-23, 24-31)
+ *   0x8E5C → [CPL_SEG2, CPL_SEG3, CPL_SEG4, CPL_SEG5]
+ *   0x8E60 → [CPL_SEG6, CPL_SEG7, CPL_SEG8, CPL_SEG9]
  * ======================================================================== */
-
-/* Send one byte via SC1 and receive one byte back (synchronous mode).
- * In sync mode, writing SC1BUF simultaneously sends and receives. */
-static uint8_t cpanel_send_byte(uint8_t byte)
-{
-    INTCLR = INTRX1_CLR;       /* Clear INTRX1 pending flag */
-    SC1BUF = byte;             /* Start 8-bit synchronous transfer */
-
-    /* Poll for RX complete with timeout */
-    uint16_t timeout = 0;
-    do {
-        if (INTES1 & INTRX1_BIT)
-            return SC1BUF;     /* Read received byte */
-        timeout++;
-    } while (timeout != 0);    /* Wraps to 0 after 65536 iterations */
-
-    return 0;                  /* Timeout */
-}
-
-/* Query a control panel button segment.
- * cmd: 0x20 = left panel, 0xE0 = right panel
- * segment: segment number to query
- * Returns: button bitmap */
-static uint8_t cpanel_query_segment(uint8_t cmd, uint8_t segment)
-{
-    cpanel_send_byte(cmd);           /* Send command */
-    cpanel_send_byte(segment);       /* Send segment number */
-    cpanel_send_byte(0xFF);          /* Clock in header (discard) */
-    return cpanel_send_byte(0xFF);   /* Clock in button bitmap */
-}
 
 /* ========================================================================
  * Input reading
  * ======================================================================== */
 
 /* Previous button state for edge detection (press, not hold) */
-static uint8_t prev_buttons = 0;
+static uint32_t prev_buttons = 0;
 
 uint8_t input_read(uint8_t source)
 {
     (void)source;
 
-    /* DEBUG: Disable input to test display rendering.
-     * The game will draw the board and sit idle. */
-    return MINE_INPUT_IGNORED;
+    /* Read button state using 32-bit aligned loads (bug #8 workaround).
+     * 32-bit register encoding is correct (XWA=0, XBC=1, etc.). */
+    uint32_t cpr_word = *(volatile uint32_t *)0x8E4C;  /* CPR segs 2-5 */
+    uint32_t cpl_word = *(volatile uint32_t *)0x8E5C;  /* CPL segs 2-5 */
+    uint32_t cpl_word2 = *(volatile uint32_t *)0x8E60; /* CPL segs 6-9 */
 
-    /* Query all needed control panel segments */
-    uint8_t cpr_seg4 = cpanel_query_segment(CPANEL_RIGHT, CPR_SEG4);
-    uint8_t cpl_seg4 = cpanel_query_segment(CPANEL_LEFT,  CPL_SEG4);
-    uint8_t cpl_seg2 = cpanel_query_segment(CPANEL_LEFT,  CPL_SEG2);
-    uint8_t cpl_seg7 = cpanel_query_segment(CPANEL_LEFT,  CPL_SEG7);
+    /* Extract segments using shifts (all 32-bit operations) */
+    uint32_t cpr_seg4 = (cpr_word >> 16) & 0xFF;   /* byte 2 of word at 0x8E4C */
+    uint32_t cpl_seg4 = (cpl_word >> 16) & 0xFF;   /* byte 2 of word at 0x8E5C */
+    uint32_t cpl_seg7 = (cpl_word2 >> 8) & 0xFF;   /* byte 1 of word at 0x8E60 */
 
-    /* Build raw button state */
-    uint8_t buttons = 0;
+    /* Build raw button state (all 32-bit operations) */
+    uint32_t buttons = 0;
 
     if (cpr_seg4 & CPR_SEG4_UP)     buttons |= MINE_INPUT_UP;
     if (cpr_seg4 & CPR_SEG4_DOWN)   buttons |= MINE_INPUT_DOWN;
     if (cpr_seg4 & CPR_SEG4_LEFT)   buttons |= MINE_INPUT_LEFT;
     if (cpr_seg4 & CPR_SEG4_RIGHT)  buttons |= MINE_INPUT_RIGHT;
     if (cpl_seg4 & CPL_SEG4_OPEN)   buttons |= MINE_INPUT_OPEN;
-    if (cpl_seg2 & CPL_SEG2_FLAG)   buttons |= MINE_INPUT_FLAG;
+    if (cpl_seg4 & CPL_SEG4_FLAG)   buttons |= MINE_INPUT_FLAG;
     if (cpl_seg7 & CPL_SEG7_QUIT)   buttons |= MINE_INPUT_QUIT;
 
     /* Edge detection: return only newly pressed buttons */
-    uint8_t pressed = buttons & ~prev_buttons;
+    uint32_t pressed = buttons & ~prev_buttons;
     prev_buttons = buttons;
 
     if (pressed == 0)

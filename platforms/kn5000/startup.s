@@ -24,6 +24,7 @@
 .equ HANDLER_SLOT,     0x20000C
 .equ PARAM_BLOCK,      0x200040
 .equ SAVED_SP,         0x200044
+.equ GAME_SAVED_SP,    0x200048
 .equ DBG_PROGRESS,     0x200050
 .equ DBG_FRAME_COUNT,  0x200054
 .equ DBG_HANDLER_XWA,  0x200058
@@ -38,6 +39,7 @@
 .globl SYSTEM_TICKS
 .globl TILES_DATA
 .globl PALETTE_DATA
+.globl yield_to_firmware
 .globl __udivsi3
 .globl __umodsi3
 
@@ -341,35 +343,21 @@ Boot_Init:
 	ret
 
 ; =============================================================================
-; Register_Frame_Handler - Register for periodic frame callbacks
-; =============================================================================
-Register_Frame_Handler:
-	push	xiz
-	push	xix
-
-	ld	xiz, (WORKSPACE_PTR)
-	add	xiz, 0x0E88
-	ld	xiz, (xiz)
-	add	xiz, 0x0108
-	ld	xix, (xiz)
-	call	(xix)
-
-	pop	xix
-	pop	xiz
-	ret
-
-; =============================================================================
-; Frame_Handler - Called every frame by main firmware (from LABEL_F1E9D0)
+; Frame_Handler - Called every frame by main firmware
 ;
-; On first call (GAME_ACTIVE=1), calls main() which blocks in its game loop.
-; When main() returns (player quit), marks GAME_ACTIVE=0 so subsequent
-; frames are no-ops.
+; Cooperative architecture: game yields to firmware between frames via
+; yield_to_firmware(), allowing the firmware's main loop to process SC1
+; serial data and update button state arrays at 0x8E4A/0x8E5A.
+;
+; First frame:  init C runtime, call main() (runs until first yield)
+; Next frames:  resume game from where yield_to_firmware() was called
+; Game exit:    main() returns normally, mark GAME_ACTIVE=0
 ;
 ; All registers must be preserved — the firmware's main loop expects them
 ; intact after this call returns.
 ; =============================================================================
 Frame_Handler:
-	; Save all registers (firmware needs them preserved)
+	; Save all firmware registers
 	push	xwa
 	push	xbc
 	push	xde
@@ -378,60 +366,137 @@ Frame_Handler:
 	push	xiy
 	push	xiz
 
-	; Debug marker F1 to AudioMix (for logic analyzer / MAME oslog)
-	ld	xde, 0x150000
-	ld	xwa, 0x00F100FE
-	ld	(xde), xwa
+	; Debug marker FF = Frame_Handler entry (every call)
+	ld	xhl, 0x150000
+	ld	xwa, 0x00FF00FE
+	ld	(xhl), xwa
 
 	; Check GAME_ACTIVE (byte at 0x200000)
 	; WORKAROUND: Use 32-bit AND+CP instead of `cp a, 0` to avoid
 	; LLVM assembler bug #8 (8-bit register encoding mismatch).
-	; `cp a, 0` encodes register W instead of A, checking the wrong byte.
 	ld	xhl, GAME_ACTIVE
 	ld	xwa, (xhl)
 	and	xwa, 0xFF
 	cp	xwa, 0
 	jr	z, .Lframe_done
 
+	; Debug marker FE = GAME_ACTIVE was nonzero
+	ld	xhl, 0x150000
+	ld	xwa, 0x00FE00FE
+	ld	(xhl), xwa
+
 	; Game is active — check if C runtime needs initialization
 	ld	xhl, GAME_INITIALIZED
 	ld	xwa, (xhl)
 	and	xwa, 0xFF
 	cp	xwa, 0
-	jr	nz, .Lskip_init
+	jr	nz, .Lresume_game
 
-	; First activation: initialize C runtime
+	; === First activation: init C runtime and start game ===
+	; Save firmware stack pointer
+	ld	xwa, xsp
+	ld	(SAVED_SP), xwa
+
+	; Switch to game stack
+	ld	xsp, STACK_TOP
+
+	; Set initialized flag (GAME_ACTIVE already 1)
+	ld	xhl, GAME_INITIALIZED
+	ld	xwa, 1
+	ld	(xhl), xwa
+
+	; Initialize C runtime
 	call	Copy_C_Data
 	call	Clear_C_BSS
 
-	; Set GAME_INITIALIZED=1 (keep GAME_ACTIVE=1)
-	ld	xhl, GAME_ACTIVE
-	ld	xwa, 0x00000101
+	; Debug marker D0 = about to call main()
+	ld	xhl, 0x150000
+	ld	xwa, 0x00D000FE
 	ld	(xhl), xwa
 
-.Lskip_init:
-	; Save firmware stack pointer, switch to game stack
-	ld	(SAVED_SP), xsp
-	ld	xsp, STACK_TOP
-
-	; Debug marker: about to call main
-	ld	xde, 0x150000
-	ld	xwa, 0x00D000FE
-	ld	(xde), xwa
-
-	; Call C main() (blocks in game loop until player quits)
+	; Call main() — game runs until first yield_to_firmware()
+	; Subsequent frames resume from yield_to_firmware via .Lresume_game
 	call	main
 
-	; Restore firmware stack pointer
-	ld	xsp, (SAVED_SP)
-
-	; main() returned — mark game inactive, clear initialized flag
-	ld	xhl, GAME_ACTIVE
-	ld	xwa, 0x00000000
+	; main() returned — game exited normally
+	; Debug marker D9 = main() returned
+	ld	xhl, 0x150000
+	ld	xwa, 0x00D900FE
 	ld	(xhl), xwa
 
+	; Clear game state
+	ld	xhl, GAME_ACTIVE
+	ld	xwa, 0
+	ld	(xhl), xwa
+	ld	xhl, GAME_INITIALIZED
+	ld	(xhl), xwa
+
+	; Switch back to firmware stack and return
+	ld	xwa, (SAVED_SP)
+	ld	xsp, xwa
+	jr	.Lframe_done
+
+.Lresume_game:
+	; Subsequent frames: resume game from yield_to_firmware()
+	; Save firmware stack pointer
+	ld	xwa, xsp
+	ld	(SAVED_SP), xwa
+
+	; Restore game stack pointer
+	ld	xwa, (GAME_SAVED_SP)
+	ld	xsp, xwa
+
+	; Pop game registers (saved by yield_to_firmware)
+	pop	xiz
+	pop	xiy
+	pop	xix
+	pop	xhl
+	pop	xde
+	pop	xbc
+	pop	xwa
+
+	; Return to game code (after call to yield_to_firmware)
+	ret
+
 .Lframe_done:
-	; Restore all registers
+	; Restore all firmware registers
+	pop	xiz
+	pop	xiy
+	pop	xix
+	pop	xhl
+	pop	xde
+	pop	xbc
+	pop	xwa
+	ret
+
+; =============================================================================
+; yield_to_firmware - Cooperative yield from game to firmware
+;
+; Called from idle_update() at the end of each game loop iteration.
+; Saves game registers and stack, switches to firmware stack, and
+; returns to firmware via .Lframe_done. The firmware's main loop then
+; runs (processing SC1 data, updating button state, etc.) until the
+; next frame, when Frame_Handler resumes the game.
+; =============================================================================
+yield_to_firmware:
+	; Save all game registers on game stack
+	push	xwa
+	push	xbc
+	push	xde
+	push	xhl
+	push	xix
+	push	xiy
+	push	xiz
+
+	; Save game stack pointer
+	ld	xwa, xsp
+	ld	(GAME_SAVED_SP), xwa
+
+	; Load firmware SP and switch
+	ld	xwa, (SAVED_SP)
+	ld	xsp, xwa
+
+	; Return to firmware (same as .Lframe_done)
 	pop	xiz
 	pop	xiy
 	pop	xix
