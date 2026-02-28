@@ -14,6 +14,7 @@
 .equ VIDEO_RAM_BASE, 0x1A0000
 .equ VRAM_SIZE,      76800
 .equ DISP_DISABLE_FLAG, 0x0D53          ; Bit 3: disable firmware display updates
+.equ DISPLAY_DIRTY_FLAGS, 0x205E4       ; Bitmap of dirty display regions
 
 ; =============================================================================
 ; RAM Variables (fixed addresses in extension DRAM at 0x200000)
@@ -26,6 +27,7 @@
 .equ PARAM_BLOCK,      0x200040
 .equ SAVED_SP,         0x200044
 .equ GAME_SAVED_SP,    0x200048
+.equ SAVED_DISP_FLAG,  0x20004C
 .equ HANDLER_WORKSPACE, 0x200100        ; 64 bytes workspace for handler lifecycle
 .equ STACK_TOP,        0x203000
 
@@ -174,10 +176,15 @@ Mines_Handler:
         ld      xwa, 1
         ld      (xhl), xwa
 
-        ; Disable firmware display updates (SET bit 3 to 0 via mask)
+        ; Disable firmware display updates
+        ; First save the exact original value
         ld      xhl, DISP_DISABLE_FLAG
         ld      a, (xhl)
-        and     a, 0xF7
+        push    xwa
+        ld      xwa, SAVED_DISP_FLAG
+        ld      (xwa), a
+        pop     xwa
+        or      a, 0x08
         ld      (xhl), a
 
         pop     xhl
@@ -274,13 +281,20 @@ Frame_Handler:
         call    main
 
         ; Exit
-        call    clear_vram
-        ; Re-enable display (SET bit 3 to 1 via mask)
+        ; call    clear_vram
+        ; Restore exact original display flag
+        push    xwa
+        ld      xwa, SAVED_DISP_FLAG
+        ld      a, (xwa)
         ld      xhl, DISP_DISABLE_FLAG
-        ld      a, (xhl)
-        or      a, 0x08
         ld      (xhl), a
-        
+        pop     xwa
+
+        ; Set all display dirty flags to force a full firmware UI redraw
+        ld      xhl, DISPLAY_DIRTY_FLAGS
+        ld      wa, 0xFFFF
+        ld      (xhl), wa
+
         ld      xhl, GAME_ACTIVE
         ld      xwa, 0
         ld      (xhl), xwa
