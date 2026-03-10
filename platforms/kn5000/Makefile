@@ -58,6 +58,8 @@ LLC_FLAGS := -mtriple=tlcs900 -mcpu=tmp94c241 -O2
 # Output files
 ROM_FILE := $(BUILD_DIR)/mines_kn5000.bin
 ELF_FILE := $(BUILD_DIR)/mines_kn5000.elf
+DISK_BIN := $(BUILD_DIR)/mines_disk.bin
+DISK_ELF := $(BUILD_DIR)/mines_disk.elf
 TILES_BIN := $(BUILD_DIR)/tiles.bin
 PALETTE_BIN := $(BUILD_DIR)/palette.bin
 ICON_BIN := $(BUILD_DIR)/icon.bin
@@ -246,6 +248,36 @@ check:
 	else \
 		echo "  WARNING: Original ROM directory not found: $(ORIGINAL_ROMS)"; \
 	fi
+
+# =============================================================================
+# Disk App Build (for App Loader)
+# =============================================================================
+# Builds a flat binary that the HDAE5000 App Loader can load from hard disk.
+# Uses disk_startup.s (no XAPR) and disk.ld (linked for RAM at 0x208000).
+#
+# The resulting APP.BIN goes into the App Loader's disk image under /APPS/MINES/.
+# =============================================================================
+
+.PHONY: disk
+disk: $(DISK_BIN)
+	@echo ""
+	@echo "Disk app built: $(DISK_BIN)"
+	@echo "Size: $$(stat -c%s "$(DISK_BIN)" 2>/dev/null || stat -f%z "$(DISK_BIN)" 2>/dev/null) bytes"
+
+# Assemble disk startup (no XAPR, no icon data needed)
+$(BUILD_DIR)/disk_startup.o: disk_startup.s $(TILES_BIN) $(PALETTE_BIN) | $(BUILD_DIR)
+	$(CLANG) -target tlcs900 -mcpu=tmp94c241 -c -o $@ $<
+
+# Link disk startup + C code with disk linker script
+$(DISK_ELF): $(BUILD_DIR)/disk_startup.o $(BUILD_DIR)/all_c.o disk.ld
+	$(LLD_ENV) $(LLD) -T disk.ld -o $@ $(BUILD_DIR)/disk_startup.o $(BUILD_DIR)/all_c.o
+	@echo "Linked disk ELF: $@"
+	@$(LLVM_NM) $@ | grep -E '(main|_start|yield|TILES_DATA|__bss)' || true
+
+# Convert to flat binary (no padding — App Loader reads actual file size)
+$(DISK_BIN): $(DISK_ELF)
+	$(OBJCOPY) -O binary $< $@
+	@echo "Disk app size: $$(stat -c%s "$@" 2>/dev/null || stat -f%z "$@" 2>/dev/null) bytes"
 
 # =============================================================================
 # Help
